@@ -1,5 +1,5 @@
 venv/
-Server/Datasets/JIITAccelerometer
+Server/Datasets
 
 # Django #
 *.log
