@@ -1,3 +1,4 @@
+import 'package:app/components/app_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -17,9 +18,8 @@ class _HomeScreenState extends State<HomeScreen> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        // actions: [CircleAvatar()],
       ),
-      drawer: Drawer(),
+      drawer: AppDrawer(),
       // floatingActionButton: FloatingActionButton(onPressed: () {/* TODO */}),
       body: SlidingUpPanel(
         borderRadius: const BorderRadius.only(
