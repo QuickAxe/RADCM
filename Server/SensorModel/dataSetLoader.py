@@ -11,25 +11,24 @@ class SensorData(Dataset):
 
     def __init__(self, annotationsFile, anomaliesDir):
         """annotationsFile: Path to the csv file that has the labels and where they're stored
-           rootDir: Path to where the actula data is stored"""
+        rootDir: Path to where the actual data is stored"""
 
-        self.anomalyLabels = pd.read_csv(annotationsFile)
+        self.anomalyLabels = pd.read_csv(annotationsFile, header=None)
         self.anomaliesDir = anomaliesDir
 
     def __len__(self):
         return len(self.anomalyLabels)
 
     def __getitem__(self, idx):
-        anomalyPath = os.path.join(
-            self.anomaliesDir, self.anomalyLabels.iloc[idx, 0])
+        anomalyPath = os.path.join(self.anomaliesDir, self.anomalyLabels.iloc[idx, 0])
 
         # read the anomaly data and convert it to a numpy array:
-        anomaly = pd.read_csv(anomalyPath)
+        anomaly = pd.read_csv(anomalyPath, header=None)
         anomaly = anomaly.to_numpy(dtype=np.float64, copy=True)
 
         # load its label too
         label = self.anomalyLabels.iloc[idx, 1]
 
         # return a tuple of anomaly array, label
-        #! I think this might have to be converted to a tensor 
+        #! I think this might have to be converted to a tensor
         return (anomaly, label)

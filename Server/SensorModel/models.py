@@ -7,7 +7,8 @@ class CnnLSTM(nn.Module):
         super(CnnLSTM, self).__init__()
         self.cnn = nn.Sequential(nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, padding=1),
                                  nn.ReLU(),
-                                 # kernal size here is (height, width), so we're essentially, hopefully converting each of
+                                 # kernel size here is (height, width), so we're essentially,
+                                 # hopefully, converting each of
                                  # the 3 components (x, y, z) of the accel and gyro values into one
                                  nn.AvgPool2d(kernel_size=(3, 2)),
                                  nn.Conv2d(in_channels=32, out_channels=64,
