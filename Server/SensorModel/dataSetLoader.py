@@ -2,6 +2,7 @@
 import os
 import pandas as pd
 import numpy as np
+import os
 
 from torch.utils.data import DataLoader, Dataset
 
@@ -11,10 +12,12 @@ class SensorData(Dataset):
 
     def __init__(self, annotationsFile, anomaliesDir):
         """annotationsFile: Path to the csv file that has the labels and where they're stored
-        rootDir: Path to where the actual data is stored"""
+        anomaliesDir: Path to where the actual data is stored"""
 
-        self.anomalyLabels = pd.read_csv(annotationsFile, header=None)
+        self.anomalyLabels = pd.read_csv(annotationsFile)
         self.anomaliesDir = anomaliesDir
+        
+        
 
     def __len__(self):
         return len(self.anomalyLabels)
@@ -23,7 +26,7 @@ class SensorData(Dataset):
         anomalyPath = os.path.join(self.anomaliesDir, self.anomalyLabels.iloc[idx, 0])
 
         # read the anomaly data and convert it to a numpy array:
-        anomaly = pd.read_csv(anomalyPath, header=None)
+        anomaly = pd.read_csv(anomalyPath)
         anomaly = anomaly.to_numpy(dtype=np.float64, copy=True)
 
         # load its label too
