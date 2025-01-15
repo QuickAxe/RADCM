@@ -3,14 +3,35 @@ import 'package:app/pages/settings_screen.dart';
 import 'package:app/pages/settings_screens/routines.dart';
 import 'package:app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:app/pages/settings_screens/voice_engine.dart';
+import 'package:app/util/bg_process.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_isolate/flutter_isolate.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+
+  @override
+  void initState() {
+    super.initState();
+    FlutterIsolate.spawn(theDataCollector, "bg process isolate");
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    FlutterIsolate.killAll();
+  }
+
 
   @override
   Widget build(BuildContext context) {
