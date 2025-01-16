@@ -19,19 +19,21 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  late FlutterIsolate dataCollectorIsolate;
 
   @override
   void initState() {
     super.initState();
-    FlutterIsolate.spawn(theDataCollector, "bg process isolate");
+    FlutterIsolate.spawn(theDataCollector, "bg process isolate").then((isolate) {
+      dataCollectorIsolate = isolate;
+    });
   }
 
   @override
   void dispose() {
+    dataCollectorIsolate.kill();
     super.dispose();
-    FlutterIsolate.killAll();
   }
-
 
   @override
   Widget build(BuildContext context) {

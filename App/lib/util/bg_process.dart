@@ -20,8 +20,7 @@ Future<void> theDataCollector(String msg) async {
   List<Anomaly> probableAnomalyBuffer = []; // the buffer that contains probable anomalies
   Anomaly currentWindow = Anomaly(); // the sliding window
   DateTime? lastSampleTime; // to maintain the 50Hz freq
-  DateTime lastAnomaly = DateTime(2023, 12, 25, 0, 0, 0); // random very old date..
-  bool waiting = false; // make sure we dont check more data when processing a window
+  DateTime lastAnomaly = DateTime(2023, 12, 25, 0, 0, 0); // to set time delay between consecutive anomalies
 
   // set sampling period for the guy that gives rotation matrix
   frs.RotationSensor.samplingPeriod = SensorInterval.fastestInterval;
@@ -44,10 +43,8 @@ Future<void> theDataCollector(String msg) async {
     if (lastSampleTime == null || now.difference(lastSampleTime!).inMilliseconds >= 18) {
       lastSampleTime = now;
 
-      if (!waiting && currentWindow.accReadings.length == 200 && now.difference(lastAnomaly).inMilliseconds >= 5000) {
-        // waiting = true;
+      if (currentWindow.accReadings.length == 200 && now.difference(lastAnomaly).inMilliseconds >= 5000) {
         bool isAnomaly = checkWindow(currentWindow, probableAnomalyBuffer, locEvent);
-        // waiting = false;
         if(isAnomaly) {
           lastAnomaly = DateTime.now();
         }
@@ -98,9 +95,6 @@ Stream<Position> getLocationUpdates() {
 
 // ----------------------------------- Reorients accelerometer data using the rotation matrix -------------------------
 List<double> reorientAccelerometer(List<double> accLocal, frs.Matrix3 rotationMatrix) {
-  // Convert Euler angles to rotation matrix
-  // List<List<double>> rotationMatrix = eulerToRotationMatrix();
-
   // Multiply the rotation matrix by the accelerometer vector
   double xGlobal = rotationMatrix.a * accLocal[0] +
       rotationMatrix.b * accLocal[1] +
@@ -117,13 +111,15 @@ List<double> reorientAccelerometer(List<double> accLocal, frs.Matrix3 rotationMa
 
 // ----------------------------------- Checks if the read block is an anomaly -----------------------------------------
 bool checkWindow(Anomaly currentWindow, List<Anomaly> probableAnomalyBuffer, Position position) {
-  bool isAnomaly = false;
   double accelLeft = currentWindow.accReadings.elementAt(97)[2];
   double accelRight = currentWindow.accReadings.elementAt(103)[2];
+  double threshold = 12.0;
+  int maxBufferSize = 5; // change this later
+  bool isAnomaly = false;
 
-  // get location data if anomaly is good
-  if((accelLeft - accelRight).abs() >= 12.0) {
-    print("Anomaly Encountered At Timestamp: ${DateTime.now()}");
+  // check threshold for valid anomaly
+  if((accelLeft - accelRight).abs() >= threshold) {
+    print("---------------------  Anomaly Encountered At Timestamp: ${DateTime.now()}  ---------------------");
 
     // update location
     currentWindow.latitude = position.latitude;
@@ -133,7 +129,7 @@ bool checkWindow(Anomaly currentWindow, List<Anomaly> probableAnomalyBuffer, Pos
     isAnomaly = true;
   }
 
-  if(probableAnomalyBuffer.length == 20){
+  if(probableAnomalyBuffer.length == maxBufferSize){
     flushBuffer(probableAnomalyBuffer);
   }
 
