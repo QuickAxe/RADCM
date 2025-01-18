@@ -51,6 +51,8 @@ dependencies:
   sliding_up_panel: ^2.0.0+1
   flutter_map: ^7.0.2
   latlong2: ^0.9.1
+  provider: ^6.1.2
+  fluttertoast: ^8.2.10
 
 dev_dependencies:
   flutter_test:

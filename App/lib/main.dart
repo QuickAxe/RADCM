@@ -3,12 +3,21 @@ import 'package:app/pages/settings_screen.dart';
 import 'package:app/pages/settings_screens/routines.dart';
 import 'package:app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:app/pages/settings_screens/voice_engine.dart';
-import 'package:app/util/bg_process.dart';
+import 'package:app/services/providers/permissions.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_isolate/flutter_isolate.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    // registering providers here
+    MultiProvider(
+      providers: [
+        // permissions provider to handle permissions (location for now)
+        ChangeNotifierProvider(create: (context) => Permissions()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -19,28 +28,25 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late FlutterIsolate dataCollectorIsolate;
-
   @override
   void initState() {
     super.initState();
-    FlutterIsolate.spawn(theDataCollector, "bg process isolate").then((isolate) {
-      dataCollectorIsolate = isolate;
+    Future.microtask(() async {
+      var permissions = Provider.of<Permissions>(context, listen: false);
+      // calls fetch position
+      await permissions.fetchPosition();
     });
   }
 
   @override
   void dispose() {
-    dataCollectorIsolate.kill();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        useMaterial3: true,
-      ),
+      theme: ThemeData(useMaterial3: true),
       debugShowCheckedModeBanner: false,
       home: HomeScreen(),
       routes: {
