@@ -19,8 +19,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Isolate to run the BG process
   late FlutterIsolate dataCollectorIsolate;
+  late final MapController _mapController;
+
+  @override
+  void initState() {
+    super.initState();
+    _mapController = MapController();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     permissions.position!.latitude,
                     permissions.position!.longitude,
                   );
+                  _mapController.move(userLocation, _mapController.camera.zoom);
 
                   // Background process spawns
                   dev.log('position: ${permissions.position}');
@@ -62,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
 
                 return FlutterMap(
-                  mapController: MapController(),
+                  mapController: _mapController,
                   options: MapOptions(
                     initialCenter: userLocation,
                     initialZoom: 13,
@@ -73,7 +80,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     TileLayer(
                       urlTemplate:
                           'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      userAgentPackageName: 'com.example.radcm',
+                      userAgentPackageName: 'com.example.app',
                     ),
                     // updates the user location marker
                     if (permissions.position != null)
