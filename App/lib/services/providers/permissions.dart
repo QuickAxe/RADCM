@@ -47,10 +47,8 @@ class Permissions extends ChangeNotifier with WidgetsBindingObserver {
       waitingForLocationSettings = true;
       // opens location settings
       await Geolocator.openLocationSettings();
-
       return;
     }
-
     checkAndRequestLocationPermission();
   }
 
@@ -78,7 +76,37 @@ class Permissions extends ChangeNotifier with WidgetsBindingObserver {
     position = await Geolocator.getCurrentPosition();
     locationAvailable = true;
     notifyListeners();
+    // checkBatteryOptimizationStatus();
   }
+
+  // Future<void> checkBatteryOptimizationStatus() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   // ?? syntax is basically to return a fallback value, in our case false
+  //   bool batteryPromptShown = prefs.getBool("battery_prompt_shown") ?? false;
+  //
+  //   if (!batteryPromptShown) {
+  //     await batteryOptimizationDisable();
+  //     await prefs.setBool("battery_prompt_shown", true);
+  //   }
+  // }
+  //
+  // Future<void> batteryOptimizationDisable() async {
+  //   if (Platform.isAndroid) {
+  //     Fluttertoast.showToast(
+  //       msg: "Please disable battery optimization.",
+  //       toastLength: Toast.LENGTH_LONG,
+  //       gravity: ToastGravity.BOTTOM,
+  //     );
+  //
+  //     const intent = AndroidIntent(
+  //       action: 'android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS',
+  //       data: 'package:com.example.app',
+  //       flags: [Flag.FLAG_ACTIVITY_NEW_TASK],
+  //     );
+  //
+  //     await intent.launch();
+  //   }
+  // }
 
   void startListening() {
     Geolocator.getPositionStream().listen(

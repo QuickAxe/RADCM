@@ -34,13 +34,14 @@ dependencies:
   flutter_background_service: ^5.1.0
   geolocator: ^13.0.2
   flutter_local_notifications: ^18.0.1
+  shared_preferences: ^2.3.5
   device_info_plus: ^11.2.0
   rxdart: ^0.27.0
   simple_3d: ^15.0.0
   simple_3d_renderer: ^21.0.0
   util_simple_3d: ^11.0.0
-  flutter_rotation_sensor:
   integral_isolates: ^0.5.1
+  flutter_rotation_sensor: ^0.1.1
   flutter_isolate: ^2.1.0
   http:
 
@@ -53,6 +54,7 @@ dependencies:
   latlong2: ^0.9.1
   provider: ^6.1.2
   fluttertoast: ^8.2.10
+  android_intent_plus: ^5.2.2
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,6 @@
 import 'package:app/pages/home_screen.dart';
 import 'package:app/pages/settings_screen.dart';
+import 'package:app/pages/settings_screens/additional_settings.dart';
 import 'package:app/pages/settings_screens/routines.dart';
 import 'package:app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:app/pages/settings_screens/voice_engine.dart';
@@ -54,6 +55,7 @@ class _MyAppState extends State<MyApp> {
         '/toggle_anomalies': (context) => ToggleAnomaliesScreen(),
         '/routines': (context) => RoutinesScreen(),
         '/voice_engine': (context) => VoiceEngineScreen(),
+        '/additional_settings': (context) => AdditionalSettings(),
       },
     );
   }
