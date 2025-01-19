@@ -23,7 +23,7 @@ Future<void> theDataCollector(String msg) async {
   DateTime lastAnomaly = DateTime(2023, 12, 25, 0, 0, 0); // to set time delay between consecutive anomalies
 
   // set sampling period for the guy that gives rotation matrix
-  frs.RotationSensor.samplingPeriod = SensorInterval.fastestInterval;
+  frs.RotationSensor.samplingPeriod = frs.SensorInterval.fastestInterval;
 
   // request geo permissions
   await requestPermissions();
