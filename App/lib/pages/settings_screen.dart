@@ -38,6 +38,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Navigator.pushNamed(context, '/voice_engine');
             },
           ),
+          ListTile(
+            title: const Text('Additional Settings'),
+            leading: const Icon(Icons.app_settings_alt),
+            onTap: () {
+              Navigator.pushNamed(context, '/additional_settings');
+            },
+          ),
         ],
       ),
     );
