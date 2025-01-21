@@ -34,6 +34,7 @@ class _SearchPlaceState extends State<SearchPlace> {
     dev.log(searchSuggestions.toString());
   }
 
+  // returns a single suggestion ListTile
   ListTile buildPlaceItem(dynamic place, SearchController controller) {
     return ListTile(
       title: Text(
@@ -53,8 +54,7 @@ class _SearchPlaceState extends State<SearchPlace> {
     );
   }
 
-  void userTapsSearchResult(
-      String displayName, LatLng loc, SearchController controller) {
+  void userTapsSearchResult(String displayName, LatLng loc, SearchController controller) {
     widget.mapController.move(loc, widget.mapController.camera.zoom);
     controller.closeView(displayName);
   }
@@ -90,7 +90,9 @@ class _SearchPlaceState extends State<SearchPlace> {
       viewOnSubmitted: (_) async {
         await getSuggestions(_searchController.text.toString());
         dev.log(_searchController.text.toString());
+        _searchController.closeView(_searchController.text.toString());
         _searchController.openView();
+        // _searchController.openView();
       },
     );
   }

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:developer' as dev;
 
 import 'package:app/components/app_drawer.dart';
@@ -10,7 +9,6 @@ import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
-import 'package:http/http.dart' as http;
 import '../services/providers/permissions.dart';
 import '../util/bg_process.dart';
 
