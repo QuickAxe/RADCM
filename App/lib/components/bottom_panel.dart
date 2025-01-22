@@ -3,7 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
-import '../services/providers/filters.dart';
+import '../services/providers/user_settings.dart';
 import 'search_place.dart';
 
 class BottomPanel extends StatefulWidget {
@@ -21,7 +21,7 @@ class BottomPanel extends StatefulWidget {
 class _BottomPanelState extends State<BottomPanel> {
   @override
   Widget build(BuildContext context) {
-    final filterProvider = Provider.of<Filters>(context);
+    final userSettings = Provider.of<UserSettingsProvider>(context);
 
     return SlidingUpPanel(
       padding: const EdgeInsets.symmetric(horizontal: 5.0),
@@ -52,6 +52,7 @@ class _BottomPanelState extends State<BottomPanel> {
               mapController: widget.mapController,
             ),
           ),
+          // Choice Chips for filtering anomalies
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0),
             child: SizedBox(
@@ -59,15 +60,15 @@ class _BottomPanelState extends State<BottomPanel> {
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
-                  children: filterProvider.filters.map((option) {
-                    bool isSelected = filterProvider.selectedFilter == option;
+                  children: userSettings.showOnMap.keys.map((anomaly) {
+                    bool isSelected = userSettings.showOnMap[anomaly] ?? false;
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 5.0),
                       child: ChoiceChip(
-                        label: Text(option),
+                        label: Text(anomaly),
                         selected: isSelected,
                         onSelected: (bool selected) {
-                          filterProvider.setFilter(selected ? option : null);
+                          userSettings.toggleShowOnMap(anomaly);
                         },
                       ),
                     );

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../../services/providers/user_settings.dart';
 
 class VoiceEngineScreen extends StatefulWidget {
   const VoiceEngineScreen({super.key});
@@ -8,11 +11,9 @@ class VoiceEngineScreen extends StatefulWidget {
 }
 
 class _VoiceEngineScreenState extends State<VoiceEngineScreen> {
-  String? _selectedVoice; // TODO: This is placeholder
-  double _pitch = 0.5; // TODO: This is placeholder
-
   @override
   Widget build(BuildContext context) {
+    final settings = Provider.of<UserSettingsProvider>(context);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -35,34 +36,22 @@ class _VoiceEngineScreenState extends State<VoiceEngineScreen> {
             title: const Text('Male Voice'),
             subtitle: const Text('A husky male voice'),
             value: 'male',
-            groupValue: _selectedVoice,
-            onChanged: (value) {
-              setState(() {
-                _selectedVoice = value;
-              });
-            },
+            groupValue: settings.selectedVoice,
+            onChanged: (value) => settings.setSelectedVoice(value!),
           ),
           RadioListTile<String>(
             title: const Text('Female Voice'),
             subtitle: const Text('A soft female voice'),
             value: 'female',
-            groupValue: _selectedVoice,
-            onChanged: (value) {
-              setState(() {
-                _selectedVoice = value;
-              });
-            },
+            groupValue: settings.selectedVoice,
+            onChanged: (value) => settings.setSelectedVoice(value!),
           ),
           RadioListTile<String>(
             title: const Text('Default Voice'),
             subtitle: const Text('Electronic Voice'),
             value: 'default',
-            groupValue: _selectedVoice,
-            onChanged: (value) {
-              setState(() {
-                _selectedVoice = value;
-              });
-            },
+            groupValue: settings.selectedVoice,
+            onChanged: (value) => settings.setSelectedVoice(value!),
           ),
           ListTile(
             contentPadding: const EdgeInsets.only(left: 25),
@@ -79,12 +68,8 @@ class _VoiceEngineScreenState extends State<VoiceEngineScreen> {
             height: 10,
           ),
           Slider(
-            value: _pitch,
-            onChanged: (newValue) {
-              setState(() {
-                _pitch = newValue;
-              });
-            },
+            value: settings.voiceVolume,
+            onChanged: (newValue) => settings.setVoiceVolume(newValue),
           ),
         ],
       ),
