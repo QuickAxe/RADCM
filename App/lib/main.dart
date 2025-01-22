@@ -6,6 +6,7 @@ import 'package:app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:app/pages/settings_screens/voice_engine.dart';
 import 'package:app/services/providers/filters.dart';
 import 'package:app/services/providers/permissions.dart';
+import 'package:app/services/providers/search.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,6 +18,7 @@ void main() {
         // permissions provider to handle permissions (location for now)
         ChangeNotifierProvider(create: (context) => Permissions()),
         ChangeNotifierProvider(create: (context) => Filters()),
+        ChangeNotifierProvider(create: (context) => Search()),
       ],
       child: const MyApp(),
     ),
