@@ -1,6 +1,7 @@
 import 'dart:developer' as dev;
 
 import 'package:app/components/app_drawer.dart';
+import 'package:app/services/providers/anomaly_marker_layer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -87,6 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
+                  const AnomalyMarkerLayer(),
                 ],
               );
             },

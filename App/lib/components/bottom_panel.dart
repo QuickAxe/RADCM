@@ -52,24 +52,27 @@ class _BottomPanelState extends State<BottomPanel> {
               mapController: widget.mapController,
             ),
           ),
-          SizedBox(
-            height: 50,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: filterProvider.filters.map((option) {
-                  bool isSelected = filterProvider.selectedFilter == option;
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                    child: ChoiceChip(
-                      label: Text(option),
-                      selected: isSelected,
-                      onSelected: (bool selected) {
-                        filterProvider.setFilter(selected ? option : null);
-                      },
-                    ),
-                  );
-                }).toList(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 5.0),
+            child: SizedBox(
+              height: 50,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: filterProvider.filters.map((option) {
+                    bool isSelected = filterProvider.selectedFilter == option;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+                      child: ChoiceChip(
+                        label: Text(option),
+                        selected: isSelected,
+                        onSelected: (bool selected) {
+                          filterProvider.setFilter(selected ? option : null);
+                        },
+                      ),
+                    );
+                  }).toList(),
+                ),
               ),
             ),
           ),

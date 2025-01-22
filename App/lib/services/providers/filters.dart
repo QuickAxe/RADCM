@@ -3,13 +3,12 @@ import 'package:flutter/material.dart';
 class Filters extends ChangeNotifier {
   final List<String> _filters = [
     "All",
-    "Speedbreakers",
-    "Rumblers",
-    "Obstacles",
-    "Rumblers",
+    "Speedbreaker",
+    "Rumbler",
+    "Obstacle",
+    "Rumbler",
   ];
-  List<String> get filters =>
-      _filters; // exposeds this list so we can access it outside
+  List<String> get filters => _filters;
   String _selectedFilter = "All";
   String get selectedFilter => _selectedFilter;
 

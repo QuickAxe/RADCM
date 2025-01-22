@@ -135,7 +135,6 @@ bool checkWindow(Anomaly currentWindow, List<Anomaly> probableAnomalyBuffer,
     Fluttertoast.showToast(
       msg: "Anomaly detected at ${DateTime.now()}!",
       toastLength: Toast.LENGTH_LONG,
-      gravity: ToastGravity.BOTTOM,
     );
 
     // update location
