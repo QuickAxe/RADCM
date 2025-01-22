@@ -23,8 +23,7 @@ class ToggleAnomaliesScreen extends StatelessWidget {
               children: const [
                 ListTile(
                   leading: Image(
-                    image:
-                        AssetImage('lib/images/leading_icons/speedbreaker.png'),
+                    image: AssetImage('assets/icons/ic_speedbreaker.png'),
                     width: 32,
                     height: 32,
                   ),
@@ -33,7 +32,7 @@ class ToggleAnomaliesScreen extends StatelessWidget {
                 ),
                 ListTile(
                   leading: Image(
-                    image: AssetImage('lib/images/leading_icons/rumbler.png'),
+                    image: AssetImage('assets/icons/ic_rumbler.png'),
                     width: 32,
                     height: 32,
                   ),
@@ -42,7 +41,7 @@ class ToggleAnomaliesScreen extends StatelessWidget {
                 ),
                 ListTile(
                   leading: Image(
-                    image: AssetImage('lib/images/leading_icons/obstacle.png'),
+                    image: AssetImage('assets/icons/ic_obstacle.png'),
                     width: 32,
                     height: 32,
                   ),

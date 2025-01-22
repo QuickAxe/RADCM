@@ -1,12 +1,14 @@
-import 'dart:collection';
-import 'package:geolocator/geolocator.dart';
 import 'dart:async';
-import 'package:sensors_plus/sensors_plus.dart';
-import 'package:rxdart/rxdart.dart';
+import 'dart:collection';
+
 import 'package:flutter_rotation_sensor/flutter_rotation_sensor.dart' as frs;
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:sensors_plus/sensors_plus.dart';
 
 // ----------------------------------- Represents the structure of an anomaly -----------------------------------------
-class Anomaly{
+class Anomaly {
   ListQueue<List<double>> accReadings = ListQueue();
   double latitude = 0.0;
   double longitude = 0.0;
@@ -17,10 +19,12 @@ class Anomaly{
 Future<void> theDataCollector(String msg) async {
   frs.Matrix3 rotationMatrix = frs.Matrix3(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-  List<Anomaly> probableAnomalyBuffer = []; // the buffer that contains probable anomalies
+  List<Anomaly> probableAnomalyBuffer =
+      []; // the buffer that contains probable anomalies
   Anomaly currentWindow = Anomaly(); // the sliding window
   DateTime? lastSampleTime; // to maintain the 50Hz freq
-  DateTime lastAnomaly = DateTime(2023, 12, 25, 0, 0, 0); // to set time delay between consecutive anomalies
+  DateTime lastAnomaly = DateTime(
+      2023, 12, 25, 0, 0, 0); // to set time delay between consecutive anomalies
 
   // set sampling period for the guy that gives rotation matrix
   frs.RotationSensor.samplingPeriod = frs.SensorInterval.fastestInterval;
@@ -29,8 +33,9 @@ Future<void> theDataCollector(String msg) async {
   await requestPermissions();
 
   // Combine streams to listen simultaneously
-  CombineLatestStream
-      .list([accelerometerEventStream(samplingPeriod: SensorInterval.fastestInterval), // Stream 0
+  CombineLatestStream.list([
+    accelerometerEventStream(
+        samplingPeriod: SensorInterval.fastestInterval), // Stream 0
     frs.RotationSensor.orientationStream, // Stream 1
     getLocationUpdates(), // Stream 2
   ]).listen((data) {
@@ -40,20 +45,24 @@ Future<void> theDataCollector(String msg) async {
     final locEvent = data[2] as Position;
     final now = DateTime.now();
 
-    if (lastSampleTime == null || now.difference(lastSampleTime!).inMilliseconds >= 18) {
+    if (lastSampleTime == null ||
+        now.difference(lastSampleTime!).inMilliseconds >= 18) {
       lastSampleTime = now;
 
-      if (currentWindow.accReadings.length == 200 && now.difference(lastAnomaly).inMilliseconds >= 5000) {
-        bool isAnomaly = checkWindow(currentWindow, probableAnomalyBuffer, locEvent);
-        if(isAnomaly) {
+      if (currentWindow.accReadings.length == 200 &&
+          now.difference(lastAnomaly).inMilliseconds >= 5000) {
+        bool isAnomaly =
+            checkWindow(currentWindow, probableAnomalyBuffer, locEvent);
+        if (isAnomaly) {
           lastAnomaly = DateTime.now();
         }
-      }
-      else{
+      } else {
         // read sensor data, reorient and push the entry to buffer
         rotationMatrix = frsEvent.rotationMatrix;
-        List<double> accGlobal = reorientAccelerometer([accEvent.x, accEvent.y, accEvent.z], rotationMatrix);
-        currentWindow.accReadings.add([accGlobal[0], accGlobal[1], accGlobal[2]]);
+        List<double> accGlobal = reorientAccelerometer(
+            [accEvent.x, accEvent.y, accEvent.z], rotationMatrix);
+        currentWindow.accReadings
+            .add([accGlobal[0], accGlobal[1], accGlobal[2]]);
 
         if (currentWindow.accReadings.length == 201) {
           currentWindow.accReadings.removeFirst();
@@ -94,7 +103,8 @@ Stream<Position> getLocationUpdates() {
 }
 
 // ----------------------------------- Reorients accelerometer data using the rotation matrix -------------------------
-List<double> reorientAccelerometer(List<double> accLocal, frs.Matrix3 rotationMatrix) {
+List<double> reorientAccelerometer(
+    List<double> accLocal, frs.Matrix3 rotationMatrix) {
   // Multiply the rotation matrix by the accelerometer vector
   double xGlobal = rotationMatrix.a * accLocal[0] +
       rotationMatrix.b * accLocal[1] +
@@ -110,7 +120,8 @@ List<double> reorientAccelerometer(List<double> accLocal, frs.Matrix3 rotationMa
 }
 
 // ----------------------------------- Checks if the read block is an anomaly -----------------------------------------
-bool checkWindow(Anomaly currentWindow, List<Anomaly> probableAnomalyBuffer, Position position) {
+bool checkWindow(Anomaly currentWindow, List<Anomaly> probableAnomalyBuffer,
+    Position position) {
   double accelLeft = currentWindow.accReadings.elementAt(97)[2];
   double accelRight = currentWindow.accReadings.elementAt(103)[2];
   double threshold = 12.0;
@@ -118,8 +129,14 @@ bool checkWindow(Anomaly currentWindow, List<Anomaly> probableAnomalyBuffer, Pos
   bool isAnomaly = false;
 
   // check threshold for valid anomaly
-  if((accelLeft - accelRight).abs() >= threshold) {
-    print("---------------------  Anomaly Encountered At Timestamp: ${DateTime.now()}  ---------------------");
+  if ((accelLeft - accelRight).abs() >= threshold) {
+    print(
+        "---------------------  Anomaly Encountered At Timestamp: ${DateTime.now()}  ---------------------");
+    Fluttertoast.showToast(
+      msg: "Anomaly detected at ${DateTime.now()}!",
+      toastLength: Toast.LENGTH_LONG,
+      gravity: ToastGravity.BOTTOM,
+    );
 
     // update location
     currentWindow.latitude = position.latitude;
@@ -129,7 +146,7 @@ bool checkWindow(Anomaly currentWindow, List<Anomaly> probableAnomalyBuffer, Pos
     isAnomaly = true;
   }
 
-  if(probableAnomalyBuffer.length == maxBufferSize){
+  if (probableAnomalyBuffer.length == maxBufferSize) {
     flushBuffer(probableAnomalyBuffer);
   }
 
@@ -138,7 +155,7 @@ bool checkWindow(Anomaly currentWindow, List<Anomaly> probableAnomalyBuffer, Pos
 }
 
 // ----------------------------------- When anomaly buffer has reached its limit and needs to be emptied --------------
-void flushBuffer(List<Anomaly> probableAnomalyBuffer){
+void flushBuffer(List<Anomaly> probableAnomalyBuffer) {
   // send data to backend..
   print("Buffer Flushed.. ");
   probableAnomalyBuffer.clear();
