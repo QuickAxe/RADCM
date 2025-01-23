@@ -52,15 +52,24 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         actions: [
-          if (Provider.of<Search>(context, listen: true).isCurrentSelected)
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: FloatingActionButton(
-                onPressed: () {Provider.of<Search>(context, listen: false).performDeselection();},
-                backgroundColor: Colors.white,
-                child: const Icon(Icons.arrow_back_rounded),
-              ),
-            )
+          Consumer<Search>(builder: (context, search, child) {
+            if (search.isCurrentSelected) {
+              return Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: FloatingActionButton(
+                  onPressed: () {
+                    search.performDeselection();
+                  },
+                  backgroundColor: Colors.white,
+                  child: const Icon(Icons.arrow_back_rounded),
+                ),
+              );
+            } else {
+              return const Padding(
+                padding: EdgeInsets.all(10.0),
+              );
+            }
+          })
         ],
       ),
       drawer: const AppDrawer(),
@@ -118,10 +127,14 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
-          if(Provider.of<Search>(context, listen: true).isCurrentSelected)
-            BottomPanelNav(mapController: _mapController)
-          else
-            BottomPanel(mapController: _mapController)
+
+          Consumer<Search>(builder: (context, search, child) {
+            if (search.isCurrentSelected) {
+              return BottomPanelNav(mapController: _mapController);
+            } else {
+              return BottomPanel(mapController: _mapController);
+            }
+          })
         ],
       ),
     );
