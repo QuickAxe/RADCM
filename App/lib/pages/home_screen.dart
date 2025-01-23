@@ -1,6 +1,7 @@
 import 'dart:developer' as dev;
 
 import 'package:app/components/app_drawer.dart';
+import 'package:app/components/bottom_panel_nav.dart';
 import 'package:app/services/providers/anomaly_marker_layer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
@@ -11,6 +12,7 @@ import 'package:provider/provider.dart';
 import '../components/bottom_panel.dart';
 import '../services/isolates/anomaly_detection.dart';
 import '../services/providers/permissions.dart';
+import '../services/providers/search.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late FlutterIsolate dataCollectorIsolate;
   late final MapController _mapController;
   LatLng userLocation = const LatLng(15.49613530624519, 73.82646130357969);
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -34,9 +37,31 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        leading: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: FloatingActionButton(
+            onPressed: () {
+              _scaffoldKey.currentState?.openDrawer();
+            },
+            backgroundColor: Colors.white,
+            child: const Icon(Icons.menu),
+          ),
+        ),
+        actions: [
+          if (Provider.of<Search>(context, listen: true).isCurrentSelected)
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: FloatingActionButton(
+                onPressed: () {Provider.of<Search>(context, listen: false).performDeselection();},
+                backgroundColor: Colors.white,
+                child: const Icon(Icons.arrow_back_rounded),
+              ),
+            )
+        ],
       ),
       drawer: const AppDrawer(),
       body: Stack(
@@ -93,9 +118,10 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
-          BottomPanel(
-            mapController: _mapController,
-          ),
+          if(Provider.of<Search>(context, listen: true).isCurrentSelected)
+            BottomPanelNav(mapController: _mapController)
+          else
+            BottomPanel(mapController: _mapController)
         ],
       ),
     );
