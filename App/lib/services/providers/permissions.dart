@@ -1,13 +1,19 @@
 import 'dart:developer' as dev;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
+
+import '../isolates/anomaly_detection.dart';
 
 class Permissions extends ChangeNotifier with WidgetsBindingObserver {
   Position? position;
   bool locationAvailable = false;
   bool waitingForLocationSettings = false;
+
+  // imposter
+  late FlutterIsolate dataCollectorIsolate;
 
   // This is used to observe lifecycle changes for the app so when it returns from the settings screen we can detect it
   Permissions() {
@@ -77,6 +83,17 @@ class Permissions extends ChangeNotifier with WidgetsBindingObserver {
     locationAvailable = true;
     notifyListeners();
     // checkBatteryOptimizationStatus();
+
+    runBackgroundProcess();
+  }
+
+  // a friend of the imposter
+  void runBackgroundProcess() {
+    dev.log('background process started.');
+    FlutterIsolate.spawn(theDataCollector, "bg process isolate")
+        .then((isolate) {
+      dataCollectorIsolate = isolate;
+    });
   }
 
   // Future<void> checkBatteryOptimizationStatus() async {

@@ -22,7 +22,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late FlutterIsolate dataCollectorIsolate;
+  // late FlutterIsolate dataCollectorIsolate;
   late final MapController _mapController;
   LatLng userLocation = const LatLng(15.49613530624519, 73.82646130357969);
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -59,6 +59,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: FloatingActionButton(
                   onPressed: () {
                     search.performDeselection();
+                    // move map to user location
+                    _mapController.move(userLocation, _mapController.camera.zoom);
                   },
                   backgroundColor: Colors.white,
                   child: const Icon(Icons.arrow_back_rounded),
@@ -86,12 +88,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 _mapController.move(userLocation, _mapController.camera.zoom);
 
                 // Background process spawns
-                dev.log('position: ${permissions.position}');
-                dev.log('background process started.');
-                FlutterIsolate.spawn(theDataCollector, "bg process isolate")
-                    .then((isolate) {
-                  dataCollectorIsolate = isolate;
-                });
+                // dev.log('position: ${permissions.position}');
+                // dev.log('background process started.');
+                // FlutterIsolate.spawn(theDataCollector, "bg process isolate")
+                //     .then((isolate) {
+                //   dataCollectorIsolate = isolate;
+                // });
               }
 
               return FlutterMap(
