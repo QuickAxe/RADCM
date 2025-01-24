@@ -66,16 +66,13 @@ class _HomeScreenState extends State<HomeScreen> {
               return Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: FloatingActionButton(
-                  onPressed: () async {
+                  onPressed: () {
                     // refresh user location
-                    Provider.of<Permissions>(context, listen: false).getCurrentLocation();
+                    Provider.of<Permissions>(context, listen: false).checkAndRequestLocationPermission();
                     Position? pos = Provider.of<Permissions>(context, listen: false).position;
                     if(pos != null) {
                       userLocation = LatLng(pos.latitude, pos.longitude);
                     }
-
-                    // move map to user location
-                    _mapController.move(userLocation, _mapController.camera.zoom);
                   },
                   backgroundColor: Colors.white,
                   child: const Icon(Icons.my_location_rounded),

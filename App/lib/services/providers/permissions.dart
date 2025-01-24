@@ -80,25 +80,12 @@ class Permissions extends ChangeNotifier with WidgetsBindingObserver {
     dev.log('I AM IN CHECK & REQUEST 2');
 
     // fetches the current position
-    getCurrentLocation();
-
-    notifyListeners();
-    // checkBatteryOptimizationStatus();
-  }
-
-  Future<void> getCurrentLocation() async {
     position = await Geolocator.getCurrentPosition();
     locationAvailable = true;
-  }
+    notifyListeners();
 
-  // a friend of the imposter
-  // void runBackgroundProcess() {
-  //   dev.log('background process started.');
-  //   FlutterIsolate.spawn(theDataCollector, "bg process isolate")
-  //       .then((isolate) {
-  //     dataCollectorIsolate = isolate;
-  //   });
-  // }
+    // checkBatteryOptimizationStatus();
+  }
 
   // Future<void> checkBatteryOptimizationStatus() async {
   //   SharedPreferences prefs = await SharedPreferences.getInstance();
