@@ -12,9 +12,6 @@ class Permissions extends ChangeNotifier with WidgetsBindingObserver {
   bool locationAvailable = false;
   bool waitingForLocationSettings = false;
 
-  // imposter
-  late FlutterIsolate dataCollectorIsolate;
-
   // This is used to observe lifecycle changes for the app so when it returns from the settings screen we can detect it
   Permissions() {
     WidgetsBinding.instance.addObserver(this);
@@ -38,8 +35,11 @@ class Permissions extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> fetchPosition() async {
     // checks if location is enabled
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    dev.log('I AM IN FETCH POSITION 1');
 
     if (!serviceEnabled) {
+      dev.log('I AM IN FETCH POSITION 2');
+
       dev.log('Location Service not enabled.');
       locationAvailable = false;
       notifyListeners();
@@ -53,13 +53,15 @@ class Permissions extends ChangeNotifier with WidgetsBindingObserver {
       waitingForLocationSettings = true;
       // opens location settings
       await Geolocator.openLocationSettings();
-      return;
     }
-    checkAndRequestLocationPermission();
+
+    dev.log('I AM IN FETCH POSITION 3');
+    await checkAndRequestLocationPermission();
   }
 
   Future<void> checkAndRequestLocationPermission() async {
     LocationPermission permission = await Geolocator.checkPermission();
+    dev.log('I AM IN CHECK & REQUEST 1');
 
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -74,27 +76,27 @@ class Permissions extends ChangeNotifier with WidgetsBindingObserver {
           gravity: ToastGravity.CENTER,
         );
         // opens app settings
-        Geolocator.openAppSettings();
+        await Geolocator.openAppSettings();
       }
     }
+
+    dev.log('I AM IN CHECK & REQUEST 2');
 
     // fetches the current position
     position = await Geolocator.getCurrentPosition();
     locationAvailable = true;
     notifyListeners();
     // checkBatteryOptimizationStatus();
-
-    runBackgroundProcess();
   }
 
   // a friend of the imposter
-  void runBackgroundProcess() {
-    dev.log('background process started.');
-    FlutterIsolate.spawn(theDataCollector, "bg process isolate")
-        .then((isolate) {
-      dataCollectorIsolate = isolate;
-    });
-  }
+  // void runBackgroundProcess() {
+  //   dev.log('background process started.');
+  //   FlutterIsolate.spawn(theDataCollector, "bg process isolate")
+  //       .then((isolate) {
+  //     dataCollectorIsolate = isolate;
+  //   });
+  // }
 
   // Future<void> checkBatteryOptimizationStatus() async {
   //   SharedPreferences prefs = await SharedPreferences.getInstance();

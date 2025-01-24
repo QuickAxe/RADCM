@@ -4,11 +4,14 @@ import 'package:app/pages/settings_screens/additional_settings.dart';
 import 'package:app/pages/settings_screens/routines.dart';
 import 'package:app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:app/pages/settings_screens/voice_engine.dart';
+import 'package:app/services/isolates/anomaly_detection.dart';
 import 'package:app/services/providers/permissions.dart';
 import 'package:app/services/providers/search.dart';
 import 'package:app/services/providers/user_settings.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:provider/provider.dart';
+import 'dart:developer' as dev;
 
 void main() {
   runApp(
@@ -33,13 +36,23 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  late FlutterIsolate dataCollectorIsolate;
+
   @override
   void initState() {
     super.initState();
     Future.microtask(() async {
       var permissions = Provider.of<Permissions>(context, listen: false);
       // calls fetch position
-      await permissions.fetchPosition();
+      permissions.fetchPosition().then((_) {
+        dev.log('YOO IM THIS COOL COMMENT HERE.. IM SIC');
+
+        dev.log('background process started.');
+        FlutterIsolate.spawn(theDataCollector, "bg process isolate")
+            .then((isolate) {
+          dataCollectorIsolate = isolate;
+        });
+      });
     });
   }
 
