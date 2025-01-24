@@ -80,10 +80,15 @@ class Permissions extends ChangeNotifier with WidgetsBindingObserver {
     dev.log('I AM IN CHECK & REQUEST 2');
 
     // fetches the current position
-    position = await Geolocator.getCurrentPosition();
-    locationAvailable = true;
+    getCurrentLocation();
+
     notifyListeners();
     // checkBatteryOptimizationStatus();
+  }
+
+  Future<void> getCurrentLocation() async {
+    position = await Geolocator.getCurrentPosition();
+    locationAvailable = true;
   }
 
   // a friend of the imposter

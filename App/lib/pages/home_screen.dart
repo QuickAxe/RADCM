@@ -3,6 +3,7 @@ import 'package:app/components/bottom_panel_nav.dart';
 import 'package:app/services/providers/anomaly_marker_layer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
@@ -54,15 +55,31 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () {
                     search.performDeselection();
                     // move map to user location
-                    _mapController.move(userLocation, _mapController.camera.zoom);
+                    _mapController.move(
+                        userLocation, _mapController.camera.zoom);
                   },
                   backgroundColor: Colors.white,
                   child: const Icon(Icons.arrow_back_rounded),
                 ),
               );
             } else {
-              return const Padding(
-                padding: EdgeInsets.all(10.0),
+              return Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: FloatingActionButton(
+                  onPressed: () async {
+                    // refresh user location
+                    Provider.of<Permissions>(context, listen: false).getCurrentLocation();
+                    Position? pos = Provider.of<Permissions>(context, listen: false).position;
+                    if(pos != null) {
+                      userLocation = LatLng(pos.latitude, pos.longitude);
+                    }
+
+                    // move map to user location
+                    _mapController.move(userLocation, _mapController.camera.zoom);
+                  },
+                  backgroundColor: Colors.white,
+                  child: const Icon(Icons.my_location_rounded),
+                ),
               );
             }
           })
