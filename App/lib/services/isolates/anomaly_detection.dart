@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:collection';
+import 'dart:developer' as dev;
 
 import 'package:flutter_rotation_sensor/flutter_rotation_sensor.dart' as frs;
 import 'package:fluttertoast/fluttertoast.dart';
@@ -30,7 +31,7 @@ Future<void> theDataCollector(String msg) async {
   frs.RotationSensor.samplingPeriod = frs.SensorInterval.fastestInterval;
 
   // request geo permissions
-  await requestPermissions();
+  // await requestPermissions();
 
   // Combine streams to listen simultaneously
   CombineLatestStream.list([
@@ -73,22 +74,22 @@ Future<void> theDataCollector(String msg) async {
 }
 
 // ----------------------------------- Permission handling for lat, long ----------------------------------------------
-Future<void> requestPermissions() async {
-  LocationPermission permission = await Geolocator.checkPermission();
-  if (permission == LocationPermission.denied) {
-    permission = await Geolocator.requestPermission();
-    if (permission == LocationPermission.denied) {
-      // Handle permission denied
-      print('Location permissions are denied');
-    }
-  }
-
-  if (permission == LocationPermission.deniedForever) {
-    // Permissions are denied forever.
-    print(
-        'Location permissions are permanently denied, we cannot request permissions.');
-  }
-}
+// Future<void> requestPermissions() async {
+//   LocationPermission permission = await Geolocator.checkPermission();
+//   if (permission == LocationPermission.denied) {
+//     permission = await Geolocator.requestPermission();
+//     if (permission == LocationPermission.denied) {
+//       // Handle permission denied
+//       print('Location permissions are denied');
+//     }
+//   }
+//
+//   if (permission == LocationPermission.deniedForever) {
+//     // Permissions are denied forever.
+//     print(
+//         'Location permissions are permanently denied, we cannot request permissions.');
+//   }
+// }
 
 // ----------------------------------- Location Updates Stream --------------------------------------------------------
 Stream<Position> getLocationUpdates() {
@@ -130,7 +131,7 @@ bool checkWindow(Anomaly currentWindow, List<Anomaly> probableAnomalyBuffer,
 
   // check threshold for valid anomaly
   if ((accelLeft - accelRight).abs() >= threshold) {
-    print(
+    dev.log(
         "---------------------  Anomaly Encountered At Timestamp: ${DateTime.now()}  ---------------------");
     Fluttertoast.showToast(
       msg: "Anomaly detected at ${DateTime.now()}!",
@@ -156,6 +157,6 @@ bool checkWindow(Anomaly currentWindow, List<Anomaly> probableAnomalyBuffer,
 // ----------------------------------- When anomaly buffer has reached its limit and needs to be emptied --------------
 void flushBuffer(List<Anomaly> probableAnomalyBuffer) {
   // send data to backend..
-  print("Buffer Flushed.. ");
+  dev.log("Buffer Flushed.. ");
   probableAnomalyBuffer.clear();
 }

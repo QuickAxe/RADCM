@@ -1,16 +1,12 @@
-import 'dart:developer' as dev;
-
 import 'package:app/components/app_drawer.dart';
 import 'package:app/components/bottom_panel_nav.dart';
 import 'package:app/services/providers/anomaly_marker_layer.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
 import '../components/bottom_panel.dart';
-import '../services/isolates/anomaly_detection.dart';
 import '../services/providers/permissions.dart';
 import '../services/providers/search.dart';
 
@@ -22,7 +18,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // late FlutterIsolate dataCollectorIsolate;
   late final MapController _mapController;
   LatLng userLocation = const LatLng(15.49613530624519, 73.82646130357969);
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -31,7 +26,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _mapController = MapController();
-    // _panelController = PanelController();
   }
 
   @override
@@ -48,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _scaffoldKey.currentState?.openDrawer();
             },
             backgroundColor: Colors.white,
-            child: const Icon(Icons.menu),
+            child: const Icon(Icons.menu_rounded),
           ),
         ),
         actions: [
@@ -86,14 +80,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   permissions.position!.longitude,
                 );
                 _mapController.move(userLocation, _mapController.camera.zoom);
-
-                // Background process spawns
-                // dev.log('position: ${permissions.position}');
-                // dev.log('background process started.');
-                // FlutterIsolate.spawn(theDataCollector, "bg process isolate")
-                //     .then((isolate) {
-                //   dataCollectorIsolate = isolate;
-                // });
               }
 
               return FlutterMap(

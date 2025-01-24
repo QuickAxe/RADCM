@@ -1,10 +1,8 @@
-import 'dart:convert';
 import 'dart:developer' as dev;
 
 import 'package:app/services/providers/search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
@@ -64,7 +62,8 @@ class _SearchPlaceState extends State<SearchPlace> {
             },
             trailing: [
               IconButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    await search.getSuggestions(controller.text.toString());
                     controller.openView();
                   },
                   icon: const Icon(Icons.search)),

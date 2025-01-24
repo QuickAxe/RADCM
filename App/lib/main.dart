@@ -42,7 +42,8 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     Future.microtask(() async {
-      var permissions = Provider.of<Permissions>(context, listen: false);
+      Permissions permissions = Provider.of<Permissions>(context, listen: false);
+
       // calls fetch position
       permissions.fetchPosition().then((_) {
         dev.log('YOO IM THIS COOL COMMENT HERE.. IM SIC');
@@ -66,13 +67,13 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       theme: ThemeData(useMaterial3: true),
       debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
+      home: const HomeScreen(),
       routes: {
-        '/settings': (context) => SettingsScreen(),
-        '/toggle_anomalies': (context) => ToggleAnomaliesScreen(),
-        '/routines': (context) => RoutinesScreen(),
-        '/voice_engine': (context) => VoiceEngineScreen(),
-        '/additional_settings': (context) => AdditionalSettings(),
+        '/settings': (context) => const SettingsScreen(),
+        '/toggle_anomalies': (context) => const ToggleAnomaliesScreen(),
+        '/routines': (context) => const RoutinesScreen(),
+        '/voice_engine': (context) => const VoiceEngineScreen(),
+        '/additional_settings': (context) => const AdditionalSettings(),
       },
     );
   }

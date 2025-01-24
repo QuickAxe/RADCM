@@ -1,11 +1,8 @@
 import 'dart:developer' as dev;
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
-
-import '../isolates/anomaly_detection.dart';
 
 class Permissions extends ChangeNotifier with WidgetsBindingObserver {
   Position? position;

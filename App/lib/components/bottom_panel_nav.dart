@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-
 import '../services/providers/search.dart';
-import '../services/providers/user_settings.dart';
-import 'search_place.dart';
 
 class BottomPanelNav extends StatefulWidget {
   final MapController mapController;
@@ -22,7 +19,7 @@ class BottomPanelNav extends StatefulWidget {
 class _BottomPanelState extends State<BottomPanelNav> {
   @override
   Widget build(BuildContext context) {
-    final userSettings = Provider.of<UserSettingsProvider>(context);
+    // final userSettings = Provider.of<UserSettingsProvider>(context);
 
     return SlidingUpPanel(
       padding: const EdgeInsets.symmetric(horizontal: 5.0),
@@ -50,7 +47,7 @@ class _BottomPanelState extends State<BottomPanelNav> {
             Padding(
               padding: const EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 10.0),
               child: ListTile(
-                leading: const Icon(Icons.location_on),
+                leading: const Icon(Icons.location_on_rounded),
                 title: Text(Provider.of<Search>(context, listen: true).currentSelected['name']),
                 subtitle: Text(Provider.of<Search>(context, listen: true)
                     .currentSelected['addresstype']),
