@@ -53,18 +53,18 @@ class _BottomPanelState extends State<BottomPanelNav> {
                     .currentSelected['addresstype']),
               ),
             ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 10.0),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                minimumSize: const Size.fromHeight(40),
-              ),
-              onPressed: () {},
-              child: const Text("Get Routes"),
-            ),
-          )
+          // Padding(
+          //   padding: const EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 10.0),
+          //   child: ElevatedButton(
+          //     style: ElevatedButton.styleFrom(
+          //       backgroundColor: Theme.of(context).colorScheme.primary,
+          //       foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          //       minimumSize: const Size.fromHeight(40),
+          //     ),
+          //     onPressed: () {},
+          //     child: const Text("Get Routes"),
+          //   ),
+          // )
         ],
       ),
     );

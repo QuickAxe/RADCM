@@ -1,7 +1,9 @@
+import 'package:admin_app/services/providers/permissions.dart';
 import 'package:admin_app/services/providers/user_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:geocoding/geocoding.dart';
 
@@ -23,9 +25,11 @@ class AnomalyMarkerLayer extends StatelessWidget {
     return imageAssetPath;
   }
 
-  Future<void> _showAnomalyDialog(BuildContext context, AnomalyMarker anomaly) async {
-    List<Placemark> placemarks = await placemarkFromCoordinates(anomaly.location.latitude, anomaly.location.longitude);
-print(placemarks.toString());
+  Future<void> _showAnomalyDialog(
+      BuildContext context, AnomalyMarker anomaly) async {
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+        anomaly.location.latitude, anomaly.location.longitude);
+    print(placemarks.toString());
 
     showDialog(
       context: context,
@@ -40,7 +44,8 @@ print(placemarks.toString());
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text("${placemarks[0].street}, ${placemarks[0].locality}, ${placemarks[0].country} - ${placemarks[0].postalCode}"),
+                  Text(
+                      "${placemarks[0].street}, ${placemarks[0].locality}, ${placemarks[0].country} - ${placemarks[0].postalCode}"),
                   Row(
                     children: [
                       Checkbox(
@@ -73,14 +78,34 @@ print(placemarks.toString());
                     ElevatedButton(
                       onPressed: (checkboxOne && checkboxTwo)
                           ? () {
-                              Fluttertoast.showToast(
-                                msg: "Anomaly Fixed!",
-                                toastLength: Toast.LENGTH_LONG,
-                              );
+                              Position? pos = Provider.of<Permissions>(context,
+                                      listen: false)
+                                  .position;
 
-                              // remove this anomaly or whatever..
+                              double distance = pos == null
+                                  ? 1000.0
+                                  : Geolocator.distanceBetween(
+                                      pos.latitude,
+                                      pos.longitude,
+                                      anomaly.location.latitude,
+                                      anomaly.location.longitude);
 
-                              Navigator.pop(context);
+                              if (distance >= 1000.0) {
+                                Fluttertoast.showToast(
+                                  msg:
+                                      "Anomaly is more than a kilometer away!!",
+                                  toastLength: Toast.LENGTH_LONG,
+                                );
+                              } else {
+                                Fluttertoast.showToast(
+                                  msg: "Anomaly Fixed!",
+                                  toastLength: Toast.LENGTH_LONG,
+                                );
+
+                                // remove this anomaly or whatever..
+
+                                Navigator.pop(context);
+                              }
                             }
                           : null,
                       child: const Text("Mark fixed"),

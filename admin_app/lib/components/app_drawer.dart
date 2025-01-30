@@ -12,7 +12,7 @@ class AppDrawer extends StatelessWidget {
           const DrawerHeader(
             child: Center(
               child: Text(
-                'RADCM',
+                'RADCM Admin',
                 style: TextStyle(fontSize: 24),
               ),
             ),
