@@ -1,3 +1,4 @@
+import 'package:admin_app/pages/fix_anomaly.dart';
 import 'package:admin_app/pages/home_screen.dart';
 import 'package:admin_app/pages/login_page.dart';
 import 'package:admin_app/pages/settings_screen.dart';
@@ -41,18 +42,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // @override
-  // void initState() {
-  //   super.initState();
-
-    // Future.microtask(() async {
-    //   Permissions permissions = Provider.of<Permissions>(context, listen: false);
-    //
-    //   // calls fetch position
-    //   permissions.fetchPosition();
-    // });
-  // }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -68,6 +57,7 @@ class _MyAppState extends State<MyApp> {
           '/routines': (context) => const RoutinesScreen(),
           '/voice_engine': (context) => const VoiceEngineScreen(),
           '/additional_settings': (context) => const AdditionalSettings(),
+          '/fix_anomaly': (context) => const FixAnomaly(),
         }
     );
   }

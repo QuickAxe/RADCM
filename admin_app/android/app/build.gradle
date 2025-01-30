@@ -6,6 +6,8 @@ plugins {
 }
 
 dependencies {
+    implementation 'com.google.android.gms:play-services-location:17.1.0' // For geocoding
+    implementation 'com.google.android.gms:play-services-maps:17.0.1'    // For maps-related features
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.3'
 }
 

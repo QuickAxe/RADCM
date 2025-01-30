@@ -1,7 +1,9 @@
 import 'package:admin_app/services/providers/user_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
+import 'package:geocoding/geocoding.dart';
 
 import '../../data/models/anomaly_marker.dart';
 import '../anomaly_marker_service.dart';
@@ -21,18 +23,78 @@ class AnomalyMarkerLayer extends StatelessWidget {
     return imageAssetPath;
   }
 
-  void _showAnomalyDialog(BuildContext context, AnomalyMarker anomaly) {
+  Future<void> _showAnomalyDialog(BuildContext context, AnomalyMarker anomaly) async {
+    List<Placemark> placemarks = await placemarkFromCoordinates(anomaly.location.latitude, anomaly.location.longitude);
+print(placemarks.toString());
+
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text(anomaly.category),
-          content: Text(anomaly.location.toString()),
-          actions: [
-            TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Ok")),
-          ],
+        bool checkboxOne = false; // Initial state
+        bool checkboxTwo = false;
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(anomaly.category),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("${placemarks[0].street}, ${placemarks[0].locality}, ${placemarks[0].country} - ${placemarks[0].postalCode}"),
+                  Row(
+                    children: [
+                      Checkbox(
+                          value: checkboxOne,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              checkboxOne = value ?? false;
+                            });
+                          }),
+                      const Text("Confirm Inspection")
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Checkbox(
+                          value: checkboxTwo,
+                          onChanged: (bool? value) {
+                            setState(() {
+                              checkboxTwo = value ?? false;
+                            });
+                          }),
+                      const Text("Attach my signature")
+                    ],
+                  ),
+                ],
+              ),
+              actions: [
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: (checkboxOne && checkboxTwo)
+                          ? () {
+                              Fluttertoast.showToast(
+                                msg: "Anomaly Fixed!",
+                                toastLength: Toast.LENGTH_LONG,
+                              );
+
+                              // remove this anomaly or whatever..
+
+                              Navigator.pop(context);
+                            }
+                          : null,
+                      child: const Text("Mark fixed"),
+                    ),
+                    const SizedBox(width: 5),
+                    ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Cancel"),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
         );
       },
     );
