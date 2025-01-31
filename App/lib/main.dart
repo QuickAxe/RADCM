@@ -49,10 +49,11 @@ class _MyAppState extends State<MyApp> {
         dev.log('YOO IM THIS COOL COMMENT HERE.. IM SIC');
 
         dev.log('background process started.');
-        FlutterIsolate.spawn(theDataCollector, "bg process isolate")
-            .then((isolate) {
-          dataCollectorIsolate = isolate;
-        });
+        theDataCollector();
+        // FlutterIsolate.spawn(theDataCollector, "bg process isolate")
+        //     .then((isolate) {
+        //   dataCollectorIsolate = isolate;
+        // });
       });
     });
   }

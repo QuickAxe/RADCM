@@ -16,20 +16,17 @@ class Anomaly {
 }
 
 // ----------------------------------- Heard abt tax collector? -------------------------------------------------------
-@pragma('vm:entry-point')
-Future<void> theDataCollector(String msg) async {
+// @pragma('vm:entry-point')
+Future<void> theDataCollector() async {
   frs.Matrix3 rotationMatrix = frs.Matrix3(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
   List<Anomaly> probableAnomalyBuffer =
       []; // the buffer that contains probable anomalies
   Anomaly currentWindow = Anomaly(); // the sliding window
-  DateTime? lastSampleTime; // to maintain the 50Hz freq
-  DateTime lastAnomaly = DateTime(
-      2023, 12, 25, 0, 0, 0); // to set time delay between consecutive anomalies
+  DateTime lastAnomaly = DateTime(2023, 12, 25, 0, 0, 0); // to set time delay between consecutive anomalies
 
   // set sampling period for the guy that gives rotation matrix
   frs.RotationSensor.samplingPeriod = frs.SensorInterval.fastestInterval;
-
 
   // Combine streams to listen simultaneously
   CombineLatestStream.list([
@@ -49,8 +46,7 @@ Future<void> theDataCollector(String msg) async {
     // if size is 200 then check the window for anomaly
     if (currentWindow.accReadings.length == 200 &&
         now.difference(lastAnomaly).inMilliseconds >= 5000) {
-      bool isAnomaly =
-          checkWindow(currentWindow, probableAnomalyBuffer, locEvent);
+      bool isAnomaly = checkWindow(currentWindow, probableAnomalyBuffer, locEvent);
       if (isAnomaly) {
         lastAnomaly = DateTime.now();
       }
@@ -58,8 +54,10 @@ Future<void> theDataCollector(String msg) async {
 
     // read sensor data, reorient and push the entry to buffer
     rotationMatrix = frsEvent.rotationMatrix;
+
     List<double> accGlobal = reorientAccelerometer(
         [accEvent.x, accEvent.y, accEvent.z], rotationMatrix);
+
     currentWindow.accReadings.add([accGlobal[0], accGlobal[1], accGlobal[2]]);
 
     // resize
