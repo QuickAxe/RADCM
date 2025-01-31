@@ -30,8 +30,6 @@ Future<void> theDataCollector(String msg) async {
   // set sampling period for the guy that gives rotation matrix
   frs.RotationSensor.samplingPeriod = frs.SensorInterval.fastestInterval;
 
-  // request geo permissions
-  // await requestPermissions();
 
   // Combine streams to listen simultaneously
   CombineLatestStream.list([
@@ -39,36 +37,34 @@ Future<void> theDataCollector(String msg) async {
         samplingPeriod: SensorInterval.fastestInterval), // Stream 0
     frs.RotationSensor.orientationStream, // Stream 1
     getLocationUpdates(), // Stream 2
-  ]).listen((data) {
+  ])
+      .throttleTime(const Duration(milliseconds: 20))
+      .listen((data) {
     // data[i] corresponds to the ith stream
     final accEvent = data[0] as AccelerometerEvent;
     final frsEvent = data[1] as frs.OrientationEvent;
     final locEvent = data[2] as Position;
     final now = DateTime.now();
 
-    if (lastSampleTime == null ||
-        now.difference(lastSampleTime!).inMilliseconds >= 18) {
-      lastSampleTime = now;
-
-      if (currentWindow.accReadings.length == 200 &&
-          now.difference(lastAnomaly).inMilliseconds >= 5000) {
-        bool isAnomaly =
-            checkWindow(currentWindow, probableAnomalyBuffer, locEvent);
-        if (isAnomaly) {
-          lastAnomaly = DateTime.now();
-        }
-      } else {
-        // read sensor data, reorient and push the entry to buffer
-        rotationMatrix = frsEvent.rotationMatrix;
-        List<double> accGlobal = reorientAccelerometer(
-            [accEvent.x, accEvent.y, accEvent.z], rotationMatrix);
-        currentWindow.accReadings
-            .add([accGlobal[0], accGlobal[1], accGlobal[2]]);
-
-        if (currentWindow.accReadings.length == 201) {
-          currentWindow.accReadings.removeFirst();
-        }
+    // if size is 200 then check the window for anomaly
+    if (currentWindow.accReadings.length == 200 &&
+        now.difference(lastAnomaly).inMilliseconds >= 5000) {
+      bool isAnomaly =
+          checkWindow(currentWindow, probableAnomalyBuffer, locEvent);
+      if (isAnomaly) {
+        lastAnomaly = DateTime.now();
       }
+    }
+
+    // read sensor data, reorient and push the entry to buffer
+    rotationMatrix = frsEvent.rotationMatrix;
+    List<double> accGlobal = reorientAccelerometer(
+        [accEvent.x, accEvent.y, accEvent.z], rotationMatrix);
+    currentWindow.accReadings.add([accGlobal[0], accGlobal[1], accGlobal[2]]);
+
+    // resize
+    if (currentWindow.accReadings.length == 201) {
+      currentWindow.accReadings.removeFirst();
     }
   });
 }
