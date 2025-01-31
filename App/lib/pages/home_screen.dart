@@ -68,9 +68,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: FloatingActionButton(
                   onPressed: () {
                     // refresh user location
-                    Provider.of<Permissions>(context, listen: false).checkAndRequestLocationPermission();
-                    Position? pos = Provider.of<Permissions>(context, listen: false).position;
-                    if(pos != null) {
+                    Provider.of<Permissions>(context, listen: false)
+                        .checkAndRequestLocationPermission();
+                    Position? pos =
+                        Provider.of<Permissions>(context, listen: false)
+                            .position;
+                    if (pos != null) {
                       userLocation = LatLng(pos.latitude, pos.longitude);
                     }
                   },
@@ -106,6 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 children: [
                   TileLayer(
+                    panBuffer: 3,
                     urlTemplate:
                         'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'com.example.app',
