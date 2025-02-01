@@ -1,17 +1,18 @@
+import 'dart:developer' as dev;
+
 import 'package:app/pages/home_screen.dart';
 import 'package:app/pages/settings_screen.dart';
 import 'package:app/pages/settings_screens/additional_settings.dart';
 import 'package:app/pages/settings_screens/routines.dart';
 import 'package:app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:app/pages/settings_screens/voice_engine.dart';
-import 'package:app/services/isolates/anomaly_detection.dart';
+import 'package:app/services/background/anomaly_detection.dart';
 import 'package:app/services/providers/permissions.dart';
 import 'package:app/services/providers/search.dart';
 import 'package:app/services/providers/user_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:provider/provider.dart';
-import 'dart:developer' as dev;
 
 void main() {
   runApp(
@@ -42,7 +43,8 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     Future.microtask(() async {
-      Permissions permissions = Provider.of<Permissions>(context, listen: false);
+      Permissions permissions =
+          Provider.of<Permissions>(context, listen: false);
 
       // calls fetch position
       permissions.fetchPosition().then((_) {

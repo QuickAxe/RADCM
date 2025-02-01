@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:developer' as dev;
 
 import 'package:flutter_rotation_sensor/flutter_rotation_sensor.dart' as frs;
@@ -8,12 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
-// ----------------------------------- Represents the structure of an anomaly -----------------------------------------
-class Anomaly {
-  ListQueue<List<double>> accReadings = ListQueue();
-  double latitude = 0.0;
-  double longitude = 0.0;
-}
+import '../../data/models/bg_anomaly.dart';
 
 // ----------------------------------- Heard abt tax collector? -------------------------------------------------------
 // @pragma('vm:entry-point')
@@ -23,7 +17,8 @@ Future<void> theDataCollector() async {
   List<Anomaly> probableAnomalyBuffer =
       []; // the buffer that contains probable anomalies
   Anomaly currentWindow = Anomaly(); // the sliding window
-  DateTime lastAnomaly = DateTime(2023, 12, 25, 0, 0, 0); // to set time delay between consecutive anomalies
+  DateTime lastAnomaly = DateTime(
+      2023, 12, 25, 0, 0, 0); // to set time delay between consecutive anomalies
 
   // set sampling period for the guy that gives rotation matrix
   frs.RotationSensor.samplingPeriod = frs.SensorInterval.fastestInterval;
@@ -34,9 +29,7 @@ Future<void> theDataCollector() async {
         samplingPeriod: SensorInterval.fastestInterval), // Stream 0
     frs.RotationSensor.orientationStream, // Stream 1
     getLocationUpdates(), // Stream 2
-  ])
-      .throttleTime(const Duration(milliseconds: 20))
-      .listen((data) {
+  ]).throttleTime(const Duration(milliseconds: 20)).listen((data) {
     // data[i] corresponds to the ith stream
     final accEvent = data[0] as AccelerometerEvent;
     final frsEvent = data[1] as frs.OrientationEvent;
@@ -46,7 +39,8 @@ Future<void> theDataCollector() async {
     // if size is 200 then check the window for anomaly
     if (currentWindow.accReadings.length == 200 &&
         now.difference(lastAnomaly).inMilliseconds >= 5000) {
-      bool isAnomaly = checkWindow(currentWindow, probableAnomalyBuffer, locEvent);
+      bool isAnomaly =
+          checkWindow(currentWindow, probableAnomalyBuffer, locEvent);
       if (isAnomaly) {
         lastAnomaly = DateTime.now();
       }
@@ -66,24 +60,6 @@ Future<void> theDataCollector() async {
     }
   });
 }
-
-// ----------------------------------- Permission handling for lat, long ----------------------------------------------
-// Future<void> requestPermissions() async {
-//   LocationPermission permission = await Geolocator.checkPermission();
-//   if (permission == LocationPermission.denied) {
-//     permission = await Geolocator.requestPermission();
-//     if (permission == LocationPermission.denied) {
-//       // Handle permission denied
-//       print('Location permissions are denied');
-//     }
-//   }
-//
-//   if (permission == LocationPermission.deniedForever) {
-//     // Permissions are denied forever.
-//     print(
-//         'Location permissions are permanently denied, we cannot request permissions.');
-//   }
-// }
 
 // ----------------------------------- Location Updates Stream --------------------------------------------------------
 Stream<Position> getLocationUpdates() {
