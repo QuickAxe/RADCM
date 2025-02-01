@@ -6,6 +6,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../components/bottom_panel.dart';
 import '../services/providers/permissions.dart';
@@ -113,6 +114,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     urlTemplate:
                         'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'com.example.app',
+                  ),
+                  Positioned(
+                    left: 200,
+                    bottom: 200,
+                    child: RichAttributionWidget(
+                      attributions: [
+                        TextSourceAttribution(
+                          'OpenStreetMap contributors',
+                          onTap: () => launchUrl(
+                              Uri.parse('https://openstreetmap.org/copyright')),
+                        ),
+                      ],
+                    ),
                   ),
                   // updates the user location marker
                   if (permissions.position != null)

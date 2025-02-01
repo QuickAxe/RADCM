@@ -55,6 +55,7 @@ dependencies:
   provider: ^6.1.2
   fluttertoast: ^8.2.10
   android_intent_plus: ^5.2.2
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:
