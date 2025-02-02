@@ -42,9 +42,19 @@ class _SearchPlaceState extends State<SearchPlace> {
   }
 
   void userTapsSearchResult(dynamic place, SearchController controller) {
-    LatLng loc = LatLng(double.parse(place['lat']), double.parse(place['lon']));
+    dev.log(place.toString());
+
     Provider.of<Search>(context, listen: false).performSelection(place);
-    widget.mapController.move(loc, widget.mapController.camera.zoom);
+
+    // bounding box
+    LatLngBounds bounds = LatLngBounds(
+      LatLng(double.parse(place['boundingbox'][0]),
+          double.parse(place['boundingbox'][2])),
+      LatLng(double.parse(place['boundingbox'][1]),
+          double.parse(place['boundingbox'][3])),
+    );
+
+    widget.mapController.fitCamera(CameraFit.bounds(bounds: bounds));
     controller.closeView(place['display_name']);
   }
 

@@ -56,9 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: FloatingActionButton(
                   onPressed: () {
                     search.performDeselection();
-                    // move map to user location
-                    _mapController.move(
-                        userLocation, _mapController.camera.zoom);
+                    _mapController.moveAndRotate(userLocation, 15.0, 0.0);
                   },
                   backgroundColor: Colors.white,
                   child: const Icon(Icons.arrow_back_rounded),
@@ -105,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 mapController: _mapController,
                 options: MapOptions(
                   initialCenter: userLocation,
-                  initialZoom: 13,
+                  initialZoom: 15,
                   maxZoom: 18,
                   minZoom: 3,
                 ),
@@ -134,9 +132,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     MarkerLayer(
                       markers: [
                         Marker(
+                          rotate: true,
                           point: userLocation,
                           child: const Icon(
-                            Icons.location_pin,
+                            Icons.location_on_rounded,
                             color: Colors.red,
                             size: 30.0,
                           ),
