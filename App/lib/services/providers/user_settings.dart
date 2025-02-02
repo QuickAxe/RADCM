@@ -25,12 +25,14 @@ class UserSettingsProvider extends ChangeNotifier {
     "Speedbreaker": true,
     "Rumbler": true,
     "Obstacle": true,
+    "Pothole": true,
   };
 
   final Map<String, bool> _alertWhileRiding = {
     "Speedbreaker": true,
     "Rumbler": true,
     "Obstacle": true,
+    "Pothole": true
   };
 
   Map<String, bool> get showOnMap => _showOnMap;

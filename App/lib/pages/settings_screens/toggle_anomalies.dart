@@ -13,6 +13,7 @@ class ToggleAnomaliesScreen extends StatelessWidget {
       {"name": "Speedbreaker", "icon": "assets/icons/ic_speedbreaker.png"},
       {"name": "Rumbler", "icon": "assets/icons/ic_rumbler.png"},
       {"name": "Obstacle", "icon": "assets/icons/ic_obstacle.png"},
+      {"name": "Pothole", "icon": "assets/icons/ic_pothole.png"},
     ];
 
     return Scaffold(

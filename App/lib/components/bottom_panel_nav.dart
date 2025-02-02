@@ -79,7 +79,7 @@ class _BottomPanelState extends State<BottomPanelNav> {
                 foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 minimumSize: const Size.fromHeight(40),
               ),
-              onPressed: () {},
+              onPressed: () => Navigator.pushNamed(context, '/map_route'),
               child: const Text("Get Routes"),
             ),
           )
