@@ -54,7 +54,9 @@ class _SearchPlaceState extends State<SearchPlace> {
           double.parse(place['boundingbox'][3])),
     );
 
-    widget.mapController.fitCamera(CameraFit.bounds(bounds: bounds));
+    widget.mapController.fitCamera(
+        CameraFit.bounds(bounds: bounds, padding: const EdgeInsets.all(50.0)));
+    widget.mapController.rotate(0);
     controller.closeView(place['display_name']);
   }
 

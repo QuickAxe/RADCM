@@ -96,16 +96,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   permissions.position!.latitude,
                   permissions.position!.longitude,
                 );
-                _mapController.move(userLocation, _mapController.camera.zoom);
+                // centers to the users current location and makes the map upright
+                _mapController.moveAndRotate(userLocation, 15.0, 0.0);
               }
 
               return FlutterMap(
                 mapController: _mapController,
                 options: MapOptions(
                   initialCenter: userLocation,
-                  initialZoom: 15,
-                  maxZoom: 18,
-                  minZoom: 3,
+                  initialZoom: 15.0,
+                  maxZoom: 18.0,
+                  minZoom: 3.0,
                 ),
                 children: [
                   TileLayer(
