@@ -60,6 +60,11 @@ def train_one_epoch(epoch_index, tb_writer):
         optimiser.zero_grad()
 
         # Make predictions for this batch
+        # print(inputs)
+        # for input in inputs:
+        print(inputs.shape)
+        print(inputs.dtype)
+
         outputs = model(inputs)
 
         # Compute the loss and its gradients
