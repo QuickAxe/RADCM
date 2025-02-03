@@ -16,8 +16,6 @@ class SensorData(Dataset):
 
         self.anomalyLabels = pd.read_csv(annotationsFile)
         self.anomaliesDir = anomaliesDir
-        
-        
 
     def __len__(self):
         return len(self.anomalyLabels)
@@ -27,7 +25,12 @@ class SensorData(Dataset):
 
         # read the anomaly data and convert it to a numpy array:
         anomaly = pd.read_csv(anomalyPath)
-        anomaly = anomaly.to_numpy(dtype=np.float64, copy=True)
+        anomaly = anomaly.to_numpy(dtype=np.float32, copy=True)
+
+        anomaly = np.transpose(anomaly)
+
+        anomaly = anomaly[None, :, :]
+        # print(anomaly.dtype)
 
         # load its label too
         label = self.anomalyLabels.iloc[idx, 1]
