@@ -25,11 +25,11 @@ class CnnLSTM(nn.Module):
             hidden_size=hiddenSize,
             num_layers=numLayers,
             batch_first=True,
-            bidirectional=True,
+            bidirectional=False,
         )
 
         # final neural net to classify it
-        self.fc = nn.Linear(hiddenSize, numClasses)
+        self.fullyConnected = nn.Linear(hiddenSize, numClasses)
         self.softmax = nn.Softmax()
 
     def forward(self, x):
@@ -39,12 +39,25 @@ class CnnLSTM(nn.Module):
         # x = torch.
         out = self.cnn(x)
 
-        #! not sure about below code, need to check the shape of  the tensor that the cnn layer spits out
+        # print("before view", out.shape)
+
+        #! not sure about below code, need to check the shape of the tensor that the cnn layer spits out
+
+        out = out.view(out.shape[0], out.shape[-1], out.shape[1])
+        # print("after view", out.shape)
 
         # lstm takes input of shape (batch_size, seq_len, input_size)
-        # out = out.permute(0, 2, 1)
-        out, _ = self.lstm(out)
-        out = self.fc(out[:, -1, :])
+        # should be something like (32, 99, 64) #!bound to change later
+
+        # print("before lstm layer", out.shape)
+        out, (ht, ct) = self.lstm(out)
+        # print("after lstm layer", out.shape)
+
+        out = out[:, -1]
+        # print("before nn layer", out.shape)
+        # print(out)
+        out = self.fullyConnected(out)
+        out = self.softmax(out)
         return out
 
 

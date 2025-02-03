@@ -1,5 +1,9 @@
 # Road Anomaly Detection, Classification and Mapping - RADCM
 
+## Note 
+labels = {"Pothole": 0, "Breaker": 1}  
+This is the format for labels for the dataset, NOT TO BE INCLUDED IN THE DATASET ITSELF, ONLY FOR MODEL PURPOSES
+
 ## Some basic directory structure
 All the android app stuff will go in App/   
 All the backend stuff, including django folders and all the ml stuff too, will go in Server/  

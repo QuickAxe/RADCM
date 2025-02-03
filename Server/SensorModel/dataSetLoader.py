@@ -30,10 +30,14 @@ class SensorData(Dataset):
         anomaly = np.transpose(anomaly)
 
         anomaly = anomaly[None, :, :]
-        # print(anomaly.dtype)
+
+        labels = {"Pothole": 0, "Breaker": 1}
 
         # load its label too
         label = self.anomalyLabels.iloc[idx, 1]
+
+        # convert label to int
+        label = labels[label]
 
         # return a tuple of anomaly array, label
         #! I think this might have to be converted to a tensor
