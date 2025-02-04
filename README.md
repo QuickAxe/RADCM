@@ -1,7 +1,7 @@
 # Road Anomaly Detection, Classification and Mapping - RADCM
 
 ## Note 
-labels = {"Pothole": 0, "Breaker": 1}  
+labels = {"Flat": 0, "Pothole": 1, "Breaker": 2}  
 This is the format for labels for the dataset, NOT TO BE INCLUDED IN THE DATASET ITSELF, ONLY FOR MODEL PURPOSES
 
 ## Some basic directory structure
