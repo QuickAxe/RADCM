@@ -95,7 +95,7 @@ bool checkWindow(Anomaly currentWindow, List<Anomaly> probableAnomalyBuffer,
     Position position) {
   double accelLeft = currentWindow.accReadings.elementAt(97)[2];
   double accelRight = currentWindow.accReadings.elementAt(103)[2];
-  double threshold = 12.0;
+  double threshold = 18.0;
   int maxBufferSize = 5; // change this later
   bool isAnomaly = false;
 

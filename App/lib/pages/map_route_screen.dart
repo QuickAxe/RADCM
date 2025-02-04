@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:developer' as dev;
 
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
@@ -25,6 +28,7 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
 
   // alternative routes (decoded polyline points)
   List<List<LatLng>> alternativeRoutes = [];
+
   // route details (for distance, duration, and detailed directions)
   List<RouteModel> routes = [];
   bool isLoading = true;
@@ -34,6 +38,9 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
 
   // index of the currently selected route
   int selectedRouteIndex = -1;
+
+  // for the navigation arrow
+  bool startNavigation = false;
 
   @override
   void initState() {
@@ -196,110 +203,224 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        actions: [
+          if (selectedRouteIndex != -1 && startNavigation != true)
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: FloatingActionButton(
+                onPressed: () {
+                  setState(() {
+                    startNavigation = true;
+                    // _mapController.dispose();
+                    // _mapController = MapController();
+                  });
+                },
+                backgroundColor: Colors.deepPurple,
+                child: const Icon(
+                  Icons.navigation_rounded,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+        ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SlidingUpPanel(
-              borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(25.0),
-                  topRight: Radius.circular(25.0)),
-              minHeight: 200,
-              maxHeight: 700,
-              panel: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  children: [
-                    const Text(
-                      "Select a Route",
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                    ),
-                    // list of routes
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      padding: EdgeInsets.zero,
-                      itemCount: routes.length,
-                      itemBuilder: (context, index) {
-                        final route = routes[index];
-                        return ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: getColorForRoute(index),
-                            child: Text('${index + 1}'),
-                          ),
+          : startNavigation
+              ? SlidingUpPanel(
+                  borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(25.0),
+                      topRight: Radius.circular(25.0)),
+                  minHeight: 200,
+                  maxHeight: 700,
+                  panel: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      children: [
+                        // selected route routes
+                        ListTile(
                           title: Text(
-                            "Route ${index + 1}",
+                            "Route ${selectedRouteIndex + 1}",
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Text(
-                            "Distance: ${formatDistance(route.distance)} | Duration: ${formatDuration(route.duration)}",
+                            "Distance: ${formatDistance(routes[selectedRouteIndex].distance)} | Duration: ${formatDuration(routes[selectedRouteIndex].duration)}",
                           ),
-                          selected: selectedRouteIndex == index,
-                          onTap: () {
-                            setState(() {
-                              selectedRouteIndex = index;
-                              _fitMapToRoute(alternativeRoutes[index]);
-                            });
-                          },
-                        );
-                      },
-                    ),
-                    const Divider(),
-                    const SizedBox(height: 10),
-                    if (selectedRouteIndex >= 0 &&
-                        selectedRouteIndex < routes.length)
-                      Expanded(
-                        child: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              const Text(
-                                "Detailed Directions",
-                                style: TextStyle(
-                                    fontSize: 25, fontWeight: FontWeight.bold),
+                        ),
+                        const Divider(),
+                        const SizedBox(height: 10),
+                        if (selectedRouteIndex >= 0 &&
+                            selectedRouteIndex < routes.length)
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  const Text(
+                                    "Detailed Directions",
+                                    style: TextStyle(
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  buildDetailedDirections(
+                                      routes[selectedRouteIndex]),
+                                ],
                               ),
-                              buildDetailedDirections(
-                                  routes[selectedRouteIndex]),
-                            ],
-                          ),
-                        ),
-                      )
-                  ],
-                ),
-              ),
-              body: FlutterMap(
-                mapController: _mapController,
-                options: MapOptions(
-                  initialCenter: LatLng(startLat, startLng),
-                  initialZoom: 14.0,
-                  // onMapReady: () {
-                  //   if (alternativeRoutes.isNotEmpty &&
-                  //       selectedRouteIndex >= 0) {
-                  //     _fitMapToRoute(alternativeRoutes[selectedRouteIndex]);
-                  //   }
-                  // },
-                ),
-                children: [
-                  TileLayer(
-                    urlTemplate:
-                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'com.example.app',
+                            ),
+                          )
+                      ],
+                    ),
                   ),
-                  // Draw all alternative routes.
-                  PolylineLayer(
-                    polylines: [
-                      for (int i = 0; i < alternativeRoutes.length; i++)
-                        Polyline(
-                          points: alternativeRoutes[i],
-                          strokeWidth: selectedRouteIndex == i ? 6.0 : 4.0,
-                          color: selectedRouteIndex == i
-                              ? getColorForRoute(i).withOpacity(0.8)
-                              : getColorForRoute(i).withOpacity(0.5),
+                  body: FlutterMap(
+                    mapController: _mapController,
+                    options: MapOptions(
+                      initialCenter: LatLng(startLat, startLng),
+                      initialZoom: 18.0,
+                      maxZoom: 18.0,
+                      minZoom: 3.0,
+                    ),
+                    children: [
+                      TileLayer(
+                        urlTemplate:
+                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        userAgentPackageName: 'com.example.app',
+                      ),
+                      // Draw the route.
+                      PolylineLayer(
+                        polylines: [
+                          Polyline(
+                            points: alternativeRoutes[selectedRouteIndex],
+                            strokeWidth:
+                                selectedRouteIndex == selectedRouteIndex
+                                    ? 6.0
+                                    : 4.0,
+                            color: selectedRouteIndex == selectedRouteIndex
+                                ? getColorForRoute(selectedRouteIndex)
+                                    .withOpacity(0.8)
+                                : getColorForRoute(selectedRouteIndex)
+                                    .withOpacity(0.5),
+                          ),
+                        ],
+                      ),
+                      CurrentLocationLayer(
+                        alignPositionOnUpdate: AlignOnUpdate.always,
+                        alignDirectionOnUpdate: AlignOnUpdate.always,
+                        alignDirectionAnimationCurve: Curves.easeInOut,
+                        style: const LocationMarkerStyle(
+                          marker: DefaultLocationMarker(
+                            child: Icon(
+                              Icons.navigation,
+                              color: Colors.white,
+                            ),
+                          ),
+                          markerSize: Size(40, 40),
                         ),
+                      ),
                     ],
                   ),
-                ],
-              ),
-            ),
+                )
+              : SlidingUpPanel(
+                  borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(25.0),
+                      topRight: Radius.circular(25.0)),
+                  minHeight: 200,
+                  maxHeight: 700,
+                  panel: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      children: [
+                        const Text(
+                          "Select a Route",
+                          style: TextStyle(
+                              fontSize: 25, fontWeight: FontWeight.bold),
+                        ),
+                        // list of routes
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          padding: EdgeInsets.zero,
+                          itemCount: routes.length,
+                          itemBuilder: (context, index) {
+                            final route = routes[index];
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor: getColorForRoute(index),
+                                child: Text('${index + 1}'),
+                              ),
+                              title: Text(
+                                "Route ${index + 1}",
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              subtitle: Text(
+                                "Distance: ${formatDistance(route.distance)} | Duration: ${formatDuration(route.duration)}",
+                              ),
+                              selected: selectedRouteIndex == index,
+                              onTap: () {
+                                setState(() {
+                                  selectedRouteIndex = index;
+                                  _fitMapToRoute(alternativeRoutes[index]);
+                                });
+                              },
+                            );
+                          },
+                        ),
+                        const Divider(),
+                        const SizedBox(height: 10),
+                        if (selectedRouteIndex >= 0 &&
+                            selectedRouteIndex < routes.length)
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  const Text(
+                                    "Detailed Directions",
+                                    style: TextStyle(
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  buildDetailedDirections(
+                                      routes[selectedRouteIndex]),
+                                ],
+                              ),
+                            ),
+                          )
+                      ],
+                    ),
+                  ),
+                  body: FlutterMap(
+                    mapController: _mapController,
+                    options: MapOptions(
+                      initialCenter: LatLng(startLat, startLng),
+                      initialZoom: 14.0,
+                      // onMapReady: () {
+                      //   if (alternativeRoutes.isNotEmpty &&
+                      //       selectedRouteIndex >= 0) {
+                      //     _fitMapToRoute(alternativeRoutes[selectedRouteIndex]);
+                      //   }
+                      // },
+                    ),
+                    children: [
+                      TileLayer(
+                        urlTemplate:
+                            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        userAgentPackageName: 'com.example.app',
+                      ),
+                      // Draw all alternative routes.
+                      PolylineLayer(
+                        polylines: [
+                          for (int i = 0; i < alternativeRoutes.length; i++)
+                            Polyline(
+                              points: alternativeRoutes[i],
+                              strokeWidth: selectedRouteIndex == i ? 6.0 : 4.0,
+                              color: selectedRouteIndex == i
+                                  ? getColorForRoute(i).withOpacity(0.8)
+                                  : getColorForRoute(i).withOpacity(0.5),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
     );
   }
 }

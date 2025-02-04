@@ -43,6 +43,9 @@ dependencies:
   integral_isolates: ^0.5.1
   flutter_rotation_sensor: ^0.1.1
   flutter_isolate: ^2.1.0
+  flutter_map_location_marker: ^9.1.1
+  flutter_compass: ^0.8.1
+  permission_handler:
   http:
 
 
