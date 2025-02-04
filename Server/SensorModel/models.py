@@ -30,7 +30,7 @@ class CnnLSTM(nn.Module):
 
         # final neural net to classify it
         self.fullyConnected = nn.Linear(hiddenSize, numClasses)
-        self.softmax = nn.Softmax()
+        self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
 
@@ -61,6 +61,6 @@ class CnnLSTM(nn.Module):
         return out
 
 
-# todo remove later:
-model = CnnLSTM(hiddenSize=30, numLayers=30, numClasses=6)
-print(model)
+# # todo remove later:
+# model = CnnLSTM(hiddenSize=30, numLayers=30, numClasses=6)
+# print(model)

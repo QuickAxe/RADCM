@@ -55,20 +55,17 @@ def train_one_epoch(epoch_index, tb_writer):
     for i, data in enumerate(trainingDataloader):
         # Every data instance is an input + label pair
         inputs, labels = data
-
+        
         # Zero your gradients for every batch!
         optimiser.zero_grad()
 
         # Make predictions for this batch
-        # print(inputs)
-        # for input in inputs:
-        print(inputs.shape)
-        print(inputs.dtype)
-
         outputs = model(inputs)
+        print(outputs)
 
         # Compute the loss and its gradients
         loss = lossFunction(outputs, labels)
+        # print(loss)
         loss.backward()
 
         # Adjust learning weights
@@ -88,7 +85,7 @@ def train_one_epoch(epoch_index, tb_writer):
 
 # =================================== actual training loop ======================================
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-writer = SummaryWriter("runs/fashion_trainer_{}".format(timestamp))
+writer = SummaryWriter("runs/CnnLstm{}".format(timestamp))
 epoch_number = 0
 
 EPOCHS = 1
@@ -115,8 +112,8 @@ for epoch in range(EPOCHS):
             vloss = lossFunction(voutputs, vlabels)
             running_vloss += vloss
 
-    avg_vloss = running_vloss / (i + 1)
-    print("LOSS train {} valid {}".format(avg_loss, avg_vloss))
+            avg_vloss = running_vloss / (i + 1)
+            print("LOSS train {} valid {}".format(avg_loss, avg_vloss))
 
     # Log the running loss averaged per batch
     # for both training and validation
