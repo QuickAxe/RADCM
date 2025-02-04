@@ -87,12 +87,12 @@ def train_one_epoch(epoch_index):
 
 
 # =================================== actual training loop ======================================
-EPOCHS = 15
+EPOCHS = 200
 
 best_vloss = 1_000_000.0
 
 os.makedirs("./runs", exist_ok=True)
-with open("./runs/results.csv", "w") as f:
+with open("./runs/results.csv", "a") as f:
     writer = csv.writer(f)
     writer.writerow(["Epoch", "Train_Loss", "Val_Loss"])
 
@@ -135,6 +135,6 @@ with open("./runs/results.csv", "w") as f:
         # Track best performance, and save the model's state
 
         if epoch % 10 == 0:
-            model_path = "./runs/model_{}.pt".format(epoch)
+            model_path = "./runs/model_{}.pt".format(epoch + 1)
             torch.save(model.state_dict(), model_path)
             f.flush()
