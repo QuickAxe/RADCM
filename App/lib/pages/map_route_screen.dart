@@ -209,10 +209,10 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
               padding: const EdgeInsets.all(10.0),
               child: FloatingActionButton(
                 onPressed: () {
+                  _mapController.moveAndRotate(
+                      LatLng(startLat, startLng), 18.0, 0.0);
                   setState(() {
                     startNavigation = true;
-                    // _mapController.dispose();
-                    // _mapController = MapController();
                   });
                 },
                 backgroundColor: Colors.deepPurple,
@@ -275,7 +275,7 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
                     options: MapOptions(
                       initialCenter: LatLng(startLat, startLng),
                       initialZoom: 18.0,
-                      maxZoom: 18.0,
+                      // maxZoom: 18.0,
                       minZoom: 3.0,
                     ),
                     children: [
