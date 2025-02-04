@@ -11,7 +11,7 @@ from dataSetLoader import SensorData
 
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # comment out if not on a apple device
-device = torch.device("cuda" if torch.cuda.is_available() else "mps")
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 print("Device: ", device)
 
@@ -55,34 +55,30 @@ def train_one_epoch(epoch_index, tb_writer):
     for i, data in enumerate(trainingDataloader):
         # Every data instance is an input + label pair
         inputs, labels = data
-        
+
         # Zero your gradients for every batch!
         optimiser.zero_grad()
 
         # Make predictions for this batch
         outputs = model(inputs)
-        print(outputs)
-        print(labels)
+        # print(outputs)
 
         # Compute the loss and its gradients
         loss = lossFunction(outputs, labels)
         # print(loss)
         loss.backward()
-        
 
         # Adjust learning weights
         optimiser.step()
 
         # Gather data and report
         running_loss += loss.item()
-        if i % 1000 == 999:
-            last_loss = running_loss / 1000  # loss per batch
-            print("  batch {} loss: {}".format(i + 1, last_loss))
-            tb_x = epoch_index * len(trainingDataloader) + i + 1
-            tb_writer.add_scalar("Loss/train", last_loss, tb_x)
-            running_loss = 0.0
 
-    return last_loss
+        last_loss += running_loss  # loss per batch
+        print("  batch {} loss: {}".format(i + 1, running_loss))
+        running_loss = 0.0
+
+    return last_loss / len(trainingDataloader)
 
 
 # =================================== actual training loop ======================================
@@ -90,7 +86,7 @@ timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 writer = SummaryWriter("runs/CnnLstm{}".format(timestamp))
 epoch_number = 0
 
-EPOCHS = 1
+EPOCHS = 10
 
 best_vloss = 1_000_000.0
 
@@ -114,8 +110,9 @@ for epoch in range(EPOCHS):
             vloss = lossFunction(voutputs, vlabels)
             running_vloss += vloss
 
-            avg_vloss = running_vloss / (i + 1)
-            print("LOSS train {} valid {}".format(avg_loss, avg_vloss))
+    avg_vloss = running_vloss / len(validationDataloader)
+    running_vloss = 0.0
+    print("FINAL EPOCH LOSS train {} valid {}".format(avg_loss, avg_vloss))
 
     # Log the running loss averaged per batch
     # for both training and validation
