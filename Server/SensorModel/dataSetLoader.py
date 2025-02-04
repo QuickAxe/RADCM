@@ -4,7 +4,9 @@ import pandas as pd
 import numpy as np
 import os
 
-from torch.utils.data import DataLoader, Dataset
+import torch
+from torch.utils.data import Dataset
+from torch.nn.functional import normalize
 
 
 class SensorData(Dataset):
@@ -17,6 +19,9 @@ class SensorData(Dataset):
         self.anomalyLabels = pd.read_csv(annotationsFile)
         self.anomaliesDir = anomaliesDir
 
+        # a dict to store the mapping of the labels to an int value 
+        self.labels = {"Pothole": 0, "Breaker": 1}
+
     def __len__(self):
         return len(self.anomalyLabels)
 
@@ -28,17 +33,18 @@ class SensorData(Dataset):
         anomaly = anomaly.to_numpy(dtype=np.float32, copy=True)
 
         anomaly = np.transpose(anomaly)
+        anomaly = torch.tensor(anomaly)
+        anomaly = normalize(anomaly)
 
+        # add an extra dim here, to represent the number of channels 
         anomaly = anomaly[None, :, :]
 
-        labels = {"Pothole": 0, "Breaker": 1}
 
         # load its label too
         label = self.anomalyLabels.iloc[idx, 1]
 
         # convert label to int
-        label = labels[label]
+        label = self.labels[label]
 
         # return a tuple of anomaly array, label
-        #! I think this might have to be converted to a tensor
         return (anomaly, label)

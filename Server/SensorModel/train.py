@@ -7,6 +7,8 @@ from datetime import datetime
 
 from dataSetLoader import SensorData
 
+from tqdm import tqdm
+
 # ================================== initialising ========================================
 
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -75,7 +77,7 @@ def train_one_epoch(epoch_index, tb_writer):
         running_loss += loss.item()
 
         last_loss += running_loss  # loss per batch
-        print("  batch {} loss: {}".format(i + 1, running_loss))
+        # print("  batch {} loss: {}".format(i + 1, running_loss))
         running_loss = 0.0
 
     return last_loss / len(trainingDataloader)
@@ -90,8 +92,8 @@ EPOCHS = 10
 
 best_vloss = 1_000_000.0
 
-for epoch in range(EPOCHS):
-    print("EPOCH {}:".format(epoch_number + 1))
+for epoch in tqdm(range(EPOCHS)):
+    print("\n EPOCH {}:".format(epoch_number + 1))
 
     # Make sure gradient tracking is on, and do a pass over the data
     model.train(True)
@@ -112,7 +114,7 @@ for epoch in range(EPOCHS):
 
     avg_vloss = running_vloss / len(validationDataloader)
     running_vloss = 0.0
-    print("FINAL EPOCH LOSS train {} valid {}".format(avg_loss, avg_vloss))
+    print("Loss: train {} valid {}".format(avg_loss, avg_vloss))
 
     # Log the running loss averaged per batch
     # for both training and validation
