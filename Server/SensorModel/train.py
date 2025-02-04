@@ -62,11 +62,13 @@ def train_one_epoch(epoch_index, tb_writer):
         # Make predictions for this batch
         outputs = model(inputs)
         print(outputs)
+        print(labels)
 
         # Compute the loss and its gradients
         loss = lossFunction(outputs, labels)
         # print(loss)
         loss.backward()
+        
 
         # Adjust learning weights
         optimiser.step()

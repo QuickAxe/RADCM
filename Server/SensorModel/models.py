@@ -30,7 +30,7 @@ class CnnLSTM(nn.Module):
 
         # final neural net to classify it
         self.fullyConnected = nn.Linear(hiddenSize, numClasses)
-        self.softmax = nn.Softmax(dim=1)
+        # self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
 
@@ -40,8 +40,6 @@ class CnnLSTM(nn.Module):
         out = self.cnn(x)
 
         # print("before view", out.shape)
-
-        #! not sure about below code, need to check the shape of the tensor that the cnn layer spits out
 
         out = out.view(out.shape[0], out.shape[-1], out.shape[1])
         # print("after view", out.shape)
@@ -57,7 +55,7 @@ class CnnLSTM(nn.Module):
         # print("before nn layer", out.shape)
         # print(out)
         out = self.fullyConnected(out)
-        out = self.softmax(out)
+        # out = self.softmax(out)
         return out
 
 
