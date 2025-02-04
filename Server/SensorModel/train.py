@@ -1,9 +1,12 @@
 import torch
 from torch.utils.data import DataLoader
-from torch.utils.tensorboard import SummaryWriter
+import os
+import csv
+from tqdm import tqdm
+
+# from torch.utils.tensorboard import SummaryWriter
 import numpy
 from models import CnnLSTM
-from datetime import datetime
 
 from dataSetLoader import SensorData
 
@@ -11,7 +14,6 @@ from tqdm import tqdm
 
 # ================================== initialising ========================================
 
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # comment out if not on a apple device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -47,88 +49,92 @@ optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
 
 
 # helper function to train model
-def train_one_epoch(epoch_index, tb_writer):
+def train_one_epoch(epoch_index):
     running_loss = 0.0
     last_loss = 0.0
 
     # Here, we use enumerate(training_loader) instead of
     # iter(training_loader) so that we can track the batch
     # index and do some intra-epoch reporting
-    for i, data in enumerate(trainingDataloader):
-        # Every data instance is an input + label pair
-        inputs, labels = data
+    for i_ in tqdm(range(0, len(trainingDataloader))):
+        for i, data in enumerate(trainingDataloader):
+            # Every data instance is an input + label pair
+            inputs, labels = data
 
-        # Zero your gradients for every batch!
-        optimiser.zero_grad()
+            # Zero your gradients for every batch!
+            optimiser.zero_grad()
 
-        # Make predictions for this batch
-        outputs = model(inputs)
-        # print(outputs)
+            # Make predictions for this batch
+            outputs = model(inputs)
+            # print(outputs)
 
-        # Compute the loss and its gradients
-        loss = lossFunction(outputs, labels)
-        # print(loss)
-        loss.backward()
+            # Compute the loss and its gradients
+            loss = lossFunction(outputs, labels)
+            # print(loss)
+            loss.backward()
 
-        # Adjust learning weights
-        optimiser.step()
+            # Adjust learning weights
+            optimiser.step()
 
-        # Gather data and report
-        running_loss += loss.item()
+            # Gather data and report
+            running_loss += loss.item()
 
-        last_loss += running_loss  # loss per batch
-        # print("  batch {} loss: {}".format(i + 1, running_loss))
-        running_loss = 0.0
+            last_loss += running_loss  # loss per batch
+            # print("  batch {} loss: {}".format(i + 1, running_loss))
+            running_loss = 0.0
 
     return last_loss / len(trainingDataloader)
 
 
 # =================================== actual training loop ======================================
-timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-writer = SummaryWriter("runs/CnnLstm{}".format(timestamp))
-epoch_number = 0
-
-EPOCHS = 10
+EPOCHS = 15
 
 best_vloss = 1_000_000.0
 
-for epoch in tqdm(range(EPOCHS)):
-    print("\n EPOCH {}:".format(epoch_number + 1))
+os.makedirs("./runs", exist_ok=True)
+with open("./runs/results.csv", "w") as f:
+    writer = csv.writer(f)
+    writer.writerow(["Epoch", "Train_Loss", "Val_Loss"])
 
-    # Make sure gradient tracking is on, and do a pass over the data
-    model.train(True)
-    avg_loss = train_one_epoch(epoch_number, writer)
+    for epoch in range(EPOCHS):
+        print("EPOCH {}:".format(epoch + 1))
 
-    running_vloss = 0.0
-    # Set the model to evaluation mode, disabling dropout and using population
-    # statistics for batch normalization.
-    model.eval()
+        # Make sure gradient tracking is on, and do a pass over the data
+        model.train(True)
+        avg_loss = train_one_epoch(epoch)
 
-    # Disable gradient computation and reduce memory consumption.
-    with torch.no_grad():
-        for i, vdata in enumerate(validationDataloader):
-            vinputs, vlabels = vdata
-            voutputs = model(vinputs)
-            vloss = lossFunction(voutputs, vlabels)
-            running_vloss += vloss
+        running_vloss = 0.0
+        # Set the model to evaluation mode, disabling dropout and using population
+        # statistics for batch normalization.
+        model.eval()
 
-    avg_vloss = running_vloss / len(validationDataloader)
-    running_vloss = 0.0
-    print("Loss: train {} valid {}".format(avg_loss, avg_vloss))
+        # Disable gradient computation and reduce memory consumption.
+        with torch.no_grad():
+            for i, vdata in enumerate(validationDataloader):
+                vinputs, vlabels = vdata
+                voutputs = model(vinputs)
+                vloss = lossFunction(voutputs, vlabels)
+                running_vloss += vloss
 
-    # Log the running loss averaged per batch
-    # for both training and validation
-    writer.add_scalars(
-        "Training vs. Validation Loss",
-        {"Training": avg_loss, "Validation": avg_vloss},
-        epoch_number + 1,
-    )
-    writer.flush()
+        avg_vloss = running_vloss / len(validationDataloader)
+        running_vloss = 0.0
+        print(
+            "FINAL EPOCH LOSS train {} valid {}".format(avg_loss, avg_vloss), end="\n\n"
+        )
+        writer.writerow([epoch + 1, avg_loss, avg_vloss.item()])
 
-    # Track best performance, and save the model's state
-    if avg_vloss < best_vloss:
-        best_vloss = avg_vloss
-        model_path = "model_{}_{}".format(timestamp, epoch_number)
-        torch.save(model.state_dict(), model_path)
+        # Log the running loss averaged per batch
+        # for both training and validation
+        # writer.add_scalars(
+        #     "Training vs. Validation Loss",
+        #     {"Training": avg_loss, "Validation": avg_vloss},
+        #     epoch_number + 1,
+        # )
+        # writer.flush()
 
-    epoch_number += 1
+        # Track best performance, and save the model's state
+
+        if epoch % 10 == 0:
+            model_path = "./runs/model_{}.pt".format(epoch)
+            torch.save(model.state_dict(), model_path)
+            f.flush()
