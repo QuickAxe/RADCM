@@ -77,7 +77,7 @@ class NavigationMode extends StatelessWidget {
                 points: mapProvider.currentRoutePoints,
                 strokeWidth: 6.0,
                 color: getColorForRoute(mapProvider.selectedRouteIndex)
-                    .withValues(alpha: (0.8 * 255)),
+                    .withOpacity(0.8),
               ),
             ],
           ),
