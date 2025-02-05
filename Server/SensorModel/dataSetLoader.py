@@ -20,7 +20,7 @@ class SensorData(Dataset):
         self.anomaliesDir = anomaliesDir
 
         # a dict to store the mapping of the labels to an int value 
-        self.labels = {"Pothole": 0, "Breaker": 1}
+        self.labels = {"Pothole": 0, "Breaker": 1, "Flat": 2}
 
     def __len__(self):
         return len(self.anomalyLabels)

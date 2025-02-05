@@ -42,7 +42,7 @@ print("Validation set has {} instances".format(len(validationSet)))
 
 # ============================= training loop part now ============================================
 
-model = CnnLSTM(16, 3, 2)
+model = CnnLSTM(16, 3, 3)
 
 lossFunction = torch.nn.CrossEntropyLoss()
 optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
@@ -56,38 +56,40 @@ def train_one_epoch(epoch_index):
     # Here, we use enumerate(training_loader) instead of
     # iter(training_loader) so that we can track the batch
     # index and do some intra-epoch reporting
-    for i_ in tqdm(range(0, len(trainingDataloader))):
-        for i, data in enumerate(trainingDataloader):
-            # Every data instance is an input + label pair
-            inputs, labels = data
+    # for i_ in tqdm(range(0, len(trainingDataloader))):
+    for i, data in enumerate(tqdm(trainingDataloader)):
+        # Every data instance is an input + label pair
 
-            # Zero your gradients for every batch!
-            optimiser.zero_grad()
+        
+        inputs, labels = data
 
-            # Make predictions for this batch
-            outputs = model(inputs)
-            # print(outputs)
+        # Zero your gradients for every batch!
+        optimiser.zero_grad()
 
-            # Compute the loss and its gradients
-            loss = lossFunction(outputs, labels)
-            # print(loss)
-            loss.backward()
+        # Make predictions for this batch
+        outputs = model(inputs)
+        # print(outputs)
 
-            # Adjust learning weights
-            optimiser.step()
+        # Compute the loss and its gradients
+        loss = lossFunction(outputs, labels)
+        # print(loss)
+        loss.backward()
 
-            # Gather data and report
-            running_loss += loss.item()
+        # Adjust learning weights
+        optimiser.step()
 
-            last_loss += running_loss  # loss per batch
-            # print("  batch {} loss: {}".format(i + 1, running_loss))
-            running_loss = 0.0
+        # Gather data and report
+        running_loss += loss.item()
+
+        last_loss += running_loss  # loss per batch
+        # print("  batch {} loss: {}".format(i + 1, running_loss))
+        running_loss = 0.0
 
     return last_loss / len(trainingDataloader)
 
 
 # =================================== actual training loop ======================================
-EPOCHS = 200
+EPOCHS = 1
 
 best_vloss = 1_000_000.0
 
@@ -119,7 +121,7 @@ with open("./runs/results.csv", "a") as f:
         avg_vloss = running_vloss / len(validationDataloader)
         running_vloss = 0.0
         print(
-            "FINAL EPOCH LOSS train {} valid {}".format(avg_loss, avg_vloss), end="\n\n"
+            "EPOCH {} Losses: train {} valid {}".format(epoch + 1, avg_loss, avg_vloss), end="\n\n"
         )
         writer.writerow([epoch + 1, avg_loss, avg_vloss.item()])
 
