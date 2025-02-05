@@ -51,7 +51,8 @@ class RouteSelectionMode extends StatelessWidget {
                   ),
                   title: Text(
                     "Route ${index + 1}",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 18),
                   ),
                   subtitle: Text(
                     "Distance: ${formatDistance(route.distance)} | Duration: ${formatDuration(route.duration)}",
@@ -78,7 +79,7 @@ class RouteSelectionMode extends StatelessWidget {
                   child: Column(
                     children: [
                       const Text(
-                        "Detailed Directions",
+                        "Directions",
                         style: TextStyle(
                             fontSize: 25, fontWeight: FontWeight.bold),
                       ),
@@ -101,19 +102,6 @@ class RouteSelectionMode extends StatelessWidget {
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             userAgentPackageName: 'com.example.app',
           ),
-          Positioned(
-            left: 200,
-            bottom: 200,
-            child: RichAttributionWidget(
-              attributions: [
-                TextSourceAttribution(
-                  'OpenStreetMap contributors',
-                  onTap: () => launchUrl(
-                      Uri.parse('https://openstreetmap.org/copyright')),
-                ),
-              ],
-            ),
-          ),
           const AnomalyMarkerLayer(),
           // Draw all alternative routes.
           PolylineLayer(
@@ -127,6 +115,19 @@ class RouteSelectionMode extends StatelessWidget {
                       : getColorForRoute(i).withOpacity(0.5),
                 ),
             ],
+          ),
+          Positioned(
+            left: 200,
+            bottom: 200,
+            child: RichAttributionWidget(
+              attributions: [
+                TextSourceAttribution(
+                  'OpenStreetMap contributors',
+                  onTap: () => launchUrl(
+                      Uri.parse('https://openstreetmap.org/copyright')),
+                ),
+              ],
+            ),
           ),
         ],
       ),

@@ -68,19 +68,7 @@ class NavigationMode extends StatelessWidget {
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             userAgentPackageName: 'com.example.app',
           ),
-          Positioned(
-            left: 200,
-            bottom: 200,
-            child: RichAttributionWidget(
-              attributions: [
-                TextSourceAttribution(
-                  'OpenStreetMap contributors',
-                  onTap: () => launchUrl(
-                      Uri.parse('https://openstreetmap.org/copyright')),
-                ),
-              ],
-            ),
-          ),
+
           const AnomalyMarkerLayer(),
           // Draw the selected route.
           PolylineLayer(
@@ -89,7 +77,7 @@ class NavigationMode extends StatelessWidget {
                 points: mapProvider.currentRoutePoints,
                 strokeWidth: 6.0,
                 color: getColorForRoute(mapProvider.selectedRouteIndex)
-                    .withOpacity(0.8),
+                    .withValues(alpha: (0.8 * 255)),
               ),
             ],
           ),
@@ -105,6 +93,19 @@ class NavigationMode extends StatelessWidget {
                 ),
               ),
               markerSize: Size(40, 40),
+            ),
+          ),
+          Positioned(
+            left: 200,
+            bottom: 200,
+            child: RichAttributionWidget(
+              attributions: [
+                TextSourceAttribution(
+                  'OpenStreetMap contributors',
+                  onTap: () => launchUrl(
+                      Uri.parse('https://openstreetmap.org/copyright')),
+                ),
+              ],
             ),
           ),
         ],

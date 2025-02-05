@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -19,14 +20,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         children: [
           ListTile(
             title: const Text('Toggle Anomalies'),
-            leading: const Icon(Icons.warning_rounded),
+            leading: const Icon(LucideIcons.toggleRight),
             onTap: () {
               Navigator.pushNamed(context, '/toggle_anomalies');
             },
           ),
           ListTile(
             title: const Text('Routines'),
-            leading: const Icon(Icons.directions_walk),
+            leading: const Icon(LucideIcons.bot),
             onTap: () {
               Navigator.pushNamed(context, '/routines');
             },
@@ -40,7 +41,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           ListTile(
             title: const Text('Additional Settings'),
-            leading: const Icon(Icons.app_settings_alt),
+            leading: const Icon(LucideIcons.circleEllipsis),
             onTap: () {
               Navigator.pushNamed(context, '/additional_settings');
             },

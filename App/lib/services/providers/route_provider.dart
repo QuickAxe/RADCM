@@ -11,14 +11,15 @@ import 'package:provider/provider.dart';
 import '../../data/models/osrm_models.dart';
 import '../../data/repository/osrm_repository.dart';
 
+/// Provider class that handles fetching the route, and other routing related processes
 class MapRouteProvider with ChangeNotifier {
   final OSRMRepository repository = OSRMRepository();
 
   // Coordinates for start and destination.
-  double startLat = 15.49613530624519;
-  double startLng = 73.82646130357969;
-  double endLat = 15.60000652430488;
-  double endLng = 73.82570085490943;
+  double startLat = 15.49613530624519,
+      startLng = 73.82646130357969,
+      endLat = 15.60000652430488,
+      endLng = 73.82570085490943;
 
   // Data from the API
   List<List<LatLng>> alternativeRoutes = [];

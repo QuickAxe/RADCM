@@ -115,19 +115,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'com.example.app',
                   ),
-                  Positioned(
-                    left: 200,
-                    bottom: 200,
-                    child: RichAttributionWidget(
-                      attributions: [
-                        TextSourceAttribution(
-                          'OpenStreetMap contributors',
-                          onTap: () => launchUrl(
-                              Uri.parse('https://openstreetmap.org/copyright')),
-                        ),
-                      ],
-                    ),
-                  ),
                   // updates the user location marker
                   if (permissions.position != null)
                     MarkerLayer(
@@ -144,6 +131,19 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   const AnomalyMarkerLayer(),
+                  Positioned(
+                    left: 200,
+                    bottom: 200,
+                    child: RichAttributionWidget(
+                      attributions: [
+                        TextSourceAttribution(
+                          'OpenStreetMap contributors',
+                          onTap: () => launchUrl(
+                              Uri.parse('https://openstreetmap.org/copyright')),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               );
             },
