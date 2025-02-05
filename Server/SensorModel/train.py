@@ -3,14 +3,14 @@ from torch.utils.data import DataLoader
 import os
 import csv
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+import pandas as pd
 
 # from torch.utils.tensorboard import SummaryWriter
 import numpy
 from models import CnnLSTM
 
 from dataSetLoader import SensorData
-
-from tqdm import tqdm
 
 # ================================== initialising ========================================
 
@@ -60,7 +60,6 @@ def train_one_epoch(epoch_index):
     for i, data in enumerate(tqdm(trainingDataloader)):
         # Every data instance is an input + label pair
 
-        
         inputs, labels = data
 
         # Zero your gradients for every batch!
@@ -89,12 +88,12 @@ def train_one_epoch(epoch_index):
 
 
 # =================================== actual training loop ======================================
-EPOCHS = 1
+EPOCHS = 10
 
 best_vloss = 1_000_000.0
 
 os.makedirs("./runs", exist_ok=True)
-with open("./runs/results.csv", "a") as f:
+with open("./runs/results.csv", "w") as f:
     writer = csv.writer(f)
     writer.writerow(["Epoch", "Train_Loss", "Val_Loss"])
 
@@ -121,7 +120,8 @@ with open("./runs/results.csv", "a") as f:
         avg_vloss = running_vloss / len(validationDataloader)
         running_vloss = 0.0
         print(
-            "EPOCH {} Losses: train {} valid {}".format(epoch + 1, avg_loss, avg_vloss), end="\n\n"
+            "EPOCH {} Losses: train {} valid {}".format(epoch + 1, avg_loss, avg_vloss),
+            end="\n\n",
         )
         writer.writerow([epoch + 1, avg_loss, avg_vloss.item()])
 
@@ -140,3 +140,22 @@ with open("./runs/results.csv", "a") as f:
             model_path = "./runs/model_{}.pt".format(epoch + 1)
             torch.save(model.state_dict(), model_path)
             f.flush()
+
+filePath = "./runs/results.csv"
+df = pd.read_csv(filePath)
+
+x = df.iloc[:, 0]
+y1 = df.iloc[:, 1]
+y2 = df.iloc[:, 2]
+
+plt.figure(figsize=(10, 5))
+plt.plot(x, y1, "r-", label="Train Loss")
+plt.plot(x, y2, "b-", label="Val Loss")
+
+plt.xlabel("Epoch")
+plt.ylabel("Values")
+plt.legend()
+plt.grid(True)
+
+plt.savefig("./runs/results.png", dpi=300, bbox_inches="tight")
+plt.close()
