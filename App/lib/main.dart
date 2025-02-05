@@ -9,6 +9,7 @@ import 'package:app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:app/pages/settings_screens/voice_engine.dart';
 import 'package:app/services/background/anomaly_detection.dart';
 import 'package:app/services/providers/permissions.dart';
+import 'package:app/services/providers/route_provider.dart';
 import 'package:app/services/providers/search.dart';
 import 'package:app/services/providers/user_settings.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +25,7 @@ void main() {
         ChangeNotifierProvider(create: (context) => Permissions()),
         ChangeNotifierProvider(create: (context) => Search()),
         ChangeNotifierProvider(create: (context) => UserSettingsProvider()),
+        ChangeNotifierProvider(create: (context) => MapRouteProvider()),
       ],
       child: const MyApp(),
     ),
