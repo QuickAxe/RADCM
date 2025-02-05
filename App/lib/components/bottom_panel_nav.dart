@@ -1,3 +1,4 @@
+import 'package:app/components/transport_profile_selector_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +29,7 @@ class _BottomPanelState extends State<BottomPanelNav> {
         topLeft: Radius.circular(25.0),
         topRight: Radius.circular(25.0),
       ),
-      minHeight: 200,
+      minHeight: 220,
       maxHeight: 700,
       panel: Column(
         children: [
@@ -49,7 +50,7 @@ class _BottomPanelState extends State<BottomPanelNav> {
               children: [
                 ListTile(
                   leading: const Icon(Icons.location_on_rounded,
-                      color: Colors.blueAccent),
+                      color: Colors.deepPurpleAccent),
                   title: Text(
                     searchProvider.currentSelected['name'],
                     style: const TextStyle(fontWeight: FontWeight.bold),
@@ -65,14 +66,11 @@ class _BottomPanelState extends State<BottomPanelNav> {
                     ],
                   ),
                 ),
-                // const Divider(),
-                const SizedBox(
-                  height: 20,
-                )
               ],
             ),
+          TransportProfileSelectorRow(),
           Padding(
-            padding: const EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 10.0),
+            padding: const EdgeInsets.fromLTRB(10.0, 8.0, 10.0, 10.0),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).colorScheme.primary,

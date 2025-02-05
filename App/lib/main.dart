@@ -4,6 +4,7 @@ import 'package:app/pages/home_screen.dart';
 import 'package:app/pages/map_route_screen.dart';
 import 'package:app/pages/settings_screen.dart';
 import 'package:app/pages/settings_screens/additional_settings.dart';
+import 'package:app/pages/settings_screens/navigation_preferences.dart';
 import 'package:app/pages/settings_screens/routines.dart';
 import 'package:app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:app/pages/settings_screens/voice_engine.dart';
@@ -77,6 +78,7 @@ class _MyAppState extends State<MyApp> {
         '/voice_engine': (context) => const VoiceEngineScreen(),
         '/additional_settings': (context) => const AdditionalSettings(),
         '/map_route': (context) => const MapRouteScreen(),
+        '/navigation_preferences': (context) => const NavigationPreferences(),
       },
     );
   }

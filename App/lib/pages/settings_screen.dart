@@ -21,30 +21,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             title: const Text('Toggle Anomalies'),
             leading: const Icon(LucideIcons.toggleRight),
-            onTap: () {
-              Navigator.pushNamed(context, '/toggle_anomalies');
-            },
+            onTap: () => Navigator.pushNamed(context, '/toggle_anomalies'),
           ),
           ListTile(
             title: const Text('Routines'),
             leading: const Icon(LucideIcons.bot),
-            onTap: () {
-              Navigator.pushNamed(context, '/routines');
-            },
+            onTap: () => Navigator.pushNamed(context, '/routines'),
           ),
           ListTile(
             title: const Text('Voice Engine'),
             leading: const Icon(Icons.record_voice_over),
-            onTap: () {
-              Navigator.pushNamed(context, '/voice_engine');
-            },
+            onTap: () => Navigator.pushNamed(context, '/voice_engine'),
+          ),
+          ListTile(
+            title: const Text('Navigation Preferences'),
+            leading: const Icon(LucideIcons.navigation),
+            onTap: () =>
+                Navigator.pushNamed(context, '/navigation_preferences'),
           ),
           ListTile(
             title: const Text('Additional Settings'),
             leading: const Icon(LucideIcons.circleEllipsis),
-            onTap: () {
-              Navigator.pushNamed(context, '/additional_settings');
-            },
+            onTap: () => Navigator.pushNamed(context, '/additional_settings'),
           ),
         ],
       ),

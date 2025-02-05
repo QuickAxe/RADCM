@@ -2,6 +2,7 @@ import 'dart:developer' as dev;
 
 import 'package:app/services/providers/permissions.dart';
 import 'package:app/services/providers/search.dart';
+import 'package:app/services/providers/user_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -56,16 +57,19 @@ class MapRouteProvider with ChangeNotifier {
       startLat = permissionsProvider.position!.latitude;
       startLng = permissionsProvider.position!.longitude;
     }
-    await _loadRoutes();
+    await _loadRoutes(context);
   }
 
-  Future<void> _loadRoutes() async {
+  Future<void> _loadRoutes(BuildContext context) async {
     try {
+      final userSettings =
+          Provider.of<UserSettingsProvider>(context, listen: false);
       RouteResponse routeResponse = await repository.fetchRoute(
         startLat: startLat,
         startLng: startLng,
         endLat: endLat,
         endLng: endLng,
+        profile: userSettings.profile,
       );
 
       List<List<LatLng>> routesList = [];

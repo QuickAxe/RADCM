@@ -6,13 +6,14 @@ import '../models/osrm_models.dart';
 
 class OSRMRepository {
   final String baseUrl =
-      "https://router.project-osrm.org/route/v1/driving"; // TODO: Allow users to select the mode
+      "https://router.project-osrm.org/route/v1/"; // TODO: Allow users to select the mode
 
   Future<RouteResponse> fetchRoute({
     required double startLat,
     required double startLng,
     required double endLat,
     required double endLng,
+    required String profile,
     bool alternatives = true,
     bool steps = true,
     String geometries = "polyline",
@@ -20,7 +21,7 @@ class OSRMRepository {
     bool annotations = true,
   }) async {
     final String url =
-        "$baseUrl/$startLng,$startLat;$endLng,$endLat?alternatives=$alternatives&steps=$steps&geometries=$geometries&overview=$overview&annotations=$annotations";
+        "$baseUrl$profile/$startLng,$startLat;$endLng,$endLat?alternatives=$alternatives&steps=$steps&geometries=$geometries&overview=$overview&annotations=$annotations";
 
     final response = await http.get(Uri.parse(url));
 
