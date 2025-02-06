@@ -1,3 +1,4 @@
+import 'package:app/components/routing/dynamic_route_directions.dart';
 import 'package:app/components/routing/route_directions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -28,30 +29,30 @@ class NavigationMode extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            ListTile(
-              title: Text(
-                "Route ${mapProvider.selectedRouteIndex + 1}",
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              subtitle: Text(
-                "Distance: ${formatDistance(mapProvider.currentRoute.distance)} | Duration: ${formatDuration(mapProvider.currentRoute.duration)}",
-              ),
-            ),
-            const Divider(),
-            const SizedBox(height: 10),
+            // ListTile(
+            //   title: Text(
+            //     "Route ${mapProvider.selectedRouteIndex + 1}",
+            //     style: const TextStyle(fontWeight: FontWeight.bold),
+            //   ),
+            //   subtitle: Text(
+            //     "Distance: ${formatDistance(mapProvider.currentRoute.distance)} | Duration: ${formatDuration(mapProvider.currentRoute.duration)}",
+            //   ),
+            // ),
+            // const Divider(),
+            // const SizedBox(height: 10),
             Expanded(
-              child: SingleChildScrollView(
+              // child: SingleChildScrollView(
                 child: Column(
                   children: [
                     const Text(
-                      "Detailed Directions",
+                      "Next Move",
                       style:
                           TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     ),
-                    RouteDirections(route: mapProvider.currentRoute),
+                    DynamicRouteDirections(route: mapProvider.currentRoute),
                   ],
                 ),
-              ),
+              // ),
             ),
           ],
         ),

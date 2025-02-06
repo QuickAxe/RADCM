@@ -28,7 +28,7 @@ class RouteDirections extends StatelessWidget {
         final step = leg.steps[index];
 
         String roadName =
-            step.name.isNotEmpty ? capitalize(step.name) : "Unnamed road";
+        step.name.isNotEmpty ? capitalize(step.name) : "Unnamed road";
         String instruction =
             "${capitalize(step.maneuver.type)} ${step.maneuver.modifier ?? ''} on $roadName";
 
