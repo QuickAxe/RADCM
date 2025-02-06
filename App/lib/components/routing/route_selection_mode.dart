@@ -100,13 +100,13 @@ class RouteSelectionMode extends StatelessWidget {
         ),
         children: [
           TileLayer(
+            panBuffer: 0,
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             userAgentPackageName: 'com.example.app',
             tileProvider: FMTCTileProvider(
               stores: const {'mapStore': BrowseStoreStrategy.readUpdateCreate},
             ),
           ),
-          const AnomalyMarkerLayer(),
           // Draw all alternative routes.
           PolylineLayer(
             polylines: [
@@ -120,6 +120,7 @@ class RouteSelectionMode extends StatelessWidget {
                 ),
             ],
           ),
+          const AnomalyMarkerLayer(),
           Positioned(
             left: 200,
             bottom: 200,

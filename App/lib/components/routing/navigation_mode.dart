@@ -65,6 +65,7 @@ class NavigationMode extends StatelessWidget {
         ),
         children: [
           TileLayer(
+            panBuffer: 0,
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             userAgentPackageName: 'com.example.app',
             // This part allows caching tiles
@@ -72,8 +73,6 @@ class NavigationMode extends StatelessWidget {
               stores: const {'mapStore': BrowseStoreStrategy.readUpdateCreate},
             ),
           ),
-
-          const AnomalyMarkerLayer(),
           // Draw the selected route.
           PolylineLayer(
             polylines: [
@@ -85,6 +84,7 @@ class NavigationMode extends StatelessWidget {
               ),
             ],
           ),
+          const AnomalyMarkerLayer(),
           CurrentLocationLayer(
             alignPositionOnUpdate: AlignOnUpdate.always,
             alignDirectionOnUpdate: AlignOnUpdate.always,
