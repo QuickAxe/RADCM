@@ -15,9 +15,15 @@ import 'package:app/services/providers/search.dart';
 import 'package:app/services/providers/user_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+Future<void> main() async {
+  // This allows flutter_map caching
+  WidgetsFlutterBinding.ensureInitialized();
+  await FMTCObjectBoxBackend().initialise();
+  // mapStore is a specialized container that is used to store Tiles (caching)
+  await const FMTCStore('mapStore').manage.create();
   runApp(
     // registering providers here
     MultiProvider(

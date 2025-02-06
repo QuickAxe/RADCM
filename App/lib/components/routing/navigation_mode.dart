@@ -2,6 +2,7 @@ import 'package:app/components/routing/route_directions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -13,7 +14,6 @@ import '../../util/route_utils.dart';
 class NavigationMode extends StatelessWidget {
   final MapRouteProvider mapProvider;
   final MapController mapController;
-
   const NavigationMode(
       {super.key, required this.mapController, required this.mapProvider});
 
@@ -67,6 +67,10 @@ class NavigationMode extends StatelessWidget {
           TileLayer(
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
             userAgentPackageName: 'com.example.app',
+            // This part allows caching tiles
+            tileProvider: FMTCTileProvider(
+              stores: const {'mapStore': BrowseStoreStrategy.readUpdateCreate},
+            ),
           ),
 
           const AnomalyMarkerLayer(),

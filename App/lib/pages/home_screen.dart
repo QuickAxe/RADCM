@@ -3,6 +3,7 @@ import 'package:app/components/bottom_panel_nav.dart';
 import 'package:app/services/providers/anomaly_marker_layer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +24,10 @@ class _HomeScreenState extends State<HomeScreen> {
   late final MapController _mapController;
   LatLng userLocation = const LatLng(15.49613530624519, 73.82646130357969);
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  // Special FMTC tileprovider
+  final _tileProvider = FMTCTileProvider(
+    stores: const {'mapStore': BrowseStoreStrategy.readUpdateCreate},
+  );
 
   @override
   void initState() {
@@ -114,6 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     urlTemplate:
                         'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                     userAgentPackageName: 'com.example.app',
+                    tileProvider: _tileProvider,
                   ),
                   // updates the user location marker
                   if (permissions.position != null)
