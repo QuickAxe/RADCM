@@ -9,11 +9,16 @@ import 'package:admin_app/services/providers/permissions.dart';
 import 'package:admin_app/services/providers/search.dart';
 import 'package:admin_app/services/providers/user_settings.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // This allows flutter_map caching
+  await FMTCObjectBoxBackend().initialise();
+  // mapStore is a specialized container that is used to store Tiles (caching)
+  await const FMTCStore('mapStore').manage.create();
 
   final prefs = await SharedPreferences.getInstance();
   String? username = prefs.getString("username");
@@ -44,19 +49,18 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      debugShowCheckedModeBanner: false,
-      home: widget.username == null ? LoginPage() : HomeScreen(),
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+        debugShowCheckedModeBanner: false,
+        home: widget.username == null ? LoginPage() : HomeScreen(),
         routes: {
           '/settings': (context) => const SettingsScreen(),
           '/toggle_anomalies': (context) => const ToggleAnomaliesScreen(),
           '/routines': (context) => const RoutinesScreen(),
           '/voice_engine': (context) => const VoiceEngineScreen(),
           '/additional_settings': (context) => const AdditionalSettings(),
-        }
-    );
+        });
   }
 }
