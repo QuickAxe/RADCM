@@ -25,12 +25,14 @@ class UserSettingsProvider extends ChangeNotifier {
     "Speedbreaker": true,
     "Rumbler": true,
     "Obstacle": true,
+    "Pothole": true,
   };
 
   final Map<String, bool> _alertWhileRiding = {
     "Speedbreaker": true,
     "Rumbler": true,
     "Obstacle": true,
+    "Pothole": true
   };
 
   Map<String, bool> get showOnMap => _showOnMap;
@@ -58,6 +60,16 @@ class UserSettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  final List<Map<String, dynamic>> profiles = [
+    {"name": "Driving", "value": "driving", "icon": Icons.directions_car},
+    {"name": "Walking", "value": "walking", "icon": Icons.directions_walk},
+    {"name": "Cycling", "value": "cycling", "icon": Icons.directions_bike},
+  ];
+
+  // Mode of transport preference (profile)
+  String _profile = "driving";
+  String get profile => _profile;
+
   UserSettingsProvider() {
     _loadPreferences();
   }
@@ -74,6 +86,14 @@ class UserSettingsProvider extends ChangeNotifier {
     }
 
     _autoDetectRoutines = prefs.getBool("autoDetectRoutines") ?? false;
+    _profile = prefs.getString("profile") ?? "driving";
+    notifyListeners();
+  }
+
+  Future<void> setProfile(String newProfile) async {
+    _profile = newProfile;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("profile", newProfile);
     notifyListeners();
   }
 

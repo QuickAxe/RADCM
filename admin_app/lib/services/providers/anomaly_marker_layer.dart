@@ -3,9 +3,9 @@ import 'package:admin_app/services/providers/user_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
-import 'package:geocoding/geocoding.dart';
 
 import '../../data/models/anomaly_marker.dart';
 import '../anomaly_marker_service.dart';
@@ -20,6 +20,7 @@ class AnomalyMarkerLayer extends StatelessWidget {
       "Speedbreaker" => "assets/icons/ic_speedbreaker.png",
       "Rumbler" => "assets/icons/ic_rumbler.png",
       "Obstacle" => "assets/icons/ic_obstacle.png",
+      "Pothole" => "assets/icons/ic_pothole.png",
       _ => "assets/icons/ic_obstacle.png",
     };
     return imageAssetPath;
