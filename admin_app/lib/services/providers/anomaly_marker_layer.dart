@@ -8,23 +8,13 @@ import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/models/anomaly_marker.dart';
+import '../../pages/anomaly_detail_page.dart';
+import '../../utils/marker_utils.dart';
 import '../anomaly_marker_service.dart';
 
 // This is the layer that displays the anomalies
 class AnomalyMarkerLayer extends StatelessWidget {
   const AnomalyMarkerLayer({super.key});
-
-  // gets the appropriate icon (image asset path) TODO: Mapping redundant, also exists in settings create a single src
-  String getAnomalyIcon(String cat) {
-    String imageAssetPath = switch (cat) {
-      "Speedbreaker" => "assets/icons/ic_speedbreaker.png",
-      "Rumbler" => "assets/icons/ic_rumbler.png",
-      "Obstacle" => "assets/icons/ic_obstacle.png",
-      "Pothole" => "assets/icons/ic_pothole.png",
-      _ => "assets/icons/ic_obstacle.png",
-    };
-    return imageAssetPath;
-  }
 
   Future<void> _showAnomalyDialog(
       BuildContext context, AnomalyMarker anomaly) async {
@@ -144,7 +134,15 @@ class AnomalyMarkerLayer extends StatelessWidget {
                 rotate: true, // so the icon stays upright
                 point: anomaly.location,
                 child: GestureDetector(
-                  onTap: () => _showAnomalyDialog(context, anomaly),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            AnomalyDetailPage(anomaly: anomaly),
+                      ),
+                    );
+                  },
                   child: Image.asset(
                     getAnomalyIcon(anomaly.category),
                     width: 20.0,

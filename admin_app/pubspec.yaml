@@ -59,6 +59,7 @@ dependencies:
   flutter_polyline_points: ^2.1.0
   lucide_icons: ^0.257.0
   flutter_map_tile_caching: ^10.0.0
+  url_launcher:
 
 dev_dependencies:
   flutter_test:
