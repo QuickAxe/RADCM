@@ -6,6 +6,7 @@ import 'package:admin_app/pages/settings_screens/routines.dart';
 import 'package:admin_app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:admin_app/pages/settings_screens/voice_engine.dart';
 import 'package:admin_app/services/providers/permissions.dart';
+import 'package:admin_app/services/providers/route_provider.dart';
 import 'package:admin_app/services/providers/search.dart';
 import 'package:admin_app/services/providers/user_settings.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +32,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => Permissions()),
         ChangeNotifierProvider(create: (context) => Search()),
         ChangeNotifierProvider(create: (context) => UserSettingsProvider()),
+        ChangeNotifierProvider(create: (context) => MapRouteProvider()),
       ],
       child: MyApp(username: username),
     ),
