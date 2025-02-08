@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../data/models/anomaly_marker.dart';
+import 'map_route_screen.dart';
 
 class AnomalyDetailPage extends StatelessWidget {
   final AnomalyMarker anomaly;
@@ -106,27 +106,20 @@ class AnomalyDetailPage extends StatelessWidget {
                         child: SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20)),
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 16, horizontal: 24),
-                              textStyle: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                            onPressed: () async {
-                              final googleMapsUrl =
-                                  "https://www.google.com/maps/search/?api=1&query=${anomaly.location.latitude},${anomaly.location.longitude}";
-                              if (await canLaunchUrl(
-                                  Uri.parse(googleMapsUrl))) {
-                                await launchUrl(Uri.parse(googleMapsUrl));
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                        content: Text("Could not open Maps")));
-                              }
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MapRouteScreen(
+                                    endLat: anomaly.location
+                                        .latitude, // Pass anomaly latitude
+                                    endLng: anomaly.location
+                                        .longitude, // Pass anomaly longitude
+                                  ),
+                                ),
+                              );
                             },
-                            child: const Text("Go to Anomaly"),
+                            child: Text("Go to Anomaly"),
                           ),
                         ),
                       ),
