@@ -16,7 +16,7 @@ class LoginPage extends StatelessWidget {
 
   // sign user in method
   Future<void> signUserIn() async {
-    if(usernameController.text.toString() == "DIRTY" && passwordController.text.toString() == "VERY"){
+    if(usernameController.text.toString() == "USERNAME" && passwordController.text.toString() == "PASSWORD"){
       final prefs = await SharedPreferences.getInstance();
 
       // update creds
@@ -32,7 +32,7 @@ class LoginPage extends StatelessWidget {
     }
     else{
       Fluttertoast.showToast(
-        msg: "WHY YOU LYING?",
+        msg: "Incorrect Credentials, try again.",
         toastLength: Toast.LENGTH_LONG,
       );
     }

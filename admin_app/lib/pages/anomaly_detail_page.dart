@@ -1,10 +1,15 @@
 import 'package:admin_app/utils/marker_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
 
 import '../data/models/anomaly_marker.dart';
+import '../services/providers/permissions.dart';
+import '../utils/fix_anomaly_dialog.dart';
 import 'map_route_screen.dart';
 
 class AnomalyDetailPage extends StatelessWidget {
@@ -48,7 +53,7 @@ class AnomalyDetailPage extends StatelessWidget {
                     children: [
                       TileLayer(
                         urlTemplate:
-                            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                            "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                         subdomains: const ['a', 'b', 'c'],
                       ),
                       MarkerLayer(
@@ -101,29 +106,37 @@ class AnomalyDetailPage extends StatelessWidget {
                       const SizedBox(height: 20),
 
                       // "Go to Anomaly" Button
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => MapRouteScreen(
-                                    endLat: anomaly.location
-                                        .latitude, // Pass anomaly latitude
-                                    endLng: anomaly.location
-                                        .longitude, // Pass anomaly longitude
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MapRouteScreen(
+                                      endLat: anomaly.location.latitude,
+                                      endLng: anomaly.location.longitude,
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
-                            child: Text("Go to Anomaly"),
+                                );
+                              },
+                              child: const Text("Go to Anomaly"),
+                            ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
+                          const SizedBox(width: 20),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                showAnomalyDialog(context, anomaly.location.latitude, anomaly.location.longitude);
+                              },
+                              child: const Text("Fix Anomaly"),
+                            ),
+                          ),
+                        ],
+                      )
+
+                      // const SizedBox(height: 20),
                     ],
                   ),
                 ),

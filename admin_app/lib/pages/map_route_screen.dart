@@ -1,6 +1,7 @@
 // used prefix here to avoid conflict between android inbuilt NavigationMode
 import 'package:admin_app/components/routing/navigation_mode.dart' as prefix;
 import 'package:admin_app/components/routing/route_selection_mode.dart';
+import 'package:admin_app/utils/fix_anomaly_dialog.dart';
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -60,19 +61,36 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
                   ),
                 )
               else if (mapProvider.startNavigation)
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: FloatingActionButton(
-                    onPressed: () {
-                      mapProvider.stopRouteNavigation();
-                    },
-                    backgroundColor: Colors.deepPurple,
-                    child: const Icon(
-                      Icons.stop,
-                      color: Colors.white,
+                Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(5.0, 10.0, 5.0, 10.0),
+                      child: FloatingActionButton(
+                        onPressed: () {
+                          showAnomalyDialog(context, widget.endLat, widget.endLng);
+                        },
+                        backgroundColor: Colors.white,
+                        child: const Icon(
+                          Icons.construction_rounded,
+                          color: Colors.deepPurple,
+                        ),
+                      ),
                     ),
-                  ),
-                )
+                    Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: FloatingActionButton(
+                        onPressed: () {
+                          mapProvider.stopRouteNavigation();
+                        },
+                        backgroundColor: Colors.deepPurple,
+                        child: const Icon(
+                          Icons.stop,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
             ],
           ),
           body: mapProvider.isLoading
