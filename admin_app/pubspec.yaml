@@ -62,6 +62,7 @@ dependencies:
   flutter_map_location_marker: ^9.1.1
   flutter_compass: ^0.8.1
   url_launcher:
+  flutter_map_marker_cluster: ^1.4.0
 
 dev_dependencies:
   flutter_test:
