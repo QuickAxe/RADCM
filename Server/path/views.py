@@ -7,20 +7,25 @@ from rest_framework.response import Response
 def get_path(long1, lat1, long2, lat2):
     with connection.cursor() as cursor:
         
-        cursor.execute('''WITH source_id as (select id from nodes 
-                order by (
-                	select ST_DISTANCE(
-                		ST_SetSRID(ST_MAKEPOINT(longitude, latitude), 4326),
-                		ST_SetSRID(ST_MAKEPOINT(%s, %s), 4326)
-                	)
+        
+        cursor.execute('''WITH source_id as (with s as (select %s as long , % as lat)
+                select id from nodes,s
+                WHERE ST_DWithin(geom, ST_SetSRID(ST_MAKEPOINT(s.long , s.lat), 4326), 0.05)
+                	order by (
+                    select ST_DISTANCE(
+                    geom,
+                    ST_SetSRID(ST_MAKEPOINT(s.long , s.lat), 4326)
+                    )
                 )
                 limit 1),
-                target_id as (select id from nodes 
-                order by (
-                	select ST_DISTANCE(
-                		ST_SetSRID(ST_MAKEPOINT(longitude, latitude), 4326),
-                		ST_SetSRID(ST_MAKEPOINT(%s, %s), 4326)
-                	)
+                target_id as (with s as (select %s as long , % as lat)
+                select id from nodes,s
+                WHERE ST_DWithin(geom, ST_SetSRID(ST_MAKEPOINT(s.long , s.lat), 4326), 0.05)
+                	order by (
+                    select ST_DISTANCE(
+                    geom,
+                    ST_SetSRID(ST_MAKEPOINT(s.long , s.lat), 4326)
+                    )
                 )
                 limit 1),
                 dr as (
