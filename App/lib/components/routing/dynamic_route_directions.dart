@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:app/util/string_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -22,9 +23,14 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
   StreamSubscription<Position>? posStream;
   int _currentStepIndex = 0;
 
+  // text to speech
+  late FlutterTts flutterTts;
+  int ttsCount = -1;
+
   @override
   void initState() {
     super.initState();
+    flutterTts = FlutterTts();
     _updateCurrentStep();
   }
 
@@ -32,6 +38,16 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
   void dispose() {
     posStream?.cancel();
     super.dispose();
+  }
+
+  Future<void> _speak(String text) async {
+    // 1sec delay to avoid collisions during route alignment
+    await Future.delayed(const Duration(milliseconds: 1000));
+
+    await flutterTts.setLanguage("en-US"); // Set language
+    await flutterTts.setPitch(1.0); // Adjust pitch
+    await flutterTts.setSpeechRate(0.4); // Adjust speed
+    await flutterTts.speak(text); // Speak the text
   }
 
   void _updateCurrentStep() {
@@ -56,7 +72,8 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
         double step2Lat = step2.maneuver.location[1];
         double step2Lng = step2.maneuver.location[0];
 
-        if (_hasPassedCheckpoint(step1Lat, step1Lng, step2Lat, step2Lng, userLat, userLng)) {
+        if (_hasPassedCheckpoint(
+            step1Lat, step1Lng, step2Lat, step2Lng, userLat, userLng)) {
           bestIndex = _currentStepIndex + 1;
         }
       } else {
@@ -72,8 +89,8 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
     });
   }
 
-
-  bool _hasPassedCheckpoint(double step1Lat, double step1Lng, double step2Lat, double step2Lng, double userLat, double userLng) {
+  bool _hasPassedCheckpoint(double step1Lat, double step1Lng, double step2Lat,
+      double step2Lng, double userLat, double userLng) {
     double vecX = step2Lng - step1Lng;
     double vecY = step2Lat - step1Lat;
 
@@ -86,7 +103,6 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
     return dotProduct > 0;
   }
 
-
   @override
   Widget build(BuildContext context) {
     if (widget.route.legs.isEmpty) {
@@ -96,10 +112,16 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
     // final step = widget.route.legs.first.steps[_currentStepIndex];
 
     String roadName =
-    widget.route.legs.first.steps[_currentStepIndex].name.isNotEmpty ? capitalize(widget.route.legs.first.steps[_currentStepIndex].name) : "Unnamed road";
+        widget.route.legs.first.steps[_currentStepIndex].name.isNotEmpty
+            ? capitalize(widget.route.legs.first.steps[_currentStepIndex].name)
+            : "Unnamed road";
     String instruction =
-        "${capitalize(widget.route.legs.first.steps[_currentStepIndex].maneuver.type)} ${widget.route.legs.first.steps[_currentStepIndex].maneuver.modifier ??
-        ''} on $roadName";
+        "${capitalize(widget.route.legs.first.steps[_currentStepIndex].maneuver.type)} ${widget.route.legs.first.steps[_currentStepIndex].maneuver.modifier ?? ''} on $roadName";
+
+    if(ttsCount != _currentStepIndex) {
+      _speak(instruction);
+      ttsCount++;
+    }
 
     return ListView(
       shrinkWrap: true,
@@ -108,21 +130,21 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
       children: [
         ListTile(
           leading: Icon(_getManeuverIcon(
-              widget.route.legs.first.steps[_currentStepIndex].maneuver.type, widget.route.legs.first.steps[_currentStepIndex].maneuver.modifier)),
+              widget.route.legs.first.steps[_currentStepIndex].maneuver.type,
+              widget.route.legs.first.steps[_currentStepIndex].maneuver
+                  .modifier)),
           title: Text(
             instruction,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           subtitle: Text(
-            "Distance: ${formatDistance(
-                widget.route.legs.first.steps[_currentStepIndex].distance)} | Duration: ${formatDuration(widget.route.legs.first.steps[_currentStepIndex].duration)}",
+            "Distance: ${formatDistance(widget.route.legs.first.steps[_currentStepIndex].distance)} | Duration: ${formatDuration(widget.route.legs.first.steps[_currentStepIndex].duration)}",
             style: TextStyle(color: Colors.grey[700]),
           ),
         ),
       ],
     );
   }
-
 
   /// Returns an appropriate icon for the given maneuver type
   IconData _getManeuverIcon(String maneuverType, String? modifier) {
