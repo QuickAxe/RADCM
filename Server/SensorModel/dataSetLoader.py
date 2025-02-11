@@ -29,7 +29,7 @@ class SensorData(Dataset):
         anomalyPath = os.path.join(self.anomaliesDir, self.anomalyLabels.iloc[idx, 0])
 
         # read the anomaly data and convert it to a numpy array:
-        anomaly = pd.read_csv(anomalyPath)
+        anomaly = pd.read_csv(anomalyPath, header=None)
         anomaly = anomaly.to_numpy(dtype=np.float32, copy=True)
 
         anomaly = np.transpose(anomaly)

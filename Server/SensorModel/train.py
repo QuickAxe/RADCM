@@ -89,7 +89,7 @@ def train_one_epoch(epoch_index):
 
 
 # =================================== actual training loop ======================================
-EPOCHS = 1
+EPOCHS = 200
 
 best_vloss = 1_000_000.0
 
