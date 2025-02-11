@@ -25,7 +25,6 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
 
   // text to speech
   late FlutterTts flutterTts;
-  int ttsCount = -1;
 
   @override
   void initState() {
@@ -118,10 +117,7 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
     String instruction =
         "${capitalize(widget.route.legs.first.steps[_currentStepIndex].maneuver.type)} ${widget.route.legs.first.steps[_currentStepIndex].maneuver.modifier ?? ''} on $roadName";
 
-    if(ttsCount != _currentStepIndex) {
-      _speak(instruction);
-      ttsCount++;
-    }
+    _speak(instruction);
 
     return ListView(
       shrinkWrap: true,
