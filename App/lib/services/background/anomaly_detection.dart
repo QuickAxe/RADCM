@@ -49,8 +49,15 @@ Future<void> theDataCollector() async {
     // read sensor data, reorient and push the entry to buffer
     rotationMatrix = frsEvent.rotationMatrix;
 
+    // dev.log("acc before: ${accEvent.x} ${accEvent.y} ${accEvent.z}");
+
     List<double> accGlobal = reorientAccelerometer(
         [accEvent.x, accEvent.y, accEvent.z], rotationMatrix);
+
+    // dev.log("acc after: ${accGlobal[0]} ${accGlobal[1]} ${accGlobal[2]}");
+    // dev.log(rotationMatrix.toString());
+
+    // dev.log("\n");
 
     currentWindow.accReadings.add([accGlobal[0], accGlobal[1], accGlobal[2]]);
 

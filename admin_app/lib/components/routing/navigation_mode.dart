@@ -1,5 +1,4 @@
-import 'package:app/components/routing/dynamic_route_directions.dart';
-import 'package:app/components/routing/route_directions.dart';
+import 'package:admin_app/components/routing/dynamic_route_directions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
@@ -10,7 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/providers/anomaly_marker_layer.dart';
 import '../../services/providers/route_provider.dart';
-import '../../util/route_utils.dart';
+import '../../utils/route_utils.dart';
 
 class NavigationMode extends StatelessWidget {
   final MapRouteProvider mapProvider;
@@ -42,16 +41,15 @@ class NavigationMode extends StatelessWidget {
             // const SizedBox(height: 10),
             Expanded(
               // child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const Text(
-                      "Next Move",
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                    ),
-                    DynamicRouteDirections(route: mapProvider.currentRoute),
-                  ],
-                ),
+              child: Column(
+                children: [
+                  const Text(
+                    "Next Move",
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                  ),
+                  DynamicRouteDirections(route: mapProvider.currentRoute),
+                ],
+              ),
               // ),
             ),
           ],

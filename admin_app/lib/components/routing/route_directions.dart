@@ -1,9 +1,9 @@
-import 'package:app/util/string_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 import '../../data/models/osrm_models.dart';
-import '../../util/route_utils.dart';
+import '../../utils/route_utils.dart';
+import '../../utils/string_utils.dart';
 
 /// A widget that displays detailed turn-by-turn directions for a chosen route
 class RouteDirections extends StatelessWidget {
@@ -28,7 +28,7 @@ class RouteDirections extends StatelessWidget {
         final step = leg.steps[index];
 
         String roadName =
-        step.name.isNotEmpty ? capitalize(step.name) : "Unnamed road";
+            step.name.isNotEmpty ? capitalize(step.name) : "Unnamed road";
         String instruction =
             "${capitalize(step.maneuver.type)} ${step.maneuver.modifier ?? ''} on $roadName";
 

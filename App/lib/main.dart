@@ -4,6 +4,7 @@ import 'package:app/pages/home_screen.dart';
 import 'package:app/pages/map_route_screen.dart';
 import 'package:app/pages/settings_screen.dart';
 import 'package:app/pages/settings_screens/additional_settings.dart';
+import 'package:app/pages/settings_screens/navigation_preferences.dart';
 import 'package:app/pages/settings_screens/routines.dart';
 import 'package:app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:app/pages/settings_screens/voice_engine.dart';
@@ -14,9 +15,15 @@ import 'package:app/services/providers/search.dart';
 import 'package:app/services/providers/user_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+Future<void> main() async {
+  // This allows flutter_map caching
+  WidgetsFlutterBinding.ensureInitialized();
+  await FMTCObjectBoxBackend().initialise();
+  // mapStore is a specialized container that is used to store Tiles (caching)
+  await const FMTCStore('mapStore').manage.create();
   runApp(
     // registering providers here
     MultiProvider(
@@ -77,6 +84,7 @@ class _MyAppState extends State<MyApp> {
         '/voice_engine': (context) => const VoiceEngineScreen(),
         '/additional_settings': (context) => const AdditionalSettings(),
         '/map_route': (context) => const MapRouteScreen(),
+        '/navigation_preferences': (context) => const NavigationPreferences(),
       },
     );
   }

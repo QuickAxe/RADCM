@@ -121,7 +121,8 @@ with open("./runs/results.csv", "a") as f:
         avg_vloss = running_vloss / len(validationDataloader)
         running_vloss = 0.0
         print(
-            "EPOCH {} Losses: train {} valid {}".format(epoch + 1, avg_loss, avg_vloss), end="\n\n"
+            "EPOCH {} Losses: train {} valid {}".format(epoch + 1, avg_loss, avg_vloss),
+            end="\n\n",
         )
         writer.writerow([epoch + 1, avg_loss, avg_vloss.item()])
 
@@ -140,3 +141,22 @@ with open("./runs/results.csv", "a") as f:
             model_path = "./runs/model_{}.pt".format(epoch + 1)
             torch.save(model.state_dict(), model_path)
             f.flush()
+
+filePath = "./runs/results.csv"
+df = pd.read_csv(filePath)
+
+x = df.iloc[:, 0]
+y1 = df.iloc[:, 1]
+y2 = df.iloc[:, 2]
+
+plt.figure(figsize=(10, 5))
+plt.plot(x, y1, "r-", label="Train Loss")
+plt.plot(x, y2, "b-", label="Val Loss")
+
+plt.xlabel("Epoch")
+plt.ylabel("Values")
+plt.legend()
+plt.grid(True)
+
+plt.savefig("./runs/results.png", dpi=300, bbox_inches="tight")
+plt.close()

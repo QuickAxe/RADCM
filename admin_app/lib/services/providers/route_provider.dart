@@ -1,8 +1,7 @@
 import 'dart:developer' as dev;
 
-import 'package:app/services/providers/permissions.dart';
-import 'package:app/services/providers/search.dart';
-import 'package:app/services/providers/user_settings.dart';
+import 'package:admin_app/services/providers/permissions.dart';
+import 'package:admin_app/services/providers/user_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -35,23 +34,12 @@ class MapRouteProvider with ChangeNotifier {
   late LatLngBounds bounds;
 
   /// Initialize the provider by fetching routes.
-  Future<void> initialize(BuildContext context) async {
-    final searchProvider = Provider.of<Search>(context, listen: false);
+  Future<void> initialize(
+      BuildContext context, double newEndLat, double newEndLng) async {
     final permissionsProvider =
         Provider.of<Permissions>(context, listen: false);
-
-    // sets destination to the currently selected place
-    if (searchProvider.isCurrentSelected &&
-        searchProvider.currentSelected != null) {
-      double? parsedLat =
-          double.tryParse(searchProvider.currentSelected['lat']);
-      double? parsedLng =
-          double.tryParse(searchProvider.currentSelected['lon']);
-      if (parsedLat != null && parsedLng != null) {
-        endLat = parsedLat;
-        endLng = parsedLng;
-      }
-    }
+    endLat = newEndLat;
+    endLng = newEndLng;
     // users current pos as starting point
     if (permissionsProvider.position != null) {
       startLat = permissionsProvider.position!.latitude;

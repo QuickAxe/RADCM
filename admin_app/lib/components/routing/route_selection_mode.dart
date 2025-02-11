@@ -7,7 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/providers/anomaly_marker_layer.dart';
 import '../../services/providers/route_provider.dart';
-import '../../util/route_utils.dart';
+import '../../utils/route_utils.dart';
 import 'route_directions.dart';
 
 class RouteSelectionMode extends StatelessWidget {

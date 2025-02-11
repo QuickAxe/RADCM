@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
@@ -22,13 +23,17 @@ class _HomeScreenState extends State<HomeScreen> {
   late final MapController _mapController;
   LatLng userLocation = const LatLng(15.49613530624519, 73.82646130357969);
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
+// Special FMTC tileprovider
+  final _tileProvider = FMTCTileProvider(
+    stores: const {'mapStore': BrowseStoreStrategy.readUpdateCreate},
+  );
   @override
   void initState() {
     super.initState();
 
     Future.microtask(() async {
-      Permissions permissions = Provider.of<Permissions>(context, listen: false);
+      Permissions permissions =
+          Provider.of<Permissions>(context, listen: false);
 
       // calls fetch position
       permissions.fetchPosition();
@@ -76,9 +81,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: FloatingActionButton(
                   onPressed: () {
                     // refresh user location
-                    Provider.of<Permissions>(context, listen: false).checkAndRequestLocationPermission();
-                    Position? pos = Provider.of<Permissions>(context, listen: false).position;
-                    if(pos != null) {
+                    Provider.of<Permissions>(context, listen: false)
+                        .checkAndRequestLocationPermission();
+                    Position? pos =
+                        Provider.of<Permissions>(context, listen: false)
+                            .position;
+                    if (pos != null) {
                       userLocation = LatLng(pos.latitude, pos.longitude);
                     }
                   },
@@ -114,9 +122,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 children: [
                   TileLayer(
+                    panBuffer: 0,
                     urlTemplate:
-                    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    userAgentPackageName: 'com.example.app',
+                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    userAgentPackageName: 'com.example.admin_app',
+                    tileProvider: _tileProvider,
                   ),
                   // updates the user location marker
                   if (permissions.position != null)
