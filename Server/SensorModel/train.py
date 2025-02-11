@@ -3,6 +3,8 @@ from torch.utils.data import DataLoader
 import os
 import csv
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+import pandas as pd
 
 # from torch.utils.tensorboard import SummaryWriter
 import numpy
@@ -60,7 +62,6 @@ def train_one_epoch(epoch_index):
     for i, data in enumerate(tqdm(trainingDataloader)):
         # Every data instance is an input + label pair
 
-        
         inputs, labels = data
 
         # Zero your gradients for every batch!
