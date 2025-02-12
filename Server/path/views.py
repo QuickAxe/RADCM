@@ -4,11 +4,12 @@ from django.db import connection
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+
 def get_path(long1, lat1, long2, lat2):
     with connection.cursor() as cursor:
-        
-        
-        cursor.execute('''WITH source_id as (with s as (select %s as long , % as lat)
+
+        cursor.execute(
+            """WITH source_id as (with s as (select %s as long , %s as lat)
                 select id from nodes,s
                 WHERE ST_DWithin(geom, ST_SetSRID(ST_MAKEPOINT(s.long , s.lat), 4326), 0.05)
                 	order by (
@@ -18,7 +19,7 @@ def get_path(long1, lat1, long2, lat2):
                     )
                 )
                 limit 1),
-                target_id as (with s as (select %s as long , % as lat)
+                target_id as (with s as (select %s as long , %s as lat)
                 select id from nodes,s
                 WHERE ST_DWithin(geom, ST_SetSRID(ST_MAKEPOINT(s.long , s.lat), 4326), 0.05)
                 	order by (
@@ -35,27 +36,57 @@ def get_path(long1, lat1, long2, lat2):
                 	(select id from target_id))
                 	)
                 select dr.*, e.wkt from dr, edges e where e.id_new = dr.edge order by seq, path_seq asc;
-            ''', [long1, lat1, long2, lat2])
+            """,
+            [long1, lat1, long2, lat2],
+        )
 
         # Fetch the results
         results = cursor.fetchall()
         return results
 
-@api_view(['GET'])
-def my_view(request,coords):
+
+@api_view(["GET"])
+def my_view(request, coords):
     try:
         coords_pair = coords.split(";")
-        if len(coords_pair )!= 2:
-            raise ValueError
-        long_lat1 = coords_pair[0].split(',')
-        if len(long_lat1) != 2:
-            raise ValueError
-        long_lat2 = coords_pair[1].split(',')
-        if len(long_lat2) != 2:
-            raise ValueError
+    except:
+        if not coords_pair or  len(coords_pair) != 2:
+            return Response(
+                {"error": "Invalid coordinates. Need two coordinates separated by ';'"},
+                status=400,
+            )
+    try:
+        long_lat1 = coords_pair[0].split(",")
+    except:
+        if not long_lat1 or len(long_lat1) != 2:
+            return Response(
+                {
+                    "error": "Invalid coordinates. Each coordinate must be separated by ','"
+                },
+                status=400,
+            )
+    try:
+        long_lat2 = coords_pair[1].split(",")
+    except:
+        if not long_lat2 or len(long_lat2) != 2:
+            return Response(
+                {
+                    "error": "Invalid coordinates. Each coordinate must be separated by ','"
+                },
+                status=400,
+            )
+        
+    try:
         long1, lat1 = map(float, long_lat1)
         long2, lat2 = map(float, long_lat2)
-        data = get_path(long1, lat1, long2, lat2) 
-        return Response(data)
     except ValueError:
-        return Response({'error': 'Invalid coordinates'}, status =400)
+        return Response(
+            {
+                "error": "Invalid coordinates. Coordinates must be floats",
+            },
+            status=400,
+        )
+    
+    data = get_path(long1, lat1, long2, lat2)
+    return Response(data)
+    
