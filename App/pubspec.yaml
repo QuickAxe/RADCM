@@ -46,6 +46,7 @@ dependencies:
   flutter_map_location_marker: ^9.1.1
   flutter_compass: ^0.8.1
   permission_handler:
+  geocoding:
   http:
   flutter_tts:
 

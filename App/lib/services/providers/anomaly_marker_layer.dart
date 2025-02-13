@@ -3,6 +3,7 @@ import 'package:app/services/providers/user_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/models/anomaly_marker.dart';
@@ -34,15 +35,23 @@ class AnomalyMarkerLayer extends StatelessWidget {
     return imageAssetPath;
   }
 
-  void _showAnomalyDialog(BuildContext context, AnomalyMarker anomaly) {
+  Future<void> _showAnomalyDialog(BuildContext context, AnomalyMarker anomaly) async {
+    List<Placemark> placemarks = await placemarkFromCoordinates(anomaly.location.latitude, anomaly.location.longitude);
+    print(placemarks.toString());
+    String address = "Address not available";
+
+    if (placemarks.isNotEmpty) {
+      address = "${placemarks[0].street}, ${placemarks[0].locality}, ${placemarks[0].country}";
+    }
+
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(anomaly.category),
-          content: Text(anomaly.location.toString()),
+          title: Center(child: Text(anomaly.category)),
+          content: Text(address),
           actions: [
-            TextButton(
+            ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 child: const Text("Ok")),
           ],
