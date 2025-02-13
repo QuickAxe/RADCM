@@ -67,6 +67,9 @@ dependencies:
   flutter_map_tile_caching: ^10.0.0
 
 dev_dependencies:
+  test:
+  mockito:
+  build_runner:
   flutter_test:
     sdk: flutter
 
