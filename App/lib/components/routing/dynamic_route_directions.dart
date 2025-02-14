@@ -42,8 +42,9 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
   Future<void> _speak(String text) async {
     // 1sec delay to avoid collisions during route alignment
     await Future.delayed(const Duration(milliseconds: 1000));
+    print(await flutterTts.getVoices);
 
-    await flutterTts.setLanguage("en-US"); // Set language
+    await flutterTts.setLanguage("jp-JP"); // Set language
     await flutterTts.setPitch(1.0); // Adjust pitch
     await flutterTts.setSpeechRate(0.4); // Adjust speed
     await flutterTts.speak(text); // Speak the text
