@@ -46,7 +46,10 @@ class AnomalyService {
         location: const LatLng(15.603075498043546, 73.81535667789652),
         category: "Pothole"),
     AnomalyMarker(
-        location: const LatLng(15.424034809674993, 73.97827426984067),
+        location: const LatLng(15.423800121925453, 73.97964867378532),
+        category: "Pothole"),
+    AnomalyMarker(
+        location: const LatLng(15.424183719267909, 73.97882496054558),
         category: "Pothole"),
   ];
 }
