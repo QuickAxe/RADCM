@@ -29,7 +29,7 @@ class _BottomPanelState extends State<BottomPanelNav> {
         topLeft: Radius.circular(25.0),
         topRight: Radius.circular(25.0),
       ),
-      minHeight: 220,
+      minHeight: 250,
       maxHeight: 700,
       panel: Column(
         children: [
@@ -46,6 +46,7 @@ class _BottomPanelState extends State<BottomPanelNav> {
             ),
           ),
           if (searchProvider.isCurrentSelected)
+            // Currently selected place
             Column(
               children: [
                 ListTile(
@@ -68,7 +69,9 @@ class _BottomPanelState extends State<BottomPanelNav> {
                 ),
               ],
             ),
-          TransportProfileSelectorRow(),
+          // Transport options
+          const TransportProfileSelectorRow(),
+          // CTA -> Go to
           Padding(
             padding: const EdgeInsets.fromLTRB(10.0, 8.0, 10.0, 10.0),
             child: ElevatedButton(
