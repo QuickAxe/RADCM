@@ -7,10 +7,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 # from torch.utils.tensorboard import SummaryWriter
-import numpy
+import numpy as np
 from models import CnnLSTM
 
 from dataSetLoader import SensorData
+from transforms import Interpolate
 
 from tqdm import tqdm
 
@@ -23,12 +24,15 @@ print("Device: ", device)
 
 # =========================== initilaise the dataloaders =================================
 
+#! determine a good smoothing factor
+interpolateTransform = Interpolate(interpolateFactor=5, smoothingFactor=30)
+
 validationSet = SensorData(
-    "./../Datasets/sensorDataset/test/labels.csv", "./../Datasets/sensorDataset/test/"
+    "./../Datasets/sensorDataset/test/labels.csv", "./../Datasets/sensorDataset/test/", transform=interpolateTransform
 )
 
 trainSet = SensorData(
-    "./../Datasets/sensorDataset/train/labels.csv", "./../Datasets/sensorDataset/train/"
+    "./../Datasets/sensorDataset/train/labels.csv", "./../Datasets/sensorDataset/train/", transform=interpolateTransform
 )
 
 validationDataloader = DataLoader(
@@ -46,7 +50,9 @@ print("Validation set has {} instances".format(len(validationSet)))
 
 model = CnnLSTM(16, 3, 3)
 
-lossFunction = torch.nn.CrossEntropyLoss()
+model = model.to(device)
+
+lossFunction = torch.nn.CrossEntropyLoss().to(device)
 optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
 
 
@@ -63,6 +69,9 @@ def train_one_epoch(epoch_index):
         # Every data instance is an input + label pair
 
         inputs, labels = data
+        
+        inputs = inputs.to(device)
+        labels = labels.to(device)
 
         # Zero your gradients for every batch!
         optimiser.zero_grad()
@@ -90,7 +99,7 @@ def train_one_epoch(epoch_index):
 
 
 # =================================== actual training loop ======================================
-EPOCHS = 200
+EPOCHS = 1
 
 best_vloss = 1_000_000.0
 
@@ -115,6 +124,9 @@ with open("./runs/results.csv", "a") as f:
         with torch.no_grad():
             for i, vdata in enumerate(validationDataloader):
                 vinputs, vlabels = vdata
+                vinputs = vinputs.to(device)
+                vlabels = vlabels.to(device)
+                
                 voutputs = model(vinputs)
                 vloss = lossFunction(voutputs, vlabels)
                 running_vloss += vloss
