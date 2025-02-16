@@ -19,7 +19,7 @@ class Interpolate(object):
 
             # make a spline function fit the data
             spl = scipy.interpolate.make_splrep(x, data[i], s = self.smoothingFactor)
-            interpolatedData = [ spl(i) for i in range( len(data[i]) * self.interpolateScale ) ]
+            interpolatedData = [spl(i) if abs(spl(i)) < 25 else 25 for i in range(len(data[i]) * self.interpolateScale)]
             # print(interpolatedData)
             newData.append(interpolatedData)
         

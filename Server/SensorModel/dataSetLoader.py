@@ -43,7 +43,7 @@ class SensorData(Dataset):
         # print(anomaly)
 
         anomaly = torch.tensor(anomaly)
-        anomaly = normalize(anomaly)
+        anomaly = normalize(anomaly, p=6)
         
         # add an extra dim here, to represent the number of channels 
         anomaly = anomaly[None, :, :]

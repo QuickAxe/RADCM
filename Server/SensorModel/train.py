@@ -6,7 +6,6 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# from torch.utils.tensorboard import SummaryWriter
 import numpy as np
 from models import CnnLSTM
 
@@ -15,6 +14,7 @@ from transforms import Interpolate
 
 from tqdm import tqdm
 
+
 #! =================================================== Parameters ==========================================================
 
 # need I explain these?
@@ -22,25 +22,25 @@ batchSize = 64
 EPOCHS = 100
 
 # the factor to smoothen the interpolated data by, duh!
+#! determine a good smoothing factor
 smoothingFactor = 50
+
 # the number of times to increase the data samples by, 
 # eg 200 data samples with a factor of 5 will output 1000 interpolated data samples 
 interpolationFactor = 5
 
 # number of cpu workers to assign to the dataloader (more is better, but make sure your cpu has enough threads)
-numWorkers = 12
+numWorkers = 3
 
 
 # ================================================== initialising =========================================================
 
-# comment out if not on a apple device
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# print("Device: ", device)
 
-print("Device: ", device)
 
 # ------------------------------------------- initilaise the dataloaders -------------------------------------------------
 
-#! determine a good smoothing factor
 interpolateTransform = Interpolate(interpolateFactor=interpolationFactor, smoothingFactor=smoothingFactor)
 
 
@@ -53,15 +53,15 @@ trainSet = SensorData(
 )
 
 validationDataloader = DataLoader(
-    validationSet, batch_size=batchSize, shuffle=False, num_workers=6, pin_memory=True
+    validationSet, batch_size=batchSize, shuffle=False, num_workers=numWorkers, pin_memory=True
 )
 
 trainingDataloader = DataLoader(
-    trainSet, batch_size=batchSize, shuffle=True, num_workers=6, pin_memory=True
+    trainSet, batch_size=batchSize, shuffle=True, num_workers=numWorkers, pin_memory=True
 )
 
-print("Training set has {} instances".format(len(trainSet)))
-print("Validation set has {} instances".format(len(validationSet)))
+# print("Training set has {} instances".format(len(trainSet)))
+# print("Validation set has {} instances".format(len(validationSet)))
 
 
 # =============================================== training loop part now ================================================
@@ -70,14 +70,13 @@ model = CnnLSTM(16, 3, 3)
 
 model = model.to(device)
 
-lossFunction = torch.nn.CrossEntropyLoss().to(device)
+lossFunction = torch.nn.CrossEntropyLoss()
 optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
 
 
 # helper function to train model
 def train_one_epoch(epoch_index):
     running_loss = 0.0
-    last_loss = 0.0
 
     # Here, we use enumerate(training_loader) instead of
     # iter(training_loader) so that we can track the batch
@@ -109,11 +108,11 @@ def train_one_epoch(epoch_index):
         # Gather data and report
         running_loss += loss.item()
 
-        last_loss += running_loss  # loss per batch
-        # print("  batch {} loss: {}".format(i + 1, running_loss))
-        running_loss = 0.0
+        # last_loss += running_loss  # loss per batch
+        # # print("  batch {} loss: {}".format(i + 1, running_loss))
+        # running_loss = 0.0
 
-    return last_loss / len(trainingDataloader)
+    return running_loss / len(trainingDataloader)
 
 
 # ================================================== actual training loop ================================================
@@ -121,8 +120,8 @@ def train():
 
     best_vloss = 1_000_000.0
 
-    os.makedirs("./runs", exist_ok=True)
-    with open("./runs/results.csv", "a") as f:
+    os.makedirs("./runs1", exist_ok=True)
+    with open("./runs1/results.csv", "a") as f:
         writer = csv.writer(f)
         writer.writerow(["Epoch", "Train_Loss", "Val_Loss"])
 
@@ -138,6 +137,7 @@ def train():
             # statistics for batch normalization.
             model.eval()
 
+            correct  = 0
             # Disable gradient computation and reduce memory consumption.
             with torch.no_grad():
                 for i, vdata in enumerate(validationDataloader):
@@ -147,14 +147,19 @@ def train():
 
                     voutputs = model(vinputs)
                     vloss = lossFunction(voutputs, vlabels)
+                    correct += (voutputs.argmax(1) == vlabels).type(torch.float).sum().item()
                     running_vloss += vloss
 
             avg_vloss = running_vloss / len(validationDataloader)
             running_vloss = 0.0
+            correct /= len(validationDataloader.dataset)
+
             print(
-                "EPOCH {} Losses: train {} valid {}".format(epoch + 1, avg_loss, avg_vloss),
+                "EPOCH {} Losses: train {} valid {} Accuracy: {}%".format(epoch + 1, avg_loss, avg_vloss, (100*correct)),
                 end="\n\n",
             )
+
+            
             writer.writerow([epoch + 1, avg_loss, avg_vloss.item()])
 
             # Log the running loss averaged per batch
@@ -169,11 +174,11 @@ def train():
             # Track best performance, and save the model's state
 
             if epoch % 10 == 0:
-                model_path = "./runs/model_{}.pt".format(epoch + 1)
+                model_path = "./runs1/model_{}.pt".format(epoch + 1)
                 torch.save(model.state_dict(), model_path)
                 f.flush()
 
-    filePath = "./runs/results.csv"
+    filePath = "./runs1/results.csv"
     df = pd.read_csv(filePath)
 
     x = df.iloc[:, 0]
@@ -189,7 +194,7 @@ def train():
     plt.legend()
     plt.grid(True)
 
-    plt.savefig("./runs/results.png", dpi=300, bbox_inches="tight")
+    plt.savefig("./runs1/results.png", dpi=300, bbox_inches="tight")
     plt.close()
 
 
