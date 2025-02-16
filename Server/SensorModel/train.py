@@ -19,7 +19,7 @@ from tqdm import tqdm
 
 # need I explain these?
 batchSize = 64
-EPOCHS = 100
+EPOCHS = 50
 
 # the factor to smoothen the interpolated data by, duh!
 #! determine a good smoothing factor
@@ -79,7 +79,7 @@ print("Validation set has {} instances".format(len(validationSet)))
 
 # =============================================== training loop part now ================================================
 
-model = CnnLSTM(16, 3, 3)
+model = CnnLSTM(256, 3, 3)
 
 model = model.to(device)
 
