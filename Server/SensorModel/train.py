@@ -1,4 +1,5 @@
 import torch
+import torch.optim.rmsprop
 from torch.utils.data import DataLoader
 import os
 import csv
@@ -7,7 +8,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 import numpy as np
-from models import CnnLSTM
+from models import CnnLSTM, Cnn5
 
 from dataSetLoader import SensorData
 from transforms import Interpolate
@@ -94,12 +95,14 @@ print("Validation set has {} instances".format(len(validationSet)))
 
 # =============================================== training loop part now ================================================
 
-model = CnnLSTM(256, 3, 3)
+# model = CnnLSTM(256, 3, 3)
+model = Cnn5(3)
 
 model = model.to(device)
 
 lossFunction = torch.nn.CrossEntropyLoss()
-optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
+# optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
+optimiser = torch.optim.RMSprop(model.parameters(), lr=0.001)
 
 
 # helper function to train model
