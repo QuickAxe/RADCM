@@ -25,49 +25,64 @@ EPOCHS = 50
 #! determine a good smoothing factor
 smoothingFactor = 0
 
-# the number of times to increase the data samples by, 
-# eg 200 data samples with a factor of 5 will output 1000 interpolated data samples 
+# the number of times to increase the data samples by,
+# eg 200 data samples with a factor of 5 will output 1000 interpolated data samples
 interpolationFactor = 5
 
 # number of cpu workers to assign to the dataloader (more is better, but make sure your cpu has enough threads)
 # ! Ok I'm not entirely sure how this works, so maybe leave it at 0
 numWorkers = 0
 
-# run number to save to it's corrosponding folder (yes yes, I know, but I'm too lazy to do this in code automatically)
-runNo = 2
+# run number to save to it's corresponding folder (yes yes, I know, but I'm too lazy to do this in code automatically)
+runNo = 3
 
 
 # ================================================== initialising =========================================================
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("mps" if torch.mps.is_available() else "cpu")
 print("Device: ", device)
 
 
 # ------------------------------------------- initilaise the dataloaders -------------------------------------------------
 
-interpolateTransform = Interpolate(interpolateFactor=interpolationFactor, smoothingFactor=smoothingFactor)
+interpolateTransform = Interpolate(
+    interpolateFactor=interpolationFactor, smoothingFactor=smoothingFactor
+)
 
 
 validationSet = SensorData(
-    "./../Datasets/sensorDataset/test/labels.csv", "./../Datasets/sensorDataset/test/", transform=interpolateTransform
+    "./../Datasets/sensorDataset/test/labels.csv",
+    "./../Datasets/sensorDataset/test/",
+    transform=interpolateTransform,
 )
 
 trainSet = SensorData(
-    "./../Datasets/sensorDataset/train/labels.csv", "./../Datasets/sensorDataset/train/", transform=interpolateTransform
+    "./../Datasets/sensorDataset/train/labels.csv",
+    "./../Datasets/sensorDataset/train/",
+    transform=interpolateTransform,
 )
 
 validationDataloader = DataLoader(
-    validationSet, batch_size=batchSize, shuffle=False, num_workers=numWorkers, pin_memory=True
+    validationSet,
+    batch_size=batchSize,
+    shuffle=False,
+    num_workers=numWorkers,
+    pin_memory=True,
 )
 
 trainingDataloader = DataLoader(
-    trainSet, batch_size=batchSize, shuffle=True, num_workers=numWorkers, pin_memory=True
+    trainSet,
+    batch_size=batchSize,
+    shuffle=True,
+    num_workers=numWorkers,
+    pin_memory=True,
 )
 
 print("Training set has {} instances".format(len(trainSet)))
 print("Validation set has {} instances".format(len(validationSet)))
 
-# attempting to load all the data to device in one shot 
+# attempting to load all the data to device in one shot
 # ! this did nothing :(
 # for data, target in validationDataloader:
 #     data = data.to('cuda')
@@ -102,7 +117,6 @@ def train_one_epoch(epoch_index):
 
         inputs = inputs.to(device)
         labels = labels.to(device)
-
 
         # Zero your gradients for every batch!
         optimiser.zero_grad()
@@ -155,18 +169,20 @@ def train():
         # statistics for batch normalization.
         model.eval()
 
-        correct  = 0
+        correct = 0
         # Disable gradient computation and reduce memory consumption.
         with torch.no_grad():
             for i, vdata in enumerate(validationDataloader):
                 vinputs, vlabels = vdata
-                
+
                 vinputs = vinputs.to(device)
                 vlabels = vlabels.to(device)
 
                 voutputs = model(vinputs)
                 vloss = lossFunction(voutputs, vlabels)
-                correct += (voutputs.argmax(1) == vlabels).type(torch.float).sum().item()
+                correct += (
+                    (voutputs.argmax(1) == vlabels).type(torch.float).sum().item()
+                )
                 running_vloss += vloss
 
         avg_vloss = running_vloss / len(validationDataloader)
@@ -174,7 +190,9 @@ def train():
         correct /= len(validationDataloader.dataset)
 
         print(
-            "EPOCH {} Losses: train {} valid {} Accuracy: {}%".format(epoch + 1, avg_loss, avg_vloss, (100*correct)),
+            "EPOCH {} Losses: train {} valid {} Accuracy: {}%".format(
+                epoch + 1, avg_loss, avg_vloss, (100 * correct)
+            ),
             end="\n\n",
         )
 
@@ -195,7 +213,6 @@ def train():
             model_path = "./runs{}/model_{}.pt".format(runNo, epoch + 1)
             torch.save(model.state_dict(), model_path)
             # f.flush()
-
 
     with open(f"./runs{runNo}/results.csv", "a") as f:
         writer = csv.writer(f)
