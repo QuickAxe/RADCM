@@ -1,0 +1,13 @@
+services:
+  map:
+    image: overv/openstreetmap-tile-server
+    ports:
+      - "8080:80"
+    volumes:
+      - osm-data:/data/database/
+    command: "run"
+    restart: unless-stopped
+
+volumes:
+  osm-data:
+    external: True
