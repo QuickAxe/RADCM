@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 def get_path(long1, lat1, long2, lat2):
     with connection.cursor() as cursor:
-
+        # If you get an error her about geom in nodes or geom_way in edges check ./migrations.sql
         cursor.execute(
             """WITH source_id as (with s as (select %s as long , %s as lat)
                 select id from nodes,s
