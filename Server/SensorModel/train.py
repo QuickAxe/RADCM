@@ -94,7 +94,7 @@ print("Validation set has {} instances".format(len(validationSet)))
 # =============================================== training loop part now ================================================
 
 # model = CnnLSTM(256, 3, 3)
-model = Cnn5(3)
+model = Cnn5(2)
 
 model = model.to(device)
 
