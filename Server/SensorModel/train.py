@@ -223,9 +223,9 @@ def train():
     filePath = f"./runs{runNo}/results.csv"
     df = pd.read_csv(filePath)
 
-    x = df.iloc[:, 0]
-    y1 = df.iloc[:, 1]
-    y2 = df.iloc[:, 2]
+    x = df.iloc[5:, 0]
+    y1 = df.iloc[5:, 1]
+    y2 = df.iloc[5:, 2]
 
     plt.figure(figsize=(10, 5))
     plt.plot(x, y1, "r-", label="Train Loss")
