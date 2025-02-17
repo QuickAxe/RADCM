@@ -79,13 +79,8 @@ class Cnn5(nn.Module):
         self.cnnPart = nn.Sequential(
             nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, padding="same"),
             nn.ReLU(),
-            # nn.BatchNorm2d(32),
-            # kernel size here is (height, width), so we're essentially,
-            # hopefully, converting each of
-            # the 3 components (x, y, z) of the accel and gyro values into one
             nn.MaxPool2d(kernel_size=(3, 3), padding=(1, 0), stride=(1, 2)),
             nn.Dropout(p=0.33),
-            # ================================================
             nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding="same"),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=(3, 3), padding=(1, 0), stride=(1, 2)),
@@ -103,7 +98,10 @@ class Cnn5(nn.Module):
         self.linearPart = nn.Sequential(
             # shape of output up to here is [batchSize,64, 3, 61]
             nn.Flatten(),
-            nn.Linear(in_features=11712, out_features=numClasses),
+            nn.Linear(in_features=11712, out_features=256),
+            nn.ReLU(),
+            nn.Dropout(p=0.5),
+            nn.Linear(in_features=256, out_features=numClasses),
             # nn.Softmax(),
         )
 

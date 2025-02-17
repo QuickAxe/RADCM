@@ -34,18 +34,16 @@ interpolationFactor = 5
 # ! Ok I'm not entirely sure how this works, so maybe leave it at 0
 numWorkers = 0
 
-# run number to save to it's corresponding folder (yes yes, I know, but I'm too lazy to do this in code automatically)
-runNo = 3
+# run number to save to its corresponding folder (yes yes, I know, but I'm too lazy to do this in code automatically)
+runNo = 6
 
 
 # ================================================== initialising =========================================================
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device = torch.device("mps" if torch.mps.is_available() else "cpu")
+device = torch.device("cuda" if torch.cuda.is_available() else ("mps" if torch.mps.is_available() else "cpu"))
 print("Device: ", device)
 
-
-# ------------------------------------------- initilaise the dataloaders -------------------------------------------------
+# ------------------------------ initilaise the dataloaders ------------------------------
 
 interpolateTransform = Interpolate(
     interpolateFactor=interpolationFactor, smoothingFactor=smoothingFactor
@@ -102,7 +100,7 @@ model = model.to(device)
 
 lossFunction = torch.nn.CrossEntropyLoss()
 # optimiser = torch.optim.Adam(model.parameters(), lr=0.001)
-optimiser = torch.optim.RMSprop(model.parameters(), lr=0.001)
+optimiser = torch.optim.RMSprop(model.parameters(), lr=0.001, weight_decay=0.0001)
 
 
 # helper function to train model

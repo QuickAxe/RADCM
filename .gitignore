@@ -2,8 +2,7 @@ venv/
 myenv/
 Server/Datasets
 Test/
-runs/
-runs1/
+runs*/
 
 # Django #
 *.log
