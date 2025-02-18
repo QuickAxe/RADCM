@@ -29,6 +29,8 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Consumer<MapRouteProvider>(
       builder: (context, mapProvider, child) {
         return Scaffold(
@@ -41,8 +43,6 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
                 Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: FloatingActionButton(
-                    backgroundColor: Theme.of(context).colorScheme.surface,
-                    foregroundColor: Theme.of(context).colorScheme.onSurface,
                     onPressed: () {
                       _mapController.moveAndRotate(
                         LatLng(mapProvider.startLat, mapProvider.startLng),
@@ -53,7 +53,6 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
                     },
                     child: const Icon(
                       Icons.navigation_rounded,
-                      color: Colors.white,
                     ),
                   ),
                 )
@@ -61,13 +60,11 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
                 Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: FloatingActionButton(
-                    backgroundColor: Colors.deepPurple,
                     onPressed: () {
                       mapProvider.stopRouteNavigation();
                     },
                     child: const Icon(
                       Icons.stop,
-                      color: Colors.white,
                     ),
                   ),
                 )

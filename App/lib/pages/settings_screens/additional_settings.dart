@@ -32,7 +32,10 @@ class AdditionalSettings extends StatelessWidget {
       body: ListView(
         children: [
           ListTile(
-            trailing: const Icon(Icons.arrow_forward_rounded),
+            trailing: Icon(
+              Icons.arrow_forward_rounded,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             title: const Text('Toggle Battery Optimization'),
             subtitle: const Text(
                 'Battery Optimization may prevent normal operation of the app. To avoid issues we recommend disabling it.'),
@@ -43,6 +46,7 @@ class AdditionalSettings extends StatelessWidget {
             subtitle: const Text(
                 "Choose between Light mode or Dark mode or select System to default to your system theme."),
             trailing: DropdownButton<ThemeMode>(
+              borderRadius: BorderRadius.circular(15),
               value: settings.themeMode,
               onChanged: (ThemeMode? newMode) {
                 if (newMode != null) {

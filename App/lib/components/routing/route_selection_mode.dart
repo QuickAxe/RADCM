@@ -19,8 +19,10 @@ class RouteSelectionMode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return SlidingUpPanel(
-      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      color: Theme.of(context).colorScheme.surfaceContainer,
       borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(25.0), topRight: Radius.circular(25.0)),
       minHeight: 200,
@@ -37,14 +39,15 @@ class RouteSelectionMode extends StatelessWidget {
                 width: 60,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[600],
+                  color: colorScheme.secondary,
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
-            const Text(
+            Text(
               "Select a Route",
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+              style: theme.textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
             // List of routes
             ListView.builder(
@@ -65,8 +68,8 @@ class RouteSelectionMode extends StatelessWidget {
                   ),
                   title: Text(
                     "Route ${index + 1}",
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 18),
+                    style: theme.textTheme.titleLarge
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
                     "Distance: ${formatDistance(route.distance)} | Duration: ${formatDuration(route.duration)}",
@@ -92,10 +95,10 @@ class RouteSelectionMode extends StatelessWidget {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      const Text(
+                      Text(
                         "Directions",
-                        style: TextStyle(
-                            fontSize: 25, fontWeight: FontWeight.bold),
+                        style: theme.textTheme.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       RouteDirections(route: mapProvider.currentRoute),
                     ],

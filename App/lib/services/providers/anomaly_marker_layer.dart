@@ -35,13 +35,16 @@ class AnomalyMarkerLayer extends StatelessWidget {
     return imageAssetPath;
   }
 
-  Future<void> _showAnomalyDialog(BuildContext context, AnomalyMarker anomaly) async {
-    List<Placemark> placemarks = await placemarkFromCoordinates(anomaly.location.latitude, anomaly.location.longitude);
+  Future<void> _showAnomalyDialog(
+      BuildContext context, AnomalyMarker anomaly) async {
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+        anomaly.location.latitude, anomaly.location.longitude);
     print(placemarks.toString());
     String address = "Address not available";
 
     if (placemarks.isNotEmpty) {
-      address = "${placemarks[0].street}, ${placemarks[0].locality}, ${placemarks[0].country}";
+      address =
+          "${placemarks[0].street}, ${placemarks[0].locality}, ${placemarks[0].country}";
     }
 
     showDialog(
@@ -77,10 +80,35 @@ class AnomalyMarkerLayer extends StatelessWidget {
             point: anomaly.location,
             child: GestureDetector(
               onTap: () => _showAnomalyDialog(context, anomaly),
-              child: Image.asset(
-                getAnomalyIcon(anomaly.category),
-                width: 20.0,
-                height: 20.0,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Shadow layer (placed behind the image)
+                  Container(
+                    width: 20, // Slightly larger than the image
+                    height: 20,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .inversePrimary
+                              .withOpacity(0.5),
+                          blurRadius: 10,
+                          spreadRadius: 2,
+                          offset: const Offset(2, 3),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Actual Marker Image
+                  Image.asset(
+                    getAnomalyIcon(anomaly.category),
+                    width: 45.0, // Slightly bigger for visibility
+                    height: 45.0,
+                  ),
+                ],
               ),
             ),
           );

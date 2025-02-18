@@ -27,7 +27,7 @@ class _BottomPanelState extends State<BottomPanelNav> {
     final colorScheme = theme.colorScheme;
 
     return SlidingUpPanel(
-      color: colorScheme.surface, // Use themed surface color
+      color: colorScheme.surfaceContainer, // Use themed surface color
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       borderRadius: const BorderRadius.only(
         topLeft: Radius.circular(25.0),
@@ -37,7 +37,7 @@ class _BottomPanelState extends State<BottomPanelNav> {
       maxHeight: 250,
       panel: Column(
         children: [
-          SizedBox(
+          const SizedBox(
             height: 25,
           ),
           if (searchProvider.isCurrentSelected)

@@ -37,6 +37,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Scaffold(
       key: _scaffoldKey,
       extendBodyBehindAppBar: true,
@@ -49,9 +51,9 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               _scaffoldKey.currentState?.openDrawer();
             },
-            backgroundColor: Theme.of(context).colorScheme.surface,
-            foregroundColor: Theme.of(context).colorScheme.onSurface,
-            child: const Icon(Icons.menu_rounded),
+            child: const Icon(
+              Icons.menu_rounded,
+            ),
           ),
         ),
         actions: [
@@ -60,21 +62,19 @@ class _HomeScreenState extends State<HomeScreen> {
               return Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: FloatingActionButton(
-                  backgroundColor: Theme.of(context).colorScheme.surface,
-                  foregroundColor: Theme.of(context).colorScheme.onSurface,
                   onPressed: () {
                     search.performDeselection();
                     _mapController.moveAndRotate(userLocation, 15.0, 0.0);
                   },
-                  child: const Icon(Icons.arrow_back_rounded),
+                  child: const Icon(
+                    Icons.arrow_back_rounded,
+                  ),
                 ),
               );
             } else {
               return Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: FloatingActionButton(
-                  backgroundColor: Theme.of(context).colorScheme.surface,
-                  foregroundColor: Theme.of(context).colorScheme.onSurface,
                   onPressed: () {
                     // refresh user location
                     Provider.of<Permissions>(context, listen: false)
@@ -86,7 +86,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       userLocation = LatLng(pos.latitude, pos.longitude);
                     }
                   },
-                  child: const Icon(Icons.my_location_rounded),
+                  child: const Icon(
+                    Icons.my_location_rounded,
+                  ),
                 ),
               );
             }

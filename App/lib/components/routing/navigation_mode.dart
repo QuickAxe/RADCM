@@ -19,34 +19,25 @@ class NavigationMode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return SlidingUpPanel(
-      color: Theme.of(context).colorScheme.surfaceContainerLow,
+      color: Theme.of(context).colorScheme.surfaceContainer,
       borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(25.0), topRight: Radius.circular(25.0)),
       minHeight: 200,
-      maxHeight: 700,
+      maxHeight: 200,
       panel: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            // ListTile(
-            //   title: Text(
-            //     "Route ${mapProvider.selectedRouteIndex + 1}",
-            //     style: const TextStyle(fontWeight: FontWeight.bold),
-            //   ),
-            //   subtitle: Text(
-            //     "Distance: ${formatDistance(mapProvider.currentRoute.distance)} | Duration: ${formatDuration(mapProvider.currentRoute.duration)}",
-            //   ),
-            // ),
-            // const Divider(),
-            // const SizedBox(height: 10),
             Expanded(
-              // child: SingleChildScrollView(
               child: Column(
                 children: [
-                  const Text(
+                  Text(
                     "Next Move",
-                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                    style: theme.textTheme.headlineSmall
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   DynamicRouteDirections(route: mapProvider.currentRoute),
                 ],
@@ -89,14 +80,17 @@ class NavigationMode extends StatelessWidget {
             alignPositionOnUpdate: AlignOnUpdate.always,
             alignDirectionOnUpdate: AlignOnUpdate.always,
             alignDirectionAnimationCurve: Curves.easeInOut,
-            style: const LocationMarkerStyle(
+            style: LocationMarkerStyle(
+              accuracyCircleColor: colorScheme.primary.withOpacity(0.2),
+              headingSectorColor: colorScheme.primary.withOpacity(0.4),
               marker: DefaultLocationMarker(
+                color: colorScheme.primary,
                 child: Icon(
                   Icons.navigation,
-                  color: Colors.white,
+                  color: colorScheme.onPrimary,
                 ),
               ),
-              markerSize: Size(40, 40),
+              markerSize: const Size(40, 40),
             ),
           ),
           Positioned(
