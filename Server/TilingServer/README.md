@@ -1,11 +1,12 @@
 # Initial process
-Only run `docker-setup.sh` when setting up the server for the first time.
+Only run `docker-setup.sh` when setting up the server for the first time.  
+Afterwards run `docker compose build`
 
 # Running the container
 Subsequently run the container with 
-`docker compose up`
+`docker compose up`  
 To stop it, run
 `docker compose down`
 
 # Tiling Server URL
-`http://{ip-address-of-server}:8080/tile/{z}/{x}/{y}.png`
+`{cloudflare-link-generated}/tile/{z}/{x}/{y}.png`

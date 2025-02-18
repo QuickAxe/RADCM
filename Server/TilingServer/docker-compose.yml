@@ -1,12 +1,20 @@
 services:
+  
   map:
-    image: overv/openstreetmap-tile-server
+    image: docker.io/overv/openstreetmap-tile-server
+    container_name: osm-tile-server
     ports:
       - "8080:80"
     volumes:
       - osm-data:/data/database/
-    command: "run"
+    command: run
     restart: unless-stopped
+  
+  cloudflared: 
+    image: docker.io/cloudflare/cloudflared 
+    container_name: cloudflare-tunnel 
+    restart: unless-stopped 
+    command: tunnel --url http://map:80
 
 volumes:
   osm-data:
