@@ -133,10 +133,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         Marker(
                           rotate: true,
                           point: userLocation,
-                          child: const Icon(
-                            Icons.location_on_rounded,
-                            color: Colors.red,
-                            size: 30.0,
+                          child: Image.asset(
+                            "assets/icons/ic_user.png",
+                            width: 60.0,
+                            height: 60.0,
                           ),
                         ),
                       ],

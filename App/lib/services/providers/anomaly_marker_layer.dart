@@ -28,9 +28,9 @@ class AnomalyMarkerLayer extends StatelessWidget {
     String imageAssetPath = switch (cat) {
       "Speedbreaker" => "assets/icons/ic_speedbreaker.png",
       "Rumbler" => "assets/icons/ic_rumbler.png",
-      "Obstacle" => "assets/icons/ic_obstacle.png",
+      // "Obstacle" => "assets/icons/ic_obstacle.png",
       "Pothole" => "assets/icons/ic_pothole.png",
-      _ => "assets/icons/ic_obstacle.png",
+      _ => "assets/icons/ic_pothole.png",
     };
     return imageAssetPath;
   }
@@ -85,8 +85,8 @@ class AnomalyMarkerLayer extends StatelessWidget {
                 children: [
                   // Shadow layer (placed behind the image)
                   Container(
-                    width: 20, // Slightly larger than the image
-                    height: 20,
+                    width: 50, // Slightly larger than the image
+                    height: 50,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       boxShadow: [
@@ -102,11 +102,10 @@ class AnomalyMarkerLayer extends StatelessWidget {
                       ],
                     ),
                   ),
-                  // Actual Marker Image
                   Image.asset(
                     getAnomalyIcon(anomaly.category),
-                    width: 45.0, // Slightly bigger for visibility
-                    height: 45.0,
+                    width: 60.0,
+                    height: 60.0,
                   ),
                 ],
               ),
