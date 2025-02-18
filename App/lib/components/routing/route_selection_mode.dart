@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/providers/anomaly_marker_layer.dart';
 import '../../services/providers/route_provider.dart';
+import '../../services/providers/user_settings.dart';
+import '../../util/map_utils.dart';
 import '../../util/route_utils.dart';
 import 'route_directions.dart';
 
@@ -21,6 +24,10 @@ class RouteSelectionMode extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final themeMode = context.select<UserSettingsProvider, ThemeMode>(
+      (settings) => settings.themeMode,
+    );
+
     return SlidingUpPanel(
       color: Theme.of(context).colorScheme.surfaceContainer,
       borderRadius: const BorderRadius.only(
@@ -118,6 +125,8 @@ class RouteSelectionMode extends StatelessWidget {
           TileLayer(
             panBuffer: 0,
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            tileBuilder:
+                themeMode == ThemeMode.dark ? customDarkModeTileBuilder : null,
             userAgentPackageName: 'com.example.app',
             tileProvider: FMTCTileProvider(
               stores: const {'mapStore': BrowseStoreStrategy.readUpdateCreate},

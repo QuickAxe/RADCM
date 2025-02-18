@@ -4,11 +4,14 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/providers/anomaly_marker_layer.dart';
 import '../../services/providers/route_provider.dart';
+import '../../services/providers/user_settings.dart';
+import '../../util/map_utils.dart';
 import '../../util/route_utils.dart';
 
 class NavigationMode extends StatelessWidget {
@@ -19,6 +22,10 @@ class NavigationMode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeMode = context.select<UserSettingsProvider, ThemeMode>(
+      (settings) => settings.themeMode,
+    );
+
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     return SlidingUpPanel(
@@ -58,6 +65,8 @@ class NavigationMode extends StatelessWidget {
           TileLayer(
             panBuffer: 0,
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            tileBuilder:
+                themeMode == ThemeMode.dark ? customDarkModeTileBuilder : null,
             userAgentPackageName: 'com.example.app',
             // This part allows caching tiles
             tileProvider: FMTCTileProvider(

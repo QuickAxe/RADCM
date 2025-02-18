@@ -1,6 +1,7 @@
 import 'package:app/components/app_drawer.dart';
 import 'package:app/components/bottom_panel_nav.dart';
 import 'package:app/services/providers/anomaly_marker_layer.dart';
+import 'package:app/services/providers/user_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
@@ -12,6 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../components/bottom_panel.dart';
 import '../services/providers/permissions.dart';
 import '../services/providers/search.dart';
+import '../util/map_utils.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -39,6 +41,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final themeMode = context.select<UserSettingsProvider, ThemeMode>(
+      (settings) => settings.themeMode,
+    );
+
     return Scaffold(
       key: _scaffoldKey,
       extendBodyBehindAppBar: true,
@@ -123,6 +129,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     panBuffer: 0,
                     urlTemplate:
                         'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    tileBuilder: themeMode == ThemeMode.dark
+                        ? customDarkModeTileBuilder
+                        : null,
                     userAgentPackageName: 'com.example.app',
                     tileProvider: _tileProvider,
                   ),
