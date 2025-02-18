@@ -20,15 +20,28 @@ class RouteSelectionMode extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SlidingUpPanel(
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
       borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(25.0), topRight: Radius.circular(25.0)),
       minHeight: 200,
       maxHeight: 700,
       panel: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Drag Indicator
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Container(
+                width: 60,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[600],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
             const Text(
               "Select a Route",
               style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),

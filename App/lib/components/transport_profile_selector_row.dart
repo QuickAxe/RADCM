@@ -9,6 +9,8 @@ class TransportProfileSelectorRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userSettings = Provider.of<UserSettingsProvider>(context);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -26,36 +28,40 @@ class TransportProfileSelectorRow extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
               decoration: BoxDecoration(
-                color: isSelected ? Colors.deepPurple : Colors.grey.shade200,
+                color: isSelected
+                    ? theme.colorScheme.primaryContainer
+                    : theme.colorScheme.surfaceVariant,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color:
-                      isSelected ? Colors.deepPurpleAccent : Colors.transparent,
-                  width: 2,
-                ),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: Colors.deepPurple.withOpacity(0.3),
-                          blurRadius: 6,
-                          offset: const Offset(0, 3),
-                        ),
-                      ]
-                    : [],
+                // border: Border.all(
+                //   color: isSelected
+                //       ? theme.colorScheme.primary
+                //       : Colors.transparent,
+                //   width: 2,
+                // ),
+                // boxShadow: isSelected
+                //     ? [
+                //         BoxShadow(
+                //           color: colorScheme.primary.withOpacity(0.3),
+                //           blurRadius: 2,
+                //           offset: const Offset(0, 3),
+                //         ),
+                //       ]
+                //     : [],
               ),
               child: Row(
                 children: [
                   Icon(
                     mode["icon"],
-                    color: isSelected ? Colors.white : Colors.black87,
+                    color: isSelected
+                        ? theme.colorScheme.primary
+                        : theme.colorScheme.onSurface,
                     size: 24,
                   ),
                   const SizedBox(width: 6),
                   Text(
                     mode["name"],
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: isSelected ? Colors.white : Colors.black87,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],

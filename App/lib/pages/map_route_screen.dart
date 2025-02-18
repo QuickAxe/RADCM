@@ -41,6 +41,8 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
                 Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: FloatingActionButton(
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                    foregroundColor: Theme.of(context).colorScheme.onSurface,
                     onPressed: () {
                       _mapController.moveAndRotate(
                         LatLng(mapProvider.startLat, mapProvider.startLng),
@@ -49,7 +51,6 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
                       );
                       mapProvider.startRouteNavigation();
                     },
-                    backgroundColor: Colors.deepPurple,
                     child: const Icon(
                       Icons.navigation_rounded,
                       color: Colors.white,
@@ -60,10 +61,10 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
                 Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: FloatingActionButton(
+                    backgroundColor: Colors.deepPurple,
                     onPressed: () {
                       mapProvider.stopRouteNavigation();
                     },
-                    backgroundColor: Colors.deepPurple,
                     child: const Icon(
                       Icons.stop,
                       color: Colors.white,

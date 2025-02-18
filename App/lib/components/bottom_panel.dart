@@ -24,6 +24,7 @@ class _BottomPanelState extends State<BottomPanel> {
     final userSettings = Provider.of<UserSettingsProvider>(context);
 
     return SlidingUpPanel(
+      color: Theme.of(context).colorScheme.surface,
       padding: const EdgeInsets.symmetric(horizontal: 5.0),
       borderRadius: const BorderRadius.only(
         topLeft: Radius.circular(25.0),

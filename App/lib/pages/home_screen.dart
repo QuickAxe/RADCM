@@ -49,7 +49,8 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               _scaffoldKey.currentState?.openDrawer();
             },
-            backgroundColor: Colors.white,
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            foregroundColor: Theme.of(context).colorScheme.onSurface,
             child: const Icon(Icons.menu_rounded),
           ),
         ),
@@ -59,11 +60,12 @@ class _HomeScreenState extends State<HomeScreen> {
               return Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: FloatingActionButton(
+                  backgroundColor: Theme.of(context).colorScheme.surface,
+                  foregroundColor: Theme.of(context).colorScheme.onSurface,
                   onPressed: () {
                     search.performDeselection();
                     _mapController.moveAndRotate(userLocation, 15.0, 0.0);
                   },
-                  backgroundColor: Colors.white,
                   child: const Icon(Icons.arrow_back_rounded),
                 ),
               );
@@ -71,6 +73,8 @@ class _HomeScreenState extends State<HomeScreen> {
               return Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: FloatingActionButton(
+                  backgroundColor: Theme.of(context).colorScheme.surface,
+                  foregroundColor: Theme.of(context).colorScheme.onSurface,
                   onPressed: () {
                     // refresh user location
                     Provider.of<Permissions>(context, listen: false)
@@ -82,7 +86,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       userLocation = LatLng(pos.latitude, pos.longitude);
                     }
                   },
-                  backgroundColor: Colors.white,
                   child: const Icon(Icons.my_location_rounded),
                 ),
               );

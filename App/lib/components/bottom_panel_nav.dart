@@ -1,4 +1,5 @@
 import 'package:app/components/transport_profile_selector_row.dart';
+import 'package:app/util/string_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:provider/provider.dart';
@@ -22,47 +23,47 @@ class _BottomPanelState extends State<BottomPanelNav> {
   @override
   Widget build(BuildContext context) {
     final searchProvider = Provider.of<Search>(context, listen: true);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return SlidingUpPanel(
+      color: colorScheme.surface, // Use themed surface color
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       borderRadius: const BorderRadius.only(
         topLeft: Radius.circular(25.0),
         topRight: Radius.circular(25.0),
       ),
       minHeight: 250,
-      maxHeight: 700,
+      maxHeight: 250,
       panel: Column(
         children: [
-          // Drag Indicator
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Container(
-              width: 60,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[600],
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
+          SizedBox(
+            height: 25,
           ),
           if (searchProvider.isCurrentSelected)
             // Currently selected place
             Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.location_on_rounded,
-                      color: Colors.deepPurpleAccent),
+                  leading: Icon(Icons.location_on_rounded,
+                      color: colorScheme.primary), // Themed icon color
                   title: Text(
                     searchProvider.currentSelected['name'],
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.titleLarge
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(searchProvider.currentSelected['type'].toString()),
+                      Text(
+                        capitalize(
+                            searchProvider.currentSelected['type'].toString()),
+                        style: TextStyle(color: colorScheme.onSurfaceVariant),
+                      ),
                       Text(
                         "${searchProvider.currentSelected['address']['road']}, ${searchProvider.currentSelected['address']['suburb']}, ${searchProvider.currentSelected['address']['postcode']}",
-                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                        style: TextStyle(
+                            fontSize: 12, color: colorScheme.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -76,12 +77,15 @@ class _BottomPanelState extends State<BottomPanelNav> {
             padding: const EdgeInsets.fromLTRB(10.0, 8.0, 10.0, 10.0),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                backgroundColor: colorScheme.primary,
                 minimumSize: const Size.fromHeight(40),
               ),
               onPressed: () => Navigator.pushNamed(context, '/map_route'),
-              child: const Text("Get Routes"),
+              child: Text(
+                "Get Routes",
+                style: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.bold, color: colorScheme.onPrimary),
+              ),
             ),
           )
         ],

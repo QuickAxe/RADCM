@@ -1,5 +1,4 @@
 import 'package:app/components/routing/dynamic_route_directions.dart';
-import 'package:app/components/routing/route_directions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
@@ -21,6 +20,7 @@ class NavigationMode extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SlidingUpPanel(
+      color: Theme.of(context).colorScheme.surfaceContainerLow,
       borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(25.0), topRight: Radius.circular(25.0)),
       minHeight: 200,
@@ -42,16 +42,15 @@ class NavigationMode extends StatelessWidget {
             // const SizedBox(height: 10),
             Expanded(
               // child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const Text(
-                      "Next Move",
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                    ),
-                    DynamicRouteDirections(route: mapProvider.currentRoute),
-                  ],
-                ),
+              child: Column(
+                children: [
+                  const Text(
+                    "Next Move",
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+                  ),
+                  DynamicRouteDirections(route: mapProvider.currentRoute),
+                ],
+              ),
               // ),
             ),
           ],
