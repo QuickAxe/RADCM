@@ -3,19 +3,25 @@ services:
   map:
     image: docker.io/overv/openstreetmap-tile-server
     container_name: osm-tile-server
-    ports:
-      - "8080:80"
     volumes:
       - osm-data:/data/database/
+      - osm-tiles:/data/tiles/
+    environment:
+      - REPLICATION_URL=https://planet.openstreetmap.org/replication/hour/
+      - MAX_INTERVAL_SECONDS=43200
+      - UPDATES=enabled
+      - OSM2PGSQL_EXTRA_ARGS=-C 4096
     command: run
     restart: unless-stopped
   
   cloudflared: 
     image: docker.io/cloudflare/cloudflared 
-    container_name: cloudflare-tunnel 
+    container_name: cloudflare-tunnel
     restart: unless-stopped 
     command: tunnel --url http://map:80
 
 volumes:
   osm-data:
+    external: True
+  osm-tiles:
     external: True
