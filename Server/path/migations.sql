@@ -14,7 +14,7 @@ CREATE INDEX IF NOT EXISTS nodes_geom_idx
     ON public.nodes USING gist
     (geom)
     TABLESPACE pg_default;
-
+CLUSTER nodes USING nodes_geom_idx;
 
 ALTER TABLE IF EXISTS public.edges DROP COLUMN IF EXISTS geom_way;
 
@@ -27,3 +27,5 @@ CREATE INDEX IF NOT EXISTS edges_geom_way_idx
     ON public.edges USING gist
     (geom_way)
     TABLESPACE pg_default;
+
+CLUSTER edges USING edges_geom_way_idx;
