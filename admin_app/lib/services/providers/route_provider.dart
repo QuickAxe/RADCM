@@ -130,6 +130,10 @@ class MapRouteProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void flushRoutes() {
+    isLoading = true;
+  }
+
   /// Get the current route model, ensuring a valid index.
   RouteModel get currentRoute =>
       (selectedRouteIndex >= 0 && selectedRouteIndex < routes.length)

@@ -1,4 +1,6 @@
 // used prefix here to avoid conflict between android inbuilt NavigationMode
+import 'dart:ui';
+
 import 'package:admin_app/components/routing/navigation_mode.dart' as prefix;
 import 'package:admin_app/components/routing/route_selection_mode.dart';
 import 'package:admin_app/utils/fix_anomaly_dialog.dart';
@@ -41,6 +43,14 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
           extendBodyBehindAppBar: true,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                mapProvider.stopRouteNavigation();
+                mapProvider.flushRoutes();
+                Navigator.of(context).pop();
+              },
+            ),
             actions: [
               if (mapProvider.selectedRouteIndex != -1 &&
                   !mapProvider.startNavigation)
@@ -90,13 +100,33 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
                 ),
             ],
           ),
-          body: mapProvider.isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : mapProvider.startNavigation
-                  ? prefix.NavigationMode(
-                      mapProvider: mapProvider, mapController: _mapController)
-                  : RouteSelectionMode(
-                      mapController: _mapController, mapProvider: mapProvider),
+          body: Stack(
+            children: [
+              /// Map or navigation mode
+              Positioned.fill(
+                child: mapProvider.startNavigation
+                    ? prefix.NavigationMode(
+                        mapProvider: mapProvider, mapController: _mapController)
+                    : RouteSelectionMode(
+                        mapController: _mapController,
+                        mapProvider: mapProvider),
+              ),
+              if (mapProvider.isLoading)
+                Positioned.fill(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                    child: Container(
+                      color: Colors.black.withOpacity(0.3),
+                    ),
+                  ),
+                ),
+              if (mapProvider.isLoading)
+                const Center(
+                  child:
+                      CircularProgressIndicator(), // Default loading animation
+                ),
+            ],
+          ),
         );
       },
     );
