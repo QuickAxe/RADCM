@@ -52,6 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: Padding(
           padding: const EdgeInsets.all(10.0),
           child: FloatingActionButton(
+            heroTag: null,
             onPressed: () {
               _scaffoldKey.currentState?.openDrawer();
             },

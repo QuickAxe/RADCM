@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:admin_app/pages/home_screen.dart';
 import 'package:flutter/material.dart';
-
+import 'package:http/http.dart' as http;
+import 'dart:developer' as dev;
 import '../components/sign_in_button.dart';
 import '../components/my_textfield.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -16,26 +19,57 @@ class LoginPage extends StatelessWidget {
 
   // sign user in method
   Future<void> signUserIn() async {
-    if(usernameController.text.toString() == "USERNAME" && passwordController.text.toString() == "PASSWORD"){
+    // bypass for dev (backend apis wont be accessible)
+    if (usernameController.text.toString() == "dev" &&
+        passwordController.text.toString() == "dev") {
+      // save tokens (bypass)
       final prefs = await SharedPreferences.getInstance();
-
-      // update creds
-      await prefs.setString("username", usernameController.text.toString());
-      await prefs.setString("password", passwordController.text.toString());
+      await prefs.setString("accessToken", "bypass");
+      await prefs.setString("refreshToken", "bypass");
 
       Fluttertoast.showToast(
-        msg: "Starting App",
+        msg: "Starting App in dev mode",
         toastLength: Toast.LENGTH_LONG,
       );
 
-      Navigator.pushReplacement(appContext!, MaterialPageRoute(builder: (context) => HomeScreen()),);
-    }
-    else{
-      Fluttertoast.showToast(
-        msg: "Incorrect Credentials, try again.",
-        toastLength: Toast.LENGTH_LONG,
+      Navigator.pushReplacement(appContext!,  MaterialPageRoute(builder: (context) => const HomeScreen()),);
+    } else {
+      final url = Uri.parse('http://<your_ip>:8000/api/auth/token/');
+
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "username": usernameController.text.toString(),
+          "password": passwordController.text.toString()
+        }),
       );
+
+      if (response.statusCode == 200) {
+        // decode the json resp
+        final responseData = jsonDecode(response.body);
+
+        // save tokens
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString("accessToken", responseData['access'].toString());
+        await prefs.setString("refreshToken", responseData['refresh'].toString());
+
+        Fluttertoast.showToast(
+          msg: "Starting App",
+          toastLength: Toast.LENGTH_LONG,
+        );
+
+        Navigator.pushReplacementNamed(appContext!, '/home');
+
+      } else {
+        Fluttertoast.showToast(
+          msg: "Incorrect Credentials",
+          toastLength: Toast.LENGTH_LONG,
+        );
+      }
     }
+
+    dev.log("-------IM OUT-------");
   }
 
   @override

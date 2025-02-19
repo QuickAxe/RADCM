@@ -22,7 +22,7 @@ Future<void> main() async {
   await const FMTCStore('mapStore').manage.create();
 
   final prefs = await SharedPreferences.getInstance();
-  String? username = prefs.getString("username");
+  String? accessToken = prefs.getString("accessToken");
 
   runApp(
     // registering providers here
@@ -34,14 +34,14 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => UserSettingsProvider()),
         ChangeNotifierProvider(create: (context) => MapRouteProvider()),
       ],
-      child: MyApp(username: username),
+      child: MyApp(accessToken: accessToken),
     ),
   );
 }
 
 class MyApp extends StatefulWidget {
-  final String? username;
-  const MyApp({super.key, required this.username});
+  final String? accessToken;
+  const MyApp({super.key, required this.accessToken});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -56,8 +56,10 @@ class _MyAppState extends State<MyApp> {
           useMaterial3: true,
         ),
         debugShowCheckedModeBanner: false,
-        home: widget.username == null ? LoginPage() : HomeScreen(),
+        home: widget.accessToken == null ? LoginPage() : const HomeScreen(),
         routes: {
+          '/login': (context) => LoginPage(),
+          '/home': (context) => const HomeScreen(),
           '/settings': (context) => const SettingsScreen(),
           '/toggle_anomalies': (context) => const ToggleAnomaliesScreen(),
           '/routines': (context) => const RoutinesScreen(),
