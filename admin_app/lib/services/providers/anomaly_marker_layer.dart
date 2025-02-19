@@ -1,4 +1,5 @@
 import 'package:admin_app/services/providers/user_settings.dart';
+import 'package:admin_app/utils/map_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
@@ -15,6 +16,8 @@ class AnomalyMarkerLayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     // consumes filter because the markers displayed must react to change in filters
     return Consumer<UserSettingsProvider>(
       builder: (context, userSettings, child) {
@@ -37,36 +40,8 @@ class AnomalyMarkerLayer extends StatelessWidget {
                   ),
                 );
               },
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Shadow layer (placed behind the image)
-                  Container(
-                    width: 50, // Slightly larger than the image
-                    height: 50,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .inversePrimary
-                              .withOpacity(0.5),
-                          blurRadius: 10,
-                          spreadRadius: 2,
-                          offset: const Offset(2, 3),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Actual Marker Image
-                  Image.asset(
-                    getAnomalyIcon(anomaly.category),
-                    width: 60.0, // Slightly bigger for visibility
-                    height: 60.0,
-                  ),
-                ],
-              ),
+              child: mapMarkerIcon(
+                  getAnomalyIcon(anomaly.category), colorScheme.surfaceDim),
             ),
           );
         }).toList();

@@ -2,6 +2,7 @@ import 'package:admin_app/pages/home_screen.dart';
 import 'package:admin_app/pages/login_page.dart';
 import 'package:admin_app/pages/settings_screen.dart';
 import 'package:admin_app/pages/settings_screens/additional_settings.dart';
+import 'package:admin_app/pages/settings_screens/navigation_preferences.dart';
 import 'package:admin_app/pages/settings_screens/routines.dart';
 import 'package:admin_app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:admin_app/pages/settings_screens/voice_engine.dart';
@@ -69,6 +70,7 @@ class _MyAppState extends State<MyApp> {
           '/routines': (context) => const RoutinesScreen(),
           '/voice_engine': (context) => const VoiceEngineScreen(),
           '/additional_settings': (context) => const AdditionalSettings(),
+          '/navigation_preferences': (context) => const NavigationPreferences(),
         });
   }
 }

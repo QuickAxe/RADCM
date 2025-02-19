@@ -104,6 +104,10 @@ class UserSettingsProvider extends ChangeNotifier {
 
     _autoDetectRoutines = prefs.getBool("autoDetectRoutines") ?? false;
     _profile = prefs.getString("profile") ?? "driving";
+
+    int themeIndex = prefs.getInt("themeMode") ?? ThemeMode.system.index;
+    _themeMode = ThemeMode.values[themeIndex]; // Convert int back to enum
+
     notifyListeners();
   }
 

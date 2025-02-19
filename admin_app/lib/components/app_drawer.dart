@@ -1,11 +1,5 @@
-import 'package:admin_app/services/providers/permissions.dart';
-import 'package:admin_app/services/providers/search.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import '../services/providers/route_provider.dart';
-import '../services/providers/user_settings.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -28,7 +22,7 @@ class AppDrawer extends StatelessWidget {
             height: 10,
           ),
           ListTile(
-            leading: const Icon(Icons.settings_rounded),
+            leading: const Icon(LucideIcons.settings2),
             title: const Text('Settings'),
             onTap: () {
               Navigator.pop(context);
@@ -36,7 +30,7 @@ class AppDrawer extends StatelessWidget {
             },
           ),
           ListTile(
-            leading: const Icon(Icons.login_rounded),
+            leading: const Icon(LucideIcons.logOut),
             title: const Text('Logout'),
             onTap: () {},
           ),

@@ -78,7 +78,7 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // appContext = context;
+    appContext = context;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
