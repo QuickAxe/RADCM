@@ -1,10 +1,11 @@
 // used prefix here to avoid conflict between android inbuilt NavigationMode
+import 'dart:ui';
+
 import 'package:app/components/routing/navigation_mode.dart' as prefix;
 import 'package:app/components/routing/route_selection_mode.dart';
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../services/providers/route_provider.dart';
@@ -30,14 +31,20 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     return Consumer<MapRouteProvider>(
       builder: (context, mapProvider, child) {
         return Scaffold(
           extendBodyBehindAppBar: true,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                mapProvider.stopRouteNavigation();
+                mapProvider.flushRoutes();
+                Navigator.of(context).pop();
+              },
+            ),
             actions: [
               if (mapProvider.selectedRouteIndex != -1 &&
                   !mapProvider.startNavigation)
@@ -71,17 +78,33 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
                 )
             ],
           ),
-          body: mapProvider.isLoading
-              ? Center(
-                  child: LoadingAnimationWidget.beat(
-                  color: Theme.of(context).hintColor,
-                  size: 65,
-                ))
-              : mapProvider.startNavigation
-                  ? prefix.NavigationMode(
-                      mapProvider: mapProvider, mapController: _mapController)
-                  : RouteSelectionMode(
-                      mapController: _mapController, mapProvider: mapProvider),
+          body: Stack(
+            children: [
+              /// Map or navigation mode
+              Positioned.fill(
+                child: mapProvider.startNavigation
+                    ? prefix.NavigationMode(
+                        mapProvider: mapProvider, mapController: _mapController)
+                    : RouteSelectionMode(
+                        mapController: _mapController,
+                        mapProvider: mapProvider),
+              ),
+              if (mapProvider.isLoading)
+                Positioned.fill(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                    child: Container(
+                      color: Colors.black.withOpacity(0.3),
+                    ),
+                  ),
+                ),
+              if (mapProvider.isLoading)
+                const Center(
+                  child:
+                      CircularProgressIndicator(), // Default loading animation
+                ),
+            ],
+          ),
         );
       },
     );

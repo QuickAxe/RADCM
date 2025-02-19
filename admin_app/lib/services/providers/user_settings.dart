@@ -78,7 +78,7 @@ class UserSettingsProvider extends ChangeNotifier {
   }
 
   // Theme Mode Setting
-  ThemeMode _themeMode = ThemeMode.system; // Default is system
+  ThemeMode _themeMode = ThemeMode.dark; // Default is system
   ThemeMode get themeMode => _themeMode;
 
   void setThemeMode(ThemeMode mode) {
@@ -105,7 +105,7 @@ class UserSettingsProvider extends ChangeNotifier {
     _autoDetectRoutines = prefs.getBool("autoDetectRoutines") ?? false;
     _profile = prefs.getString("profile") ?? "driving";
 
-    int themeIndex = prefs.getInt("themeMode") ?? ThemeMode.system.index;
+    int themeIndex = prefs.getInt("themeMode") ?? ThemeMode.dark.index;
     _themeMode = ThemeMode.values[themeIndex]; // Convert int back to enum
 
     notifyListeners();

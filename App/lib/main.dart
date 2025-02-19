@@ -75,11 +75,13 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final settings = Provider.of<UserSettingsProvider>(context);
+    final themeMode = context.select<UserSettingsProvider, ThemeMode>(
+      (settings) => settings.themeMode,
+    );
     TextTheme textTheme = createTextTheme(context, "Albert Sans", "ABeeZee");
     MaterialTheme theme = MaterialTheme(textTheme);
     return MaterialApp(
-      themeMode: settings.themeMode,
+      themeMode: themeMode,
       theme: theme.light(),
       darkTheme: theme.dark(),
       debugShowCheckedModeBanner: false,
