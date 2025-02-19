@@ -47,6 +47,7 @@ dependencies:
   flutter_compass: ^0.8.1
   permission_handler:
   geocoding:
+  loading_animation_widget:
   http:
   flutter_tts:
 

@@ -7,6 +7,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -26,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late final MapController _mapController;
   LatLng userLocation = const LatLng(15.49613530624519, 73.82646130357969);
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   // Special FMTC tileprovider
   final _tileProvider = FMTCTileProvider(
     stores: const {'mapStore': BrowseStoreStrategy.readUpdateCreate},
@@ -88,6 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Position? pos =
                         Provider.of<Permissions>(context, listen: false)
                             .position;
+
                     if (pos != null) {
                       userLocation = LatLng(pos.latitude, pos.longitude);
                     }
@@ -165,14 +168,25 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
-
-          Consumer<Search>(builder: (context, search, child) {
-            if (search.isCurrentSelected) {
-              return BottomPanelNav(mapController: _mapController);
-            } else {
-              return BottomPanel(mapController: _mapController);
-            }
-          })
+          Consumer<Permissions>(
+            builder: (context, permissions, child) {
+              return Consumer<Search>(
+                builder: (context, search, child) {
+                  if (permissions.loadingLocation) {
+                    return Center(
+                        child: LoadingAnimationWidget.beat(
+                      color: Theme.of(context).hintColor,
+                      size: 65,
+                    ));
+                  } else if (search.isCurrentSelected) {
+                    return BottomPanelNav(mapController: _mapController);
+                  } else {
+                    return BottomPanel(mapController: _mapController);
+                  }
+                },
+              );
+            },
+          )
         ],
       ),
     );

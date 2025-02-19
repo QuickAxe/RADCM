@@ -4,6 +4,7 @@ import 'package:app/components/routing/route_selection_mode.dart';
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../services/providers/route_provider.dart';
@@ -71,7 +72,11 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
             ],
           ),
           body: mapProvider.isLoading
-              ? const Center(child: CircularProgressIndicator())
+              ? Center(
+                  child: LoadingAnimationWidget.beat(
+                  color: Theme.of(context).hintColor,
+                  size: 65,
+                ))
               : mapProvider.startNavigation
                   ? prefix.NavigationMode(
                       mapProvider: mapProvider, mapController: _mapController)
