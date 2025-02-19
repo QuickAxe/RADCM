@@ -12,6 +12,8 @@ class RouteDirections extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     if (route.legs.isEmpty) {
       return const Center(child: Text("No directions available"));
     }
@@ -33,10 +35,11 @@ class RouteDirections extends StatelessWidget {
             "${capitalize(step.maneuver.type)} ${step.maneuver.modifier ?? ''} on $roadName";
 
         return ListTile(
-          leading: Icon(_getManeuverIcon(
-              step.maneuver.type,
-              step.maneuver.modifier
-                  .toString())), // Icon based on maneuver type
+          leading: Icon(
+            _getManeuverIcon(
+                step.maneuver.type, step.maneuver.modifier.toString()),
+            color: colorScheme.primary,
+          ), // Icon based on maneuver type
           title: Text(
             instruction,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),

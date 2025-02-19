@@ -37,10 +37,35 @@ class AnomalyMarkerLayer extends StatelessWidget {
                   ),
                 );
               },
-              child: Image.asset(
-                getAnomalyIcon(anomaly.category),
-                width: 20.0,
-                height: 20.0,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Shadow layer (placed behind the image)
+                  Container(
+                    width: 50, // Slightly larger than the image
+                    height: 50,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .inversePrimary
+                              .withOpacity(0.5),
+                          blurRadius: 10,
+                          spreadRadius: 2,
+                          offset: const Offset(2, 3),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Actual Marker Image
+                  Image.asset(
+                    getAnomalyIcon(anomaly.category),
+                    width: 60.0, // Slightly bigger for visibility
+                    height: 60.0,
+                  ),
+                ],
               ),
             ),
           );

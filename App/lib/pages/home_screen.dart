@@ -129,6 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     panBuffer: 0,
                     urlTemplate:
                         'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    // retinaMode: true,
                     tileBuilder: themeMode == ThemeMode.dark
                         ? customDarkModeTileBuilder
                         : null,
@@ -140,14 +141,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     MarkerLayer(
                       markers: [
                         Marker(
-                          rotate: true,
-                          point: userLocation,
-                          child: Image.asset(
-                            "assets/icons/ic_user.png",
-                            width: 60.0,
-                            height: 60.0,
-                          ),
-                        ),
+                            rotate: true,
+                            point: userLocation,
+                            child: mapMarkerIcon("assets/icons/ic_user.png",
+                                Theme.of(context).colorScheme.outlineVariant)),
                       ],
                     ),
                   const AnomalyMarkerLayer(),

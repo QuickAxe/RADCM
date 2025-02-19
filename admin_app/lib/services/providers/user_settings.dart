@@ -70,6 +70,23 @@ class UserSettingsProvider extends ChangeNotifier {
   String _profile = "driving";
   String get profile => _profile;
 
+  Future<void> setProfile(String newProfile) async {
+    _profile = newProfile;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("profile", newProfile);
+    notifyListeners();
+  }
+
+  // Theme Mode Setting
+  ThemeMode _themeMode = ThemeMode.system; // Default is system
+  ThemeMode get themeMode => _themeMode;
+
+  void setThemeMode(ThemeMode mode) {
+    _themeMode = mode;
+    _savePreference("themeMode", mode.index); // Store as an integer
+    notifyListeners();
+  }
+
   UserSettingsProvider() {
     _loadPreferences();
   }
@@ -90,13 +107,6 @@ class UserSettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setProfile(String newProfile) async {
-    _profile = newProfile;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("profile", newProfile);
-    notifyListeners();
-  }
-
   Future<void> _savePreference(String key, dynamic value) async {
     final prefs = await SharedPreferences.getInstance();
     if (value is bool) {
@@ -105,6 +115,8 @@ class UserSettingsProvider extends ChangeNotifier {
       await prefs.setDouble(key, value);
     } else if (value is String) {
       await prefs.setString(key, value);
+    } else if (value is int) {
+      await prefs.setInt(key, value);
     }
   }
 }

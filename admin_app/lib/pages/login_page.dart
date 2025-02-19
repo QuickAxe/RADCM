@@ -1,13 +1,14 @@
 import 'dart:convert';
+import 'dart:developer' as dev;
 
 import 'package:admin_app/pages/home_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:developer' as dev;
-import '../components/sign_in_button.dart';
-import '../components/my_textfield.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../components/my_textfield.dart';
+import '../components/sign_in_button.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
@@ -32,7 +33,10 @@ class LoginPage extends StatelessWidget {
         toastLength: Toast.LENGTH_LONG,
       );
 
-      Navigator.pushReplacement(appContext!,  MaterialPageRoute(builder: (context) => const HomeScreen()),);
+      Navigator.pushReplacement(
+        appContext!,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
     } else {
       final url = Uri.parse('http://<your_ip>:8000/api/auth/token/');
 
@@ -52,7 +56,8 @@ class LoginPage extends StatelessWidget {
         // save tokens
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString("accessToken", responseData['access'].toString());
-        await prefs.setString("refreshToken", responseData['refresh'].toString());
+        await prefs.setString(
+            "refreshToken", responseData['refresh'].toString());
 
         Fluttertoast.showToast(
           msg: "Starting App",
@@ -60,7 +65,6 @@ class LoginPage extends StatelessWidget {
         );
 
         Navigator.pushReplacementNamed(appContext!, '/home');
-
       } else {
         Fluttertoast.showToast(
           msg: "Incorrect Credentials",
@@ -74,7 +78,9 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    appContext = context;
+    // appContext = context;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       // backgroundColor: Theme.of(context).colorScheme.primaryFixedDim,
@@ -86,10 +92,10 @@ class LoginPage extends StatelessWidget {
               // const SizedBox(height: 50),
 
               // logo
-              const Icon(
+              Icon(
                 Icons.lock,
                 size: 100,
-                color: Colors.deepPurple,
+                color: colorScheme.primary,
               ),
 
               const SizedBox(height: 50),
@@ -98,7 +104,7 @@ class LoginPage extends StatelessWidget {
               Text(
                 'Welcome back you lil scoundrel!',
                 style: TextStyle(
-                  color: Colors.deepPurple[200],
+                  color: colorScheme.primary,
                   fontSize: 16,
                 ),
               ),
@@ -110,6 +116,8 @@ class LoginPage extends StatelessWidget {
                 controller: usernameController,
                 hintText: 'Username',
                 obscureText: false,
+                borderColor: colorScheme.outline,
+                focusedBorderColor: colorScheme.secondary,
               ),
 
               const SizedBox(height: 10),
@@ -119,6 +127,8 @@ class LoginPage extends StatelessWidget {
                 controller: passwordController,
                 hintText: 'Password',
                 obscureText: true,
+                borderColor: colorScheme.outline,
+                focusedBorderColor: colorScheme.secondary,
               ),
 
               const SizedBox(height: 10),
@@ -131,7 +141,7 @@ class LoginPage extends StatelessWidget {
                   children: [
                     Text(
                       'Reset Password?',
-                      style: TextStyle(color: Colors.deepPurple[600]),
+                      style: TextStyle(color: colorScheme.secondary),
                     ),
                   ],
                 ),
@@ -142,6 +152,8 @@ class LoginPage extends StatelessWidget {
               // sign in button
               SignInButton(
                 onTap: signUserIn,
+                buttonColor: colorScheme.primaryContainer,
+                textColor: colorScheme.onPrimaryContainer,
               ),
             ],
           ),

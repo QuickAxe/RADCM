@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/providers/anomaly_marker_layer.dart';
 import '../../services/providers/route_provider.dart';
+import '../../services/providers/user_settings.dart';
+import '../../utils/map_utils.dart';
 import '../../utils/route_utils.dart';
 import 'route_directions.dart';
 
@@ -19,19 +22,38 @@ class RouteSelectionMode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final themeMode = context.select<UserSettingsProvider, ThemeMode>(
+      (settings) => settings.themeMode,
+    );
     return SlidingUpPanel(
+      color: Theme.of(context).colorScheme.surfaceContainer,
       borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(25.0), topRight: Radius.circular(25.0)),
       minHeight: 200,
       maxHeight: 700,
       panel: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            // Drag Indicator
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Container(
+                width: 60,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colorScheme.secondary,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            Text(
               "Select a Route",
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+              style: theme.textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
             // List of routes
             ListView.builder(
@@ -52,8 +74,8 @@ class RouteSelectionMode extends StatelessWidget {
                   ),
                   title: Text(
                     "Route ${index + 1}",
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 18),
+                    style: theme.textTheme.titleLarge
+                        ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(
                     "Distance: ${formatDistance(route.distance)} | Duration: ${formatDuration(route.duration)}",
@@ -79,10 +101,10 @@ class RouteSelectionMode extends StatelessWidget {
                 child: SingleChildScrollView(
                   child: Column(
                     children: [
-                      const Text(
+                      Text(
                         "Directions",
-                        style: TextStyle(
-                            fontSize: 25, fontWeight: FontWeight.bold),
+                        style: theme.textTheme.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       RouteDirections(route: mapProvider.currentRoute),
                     ],
@@ -102,6 +124,8 @@ class RouteSelectionMode extends StatelessWidget {
           TileLayer(
             panBuffer: 0,
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            tileBuilder:
+                themeMode == ThemeMode.dark ? customDarkModeTileBuilder : null,
             userAgentPackageName: 'com.example.app',
             tileProvider: FMTCTileProvider(
               stores: const {'mapStore': BrowseStoreStrategy.readUpdateCreate},

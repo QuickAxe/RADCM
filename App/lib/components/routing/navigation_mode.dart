@@ -65,6 +65,7 @@ class NavigationMode extends StatelessWidget {
           TileLayer(
             panBuffer: 0,
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            // retinaMode: true,
             tileBuilder:
                 themeMode == ThemeMode.dark ? customDarkModeTileBuilder : null,
             userAgentPackageName: 'com.example.app',

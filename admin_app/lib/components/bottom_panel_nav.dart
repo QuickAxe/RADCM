@@ -1,8 +1,11 @@
+import 'package:admin_app/components/transport_profile_selector_row.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+
 import '../services/providers/search.dart';
+import '../utils/string_utils.dart';
 
 class BottomPanelNav extends StatefulWidget {
   final MapController mapController;
@@ -19,52 +22,72 @@ class BottomPanelNav extends StatefulWidget {
 class _BottomPanelState extends State<BottomPanelNav> {
   @override
   Widget build(BuildContext context) {
-    // final userSettings = Provider.of<UserSettingsProvider>(context);
+    final searchProvider = Provider.of<Search>(context, listen: true);
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return SlidingUpPanel(
-      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+      color: colorScheme.surfaceContainer, // Use themed surface color
+      padding: const EdgeInsets.symmetric(horizontal: 10.0),
       borderRadius: const BorderRadius.only(
         topLeft: Radius.circular(25.0),
         topRight: Radius.circular(25.0),
       ),
-      minHeight: 200,
-      maxHeight: 700,
+      minHeight: 250,
+      maxHeight: 250,
       panel: Column(
         children: [
-          // Drag Indicator
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Container(
-              width: 60,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[600],
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
+          const SizedBox(
+            height: 25,
           ),
-          if (Provider.of<Search>(context, listen: true).isCurrentSelected)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 10.0),
-              child: ListTile(
-                leading: const Icon(Icons.location_on_rounded),
-                title: Text(Provider.of<Search>(context, listen: true).currentSelected['name']),
-                subtitle: Text(Provider.of<Search>(context, listen: true)
-                    .currentSelected['addresstype']),
+          if (searchProvider.isCurrentSelected)
+            // Currently selected place
+            Column(
+              children: [
+                ListTile(
+                  leading: Icon(Icons.location_on_rounded,
+                      color: colorScheme.primary), // Themed icon color
+                  title: Text(
+                    searchProvider.currentSelected['name'],
+                    style: theme.textTheme.titleLarge
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        capitalize(
+                            searchProvider.currentSelected['type'].toString()),
+                        style: TextStyle(color: colorScheme.onSurfaceVariant),
+                      ),
+                      Text(
+                        "${searchProvider.currentSelected['address']['road']}, ${searchProvider.currentSelected['address']['suburb']}, ${searchProvider.currentSelected['address']['postcode']}",
+                        style: TextStyle(
+                            fontSize: 12, color: colorScheme.onSurfaceVariant),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          // Transport options
+          const TransportProfileSelectorRow(),
+          // CTA -> Go to
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10.0, 8.0, 10.0, 10.0),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                minimumSize: const Size.fromHeight(40),
+              ),
+              onPressed: () => Navigator.pushNamed(context, '/map_route'),
+              child: Text(
+                "Get Routes",
+                style: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.bold, color: colorScheme.onPrimary),
               ),
             ),
-          // Padding(
-          //   padding: const EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 10.0),
-          //   child: ElevatedButton(
-          //     style: ElevatedButton.styleFrom(
-          //       backgroundColor: Theme.of(context).colorScheme.primary,
-          //       foregroundColor: Theme.of(context).colorScheme.onPrimary,
-          //       minimumSize: const Size.fromHeight(40),
-          //     ),
-          //     onPressed: () {},
-          //     child: const Text("Get Routes"),
-          //   ),
-          // )
+          )
         ],
       ),
     );

@@ -9,6 +9,8 @@ import 'package:admin_app/services/providers/permissions.dart';
 import 'package:admin_app/services/providers/route_provider.dart';
 import 'package:admin_app/services/providers/search.dart';
 import 'package:admin_app/services/providers/user_settings.dart';
+import 'package:admin_app/theme/theme.dart';
+import 'package:admin_app/theme/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:provider/provider.dart';
@@ -50,11 +52,13 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
+    final settings = Provider.of<UserSettingsProvider>(context);
+    TextTheme textTheme = createTextTheme(context, "Albert Sans", "ABeeZee");
+    MaterialTheme theme = MaterialTheme(textTheme);
     return MaterialApp(
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-        ),
+        themeMode: settings.themeMode,
+        theme: theme.light(),
+        darkTheme: theme.dark(),
         debugShowCheckedModeBanner: false,
         home: widget.accessToken == null ? LoginPage() : const HomeScreen(),
         routes: {

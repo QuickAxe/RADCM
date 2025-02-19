@@ -1,5 +1,6 @@
 import 'package:app/services/anomaly_marker_service.dart';
 import 'package:app/services/providers/user_settings.dart';
+import 'package:app/util/map_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
@@ -80,35 +81,8 @@ class AnomalyMarkerLayer extends StatelessWidget {
             point: anomaly.location,
             child: GestureDetector(
               onTap: () => _showAnomalyDialog(context, anomaly),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Shadow layer (placed behind the image)
-                  Container(
-                    width: 50, // Slightly larger than the image
-                    height: 50,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .inversePrimary
-                              .withOpacity(0.5),
-                          blurRadius: 10,
-                          spreadRadius: 2,
-                          offset: const Offset(2, 3),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Image.asset(
-                    getAnomalyIcon(anomaly.category),
-                    width: 60.0,
-                    height: 60.0,
-                  ),
-                ],
-              ),
+              child: mapMarkerIcon(getAnomalyIcon(anomaly.category),
+                  Theme.of(context).colorScheme.outline.withOpacity(0.5)),
             ),
           );
         }).toList();
