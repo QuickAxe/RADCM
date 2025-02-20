@@ -114,11 +114,100 @@ class Cnn5(nn.Module):
 
         return out
 
+class Cnn5_10x(nn.Module):
+
+    def __init__(self, numClasses):
+        super(Cnn5_10x, self).__init__()
+        self.cnnPart = nn.Sequential(
+            nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, padding="same"),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=(3, 3), padding=(1, 0), stride=(1, 2)),
+            nn.Dropout(p=0.33),
+            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding="same"),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=(3, 3), padding=(1, 0), stride=(1, 2)),
+            nn.Dropout(p=0.33),
+            nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, padding="same"),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=(3, 3), padding=(1, 0), stride=(1, 2)),
+            nn.Dropout(p=0.33),
+            nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, padding="same"),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=(3, 3), padding=(1, 0), stride=(1, 2)),
+            nn.Dropout(p=0.33),
+        )
+
+        self.linearPart = nn.Sequential(
+            # shape of output up to here is [batchSize,64, 3, 61]
+            nn.Flatten(),
+            nn.Linear(in_features=23808, out_features=256),
+            nn.ReLU(),
+            nn.Dropout(p=0.5),
+            nn.Linear(in_features=256, out_features=numClasses),
+            # nn.Softmax(),
+        )
+
+    def forward(self, x):
+
+        out = self.cnnPart(x)
+
+        # print(out.shape) => torch.Size([2, 64, 3, 61])
+        out = self.linearPart(out)
+
+        return out
+
+
+class CnnBigger(nn.Module):
+
+    def __init__(self, numClasses):
+        """ A Bigger CNN only based model, Input should be of shape (nBatches, features, seqLength)
+            ### ARGS:
+            numClasses: The number of classes the Model has to classify """
+        super(CnnBigger, self).__init__()
+        self.cnnPart = nn.Sequential(
+            nn.Conv2d(in_channels=1, out_channels=32, kernel_size=3, padding="same"),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=(3, 3), padding=(1, 0), stride=(1, 2)),
+            nn.Dropout(p=0.33),
+            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding="same"),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=(3, 3), padding=(1, 0), stride=(1, 2)),
+            nn.Dropout(p=0.33),
+            nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, padding="same"),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=(3, 3), padding=(1, 0), stride=(1, 2)),
+            nn.Dropout(p=0.33),
+            nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, padding="same"),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=(3, 3), padding=(1, 0), stride=(1, 2)),
+            nn.Dropout(p=0.33),
+        )
+
+        self.linearPart = nn.Sequential(
+            # shape of output up to here is [batchSize,64, 3, 61]
+            nn.Flatten(),
+            nn.Linear(in_features=11712, out_features=16384),
+            nn.ReLU(),
+            nn.Dropout(p=0.33),
+            nn.Linear(in_features=16384, out_features=1024),
+            nn.ReLU(),
+            nn.Dropout(p=0.5),
+            nn.Linear(in_features=1024, out_features=numClasses),
+            # nn.Softmax(),
+        )
+
+    def forward(self, x):
+
+        out = self.cnnPart(x)
+        # print(out.shape) => torch.Size([2, 64, 3, 61])
+        out = self.linearPart(out)
+        return out
+
 
 # # # # todo remove later:
 # import torch
 
-# model = Cnn5(numClasses=3)
+# model = CnnBigger(numClasses=3)
 # # print(model)
 
 # y = torch.rand(2, 1, 3, 1000)

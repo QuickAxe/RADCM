@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 import numpy as np
-from models import CnnLSTM, Cnn5
+from models import *
 
 from dataSetLoader import SensorData
 from transforms import Interpolate
@@ -35,7 +35,7 @@ interpolationFactor = 5
 numWorkers = 0
 
 # run number to save to its corresponding folder (yes yes, I know, but I'm too lazy to do this in code automatically)
-runNo = 6
+runNo = "CnnBigger-Baseline"
 
 
 # ================================================== initialising =========================================================
@@ -94,7 +94,7 @@ print("Validation set has {} instances".format(len(validationSet)))
 # =============================================== training loop part now ================================================
 
 # model = CnnLSTM(256, 3, 3)
-model = Cnn5(2)
+model = CnnBigger(3)
 
 model = model.to(device)
 
@@ -210,7 +210,7 @@ def train():
         # writer.flush()
 
         # Track best performance, and save the model's state
-        if epoch % 10 == 0:
+        if epoch % 10 == 9:
             model_path = "./runs{}/model_{}.pt".format(runNo, epoch + 1)
             torch.save(model.state_dict(), model_path)
             # f.flush()

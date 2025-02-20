@@ -11,3 +11,10 @@ runs*/
 __pycache__
 db.sqlite3
 media
+
+
+# platformio stuff
+.pio
+.vscode
+# stupid workaround 
+/Mpu6050Module/MPU6050Module/.gitignore
