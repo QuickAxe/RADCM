@@ -1,5 +1,6 @@
 import 'package:app/services/anomaly_marker_service.dart';
 import 'package:app/services/providers/user_settings.dart';
+import 'package:app/util/map_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
@@ -28,20 +29,23 @@ class AnomalyMarkerLayer extends StatelessWidget {
     String imageAssetPath = switch (cat) {
       "Speedbreaker" => "assets/icons/ic_speedbreaker.png",
       "Rumbler" => "assets/icons/ic_rumbler.png",
-      "Obstacle" => "assets/icons/ic_obstacle.png",
+      // "Obstacle" => "assets/icons/ic_obstacle.png",
       "Pothole" => "assets/icons/ic_pothole.png",
-      _ => "assets/icons/ic_obstacle.png",
+      _ => "assets/icons/ic_pothole.png",
     };
     return imageAssetPath;
   }
 
-  Future<void> _showAnomalyDialog(BuildContext context, AnomalyMarker anomaly) async {
-    List<Placemark> placemarks = await placemarkFromCoordinates(anomaly.location.latitude, anomaly.location.longitude);
+  Future<void> _showAnomalyDialog(
+      BuildContext context, AnomalyMarker anomaly) async {
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+        anomaly.location.latitude, anomaly.location.longitude);
     print(placemarks.toString());
     String address = "Address not available";
 
     if (placemarks.isNotEmpty) {
-      address = "${placemarks[0].street}, ${placemarks[0].locality}, ${placemarks[0].country}";
+      address =
+          "${placemarks[0].street}, ${placemarks[0].locality}, ${placemarks[0].country}";
     }
 
     showDialog(
@@ -77,11 +81,8 @@ class AnomalyMarkerLayer extends StatelessWidget {
             point: anomaly.location,
             child: GestureDetector(
               onTap: () => _showAnomalyDialog(context, anomaly),
-              child: Image.asset(
-                getAnomalyIcon(anomaly.category),
-                width: 20.0,
-                height: 20.0,
-              ),
+              child: mapMarkerIcon(getAnomalyIcon(anomaly.category),
+                  Theme.of(context).colorScheme.outline.withOpacity(0.5)),
             ),
           );
         }).toList();

@@ -70,6 +70,23 @@ class UserSettingsProvider extends ChangeNotifier {
   String _profile = "driving";
   String get profile => _profile;
 
+  Future<void> setProfile(String newProfile) async {
+    _profile = newProfile;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("profile", newProfile);
+    notifyListeners();
+  }
+
+  // Theme Mode Setting
+  ThemeMode _themeMode = ThemeMode.dark; // Default is system
+  ThemeMode get themeMode => _themeMode;
+
+  void setThemeMode(ThemeMode mode) {
+    _themeMode = mode;
+    _savePreference("themeMode", mode.index); // Store as an integer
+    notifyListeners();
+  }
+
   UserSettingsProvider() {
     _loadPreferences();
   }
@@ -87,13 +104,10 @@ class UserSettingsProvider extends ChangeNotifier {
 
     _autoDetectRoutines = prefs.getBool("autoDetectRoutines") ?? false;
     _profile = prefs.getString("profile") ?? "driving";
-    notifyListeners();
-  }
 
-  Future<void> setProfile(String newProfile) async {
-    _profile = newProfile;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("profile", newProfile);
+    int themeIndex = prefs.getInt("themeMode") ?? ThemeMode.dark.index;
+    _themeMode = ThemeMode.values[themeIndex]; // Convert int back to enum
+
     notifyListeners();
   }
 
@@ -105,6 +119,8 @@ class UserSettingsProvider extends ChangeNotifier {
       await prefs.setDouble(key, value);
     } else if (value is String) {
       await prefs.setString(key, value);
+    } else if (value is int) {
+      await prefs.setInt(key, value);
     }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:app/components/app_drawer.dart';
 import 'package:app/components/bottom_panel_nav.dart';
 import 'package:app/services/providers/anomaly_marker_layer.dart';
+import 'package:app/services/providers/user_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
@@ -12,6 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../components/bottom_panel.dart';
 import '../services/providers/permissions.dart';
 import '../services/providers/search.dart';
+import '../util/map_utils.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -24,6 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late final MapController _mapController;
   LatLng userLocation = const LatLng(15.49613530624519, 73.82646130357969);
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   // Special FMTC tileprovider
   final _tileProvider = FMTCTileProvider(
     stores: const {'mapStore': BrowseStoreStrategy.readUpdateCreate},
@@ -37,6 +40,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final themeMode = context.select<UserSettingsProvider, ThemeMode>(
+      (settings) => settings.themeMode,
+    );
+
     return Scaffold(
       key: _scaffoldKey,
       extendBodyBehindAppBar: true,
@@ -49,8 +58,9 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               _scaffoldKey.currentState?.openDrawer();
             },
-            backgroundColor: Colors.white,
-            child: const Icon(Icons.menu_rounded),
+            child: const Icon(
+              Icons.menu_rounded,
+            ),
           ),
         ),
         actions: [
@@ -63,8 +73,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     search.performDeselection();
                     _mapController.moveAndRotate(userLocation, 15.0, 0.0);
                   },
-                  backgroundColor: Colors.white,
-                  child: const Icon(Icons.arrow_back_rounded),
+                  child: const Icon(
+                    Icons.arrow_back_rounded,
+                  ),
                 ),
               );
             } else {
@@ -78,12 +89,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     Position? pos =
                         Provider.of<Permissions>(context, listen: false)
                             .position;
+
                     if (pos != null) {
                       userLocation = LatLng(pos.latitude, pos.longitude);
                     }
                   },
-                  backgroundColor: Colors.white,
-                  child: const Icon(Icons.my_location_rounded),
+                  child: const Icon(
+                    Icons.my_location_rounded,
+                  ),
                 ),
               );
             }
@@ -118,6 +131,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     panBuffer: 0,
                     urlTemplate:
                         'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    // retinaMode: true,
+                    tileBuilder: themeMode == ThemeMode.dark
+                        ? customDarkModeTileBuilder
+                        : null,
                     userAgentPackageName: 'com.example.app',
                     tileProvider: _tileProvider,
                   ),
@@ -126,14 +143,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     MarkerLayer(
                       markers: [
                         Marker(
-                          rotate: true,
-                          point: userLocation,
-                          child: const Icon(
-                            Icons.location_on_rounded,
-                            color: Colors.red,
-                            size: 30.0,
-                          ),
-                        ),
+                            rotate: true,
+                            point: userLocation,
+                            child: mapMarkerIcon("assets/icons/ic_user.png",
+                                Theme.of(context).colorScheme.outlineVariant)),
                       ],
                     ),
                   const AnomalyMarkerLayer(),
@@ -154,14 +167,23 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
-
-          Consumer<Search>(builder: (context, search, child) {
-            if (search.isCurrentSelected) {
-              return BottomPanelNav(mapController: _mapController);
-            } else {
-              return BottomPanel(mapController: _mapController);
-            }
-          })
+          Consumer<Permissions>(
+            builder: (context, permissions, child) {
+              return Consumer<Search>(
+                builder: (context, search, child) {
+                  if (permissions.loadingLocation) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else if (search.isCurrentSelected) {
+                    return BottomPanelNav(mapController: _mapController);
+                  } else {
+                    return BottomPanel(mapController: _mapController);
+                  }
+                },
+              );
+            },
+          )
         ],
       ),
     );

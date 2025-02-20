@@ -15,6 +15,7 @@ class _VoiceEngineScreenState extends State<VoiceEngineScreen> {
   @override
   Widget build(BuildContext context) {
     final settings = Provider.of<UserSettingsProvider>(context);
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -26,9 +27,10 @@ class _VoiceEngineScreenState extends State<VoiceEngineScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Choose the voice for your audio notifications while navigating',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 15),
@@ -70,14 +72,16 @@ class _VoiceEngineScreenState extends State<VoiceEngineScreen> {
             const SizedBox(height: 24),
 
             // Volume Control
-            const Text(
+            Text(
               'Notification Volume',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'Adjust the volume of your notifications.',
-              style: TextStyle(fontSize: 14, color: Colors.black54),
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 12),
 
@@ -87,7 +91,7 @@ class _VoiceEngineScreenState extends State<VoiceEngineScreen> {
               max: 1,
               divisions: 10,
               label: "${(settings.voiceVolume * 100).toInt()}%",
-              activeColor: Colors.blue,
+              activeColor: theme.colorScheme.primary,
               onChanged: (newValue) => settings.setVoiceVolume(newValue),
             ),
           ],
@@ -105,6 +109,8 @@ class _VoiceEngineScreenState extends State<VoiceEngineScreen> {
     required bool selected,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -112,16 +118,18 @@ class _VoiceEngineScreenState extends State<VoiceEngineScreen> {
         width: MediaQuery.of(context).size.width / 3.5,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: selected ? Colors.blue.shade100 : Colors.grey.shade200,
+          color: selected
+              ? theme.colorScheme.primaryContainer
+              : theme.colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? Colors.blue : Colors.transparent,
+            color: selected ? theme.colorScheme.primary : Colors.transparent,
             width: 2,
           ),
           boxShadow: selected
               ? [
                   BoxShadow(
-                    color: Colors.blue.withOpacity(0.3),
+                    color: theme.colorScheme.primary.withOpacity(0.3),
                     blurRadius: 6,
                     offset: const Offset(0, 3),
                   ),
@@ -132,12 +140,23 @@ class _VoiceEngineScreenState extends State<VoiceEngineScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon,
-                size: 32, color: selected ? Colors.blue : Colors.black54),
+                size: 32,
+                color: selected
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface),
             const SizedBox(height: 8),
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-            Text(subtitle,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12, color: Colors.black54)),
+            Text(
+              title,
+              style: theme.textTheme.bodyLarge
+                  ?.copyWith(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall
+                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
           ],
         ),
       ),

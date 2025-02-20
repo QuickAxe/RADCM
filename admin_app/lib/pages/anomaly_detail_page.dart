@@ -1,15 +1,14 @@
 import 'package:admin_app/utils/marker_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
 import '../data/models/anomaly_marker.dart';
-import '../services/providers/permissions.dart';
+import '../services/providers/user_settings.dart';
 import '../utils/fix_anomaly_dialog.dart';
+import '../utils/map_utils.dart';
 import 'map_route_screen.dart';
 
 class AnomalyDetailPage extends StatelessWidget {
@@ -32,6 +31,11 @@ class AnomalyDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeMode = context.select<UserSettingsProvider, ThemeMode>(
+      (settings) => settings.themeMode,
+    );
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Scaffold(
       body: Stack(
         children: [
@@ -54,7 +58,9 @@ class AnomalyDetailPage extends StatelessWidget {
                       TileLayer(
                         urlTemplate:
                             "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                        subdomains: const ['a', 'b', 'c'],
+                        tileBuilder: themeMode == ThemeMode.dark
+                            ? customDarkModeTileBuilder
+                            : null,
                       ),
                       MarkerLayer(
                         markers: [
@@ -62,9 +68,9 @@ class AnomalyDetailPage extends StatelessWidget {
                             width: 50.0,
                             height: 50.0,
                             point: anomaly.location,
-                            child: Image.asset(
-                              getAnomalyIcon(anomaly.category),
-                            ),
+                            child: mapMarkerIcon(
+                                getAnomalyIcon(anomaly.category),
+                                colorScheme.surfaceDim),
                           ),
                         ],
                       ),
@@ -128,7 +134,10 @@ class AnomalyDetailPage extends StatelessWidget {
                           Expanded(
                             child: ElevatedButton(
                               onPressed: () {
-                                showAnomalyDialog(context, anomaly.location.latitude, anomaly.location.longitude);
+                                showAnomalyDialog(
+                                    context,
+                                    anomaly.location.latitude,
+                                    anomaly.location.longitude);
                               },
                               child: const Text("Fix Anomaly"),
                             ),

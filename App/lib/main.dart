@@ -13,6 +13,8 @@ import 'package:app/services/providers/permissions.dart';
 import 'package:app/services/providers/route_provider.dart';
 import 'package:app/services/providers/search.dart';
 import 'package:app/services/providers/user_settings.dart';
+import 'package:app/theme/theme.dart';
+import 'package:app/theme/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
@@ -73,8 +75,15 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final themeMode = context.select<UserSettingsProvider, ThemeMode>(
+      (settings) => settings.themeMode,
+    );
+    TextTheme textTheme = createTextTheme(context, "Albert Sans", "ABeeZee");
+    MaterialTheme theme = MaterialTheme(textTheme);
     return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
+      themeMode: themeMode,
+      theme: theme.light(),
+      darkTheme: theme.dark(),
       debugShowCheckedModeBanner: false,
       home: const HomeScreen(),
       routes: {

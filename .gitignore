@@ -3,6 +3,9 @@ myenv/
 Server/Datasets
 Test/
 runs*/
+Server/TilingServer/*.osm.pbf
+Server/TilingServer/*.poly
+Server/SensorModel/model_visualization*
 
 # Django #
 *.log

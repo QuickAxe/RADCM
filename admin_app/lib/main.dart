@@ -2,6 +2,7 @@ import 'package:admin_app/pages/home_screen.dart';
 import 'package:admin_app/pages/login_page.dart';
 import 'package:admin_app/pages/settings_screen.dart';
 import 'package:admin_app/pages/settings_screens/additional_settings.dart';
+import 'package:admin_app/pages/settings_screens/navigation_preferences.dart';
 import 'package:admin_app/pages/settings_screens/routines.dart';
 import 'package:admin_app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:admin_app/pages/settings_screens/voice_engine.dart';
@@ -9,6 +10,8 @@ import 'package:admin_app/services/providers/permissions.dart';
 import 'package:admin_app/services/providers/route_provider.dart';
 import 'package:admin_app/services/providers/search.dart';
 import 'package:admin_app/services/providers/user_settings.dart';
+import 'package:admin_app/theme/theme.dart';
+import 'package:admin_app/theme/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +25,7 @@ Future<void> main() async {
   await const FMTCStore('mapStore').manage.create();
 
   final prefs = await SharedPreferences.getInstance();
-  String? username = prefs.getString("username");
+  String? accessToken = prefs.getString("accessToken");
 
   runApp(
     // registering providers here
@@ -34,14 +37,14 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => UserSettingsProvider()),
         ChangeNotifierProvider(create: (context) => MapRouteProvider()),
       ],
-      child: MyApp(username: username),
+      child: MyApp(accessToken: accessToken),
     ),
   );
 }
 
 class MyApp extends StatefulWidget {
-  final String? username;
-  const MyApp({super.key, required this.username});
+  final String? accessToken;
+  const MyApp({super.key, required this.accessToken});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -50,19 +53,24 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
+    final settings = Provider.of<UserSettingsProvider>(context);
+    TextTheme textTheme = createTextTheme(context, "Albert Sans", "ABeeZee");
+    MaterialTheme theme = MaterialTheme(textTheme);
     return MaterialApp(
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          useMaterial3: true,
-        ),
+        themeMode: settings.themeMode,
+        theme: theme.light(),
+        darkTheme: theme.dark(),
         debugShowCheckedModeBanner: false,
-        home: widget.username == null ? LoginPage() : HomeScreen(),
+        home: widget.accessToken == null ? LoginPage() : const HomeScreen(),
         routes: {
+          '/login': (context) => LoginPage(),
+          '/home': (context) => const HomeScreen(),
           '/settings': (context) => const SettingsScreen(),
           '/toggle_anomalies': (context) => const ToggleAnomaliesScreen(),
           '/routines': (context) => const RoutinesScreen(),
           '/voice_engine': (context) => const VoiceEngineScreen(),
           '/additional_settings': (context) => const AdditionalSettings(),
+          '/navigation_preferences': (context) => const NavigationPreferences(),
         });
   }
 }

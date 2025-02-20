@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -21,12 +22,17 @@ class AppDrawer extends StatelessWidget {
             height: 10,
           ),
           ListTile(
-            leading: const Icon(Icons.settings),
+            leading: const Icon(LucideIcons.settings2),
             title: const Text('Settings'),
             onTap: () {
               Navigator.pop(context);
               Navigator.pushNamed(context, '/settings');
             },
+          ),
+          ListTile(
+            leading: const Icon(LucideIcons.logOut),
+            title: const Text('Logout'),
+            onTap: () {},
           ),
         ],
       ),

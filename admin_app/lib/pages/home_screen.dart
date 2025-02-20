@@ -11,6 +11,8 @@ import '../components/bottom_panel_nav.dart';
 import '../services/providers/anomaly_marker_layer.dart';
 import '../services/providers/permissions.dart';
 import '../services/providers/search.dart';
+import '../services/providers/user_settings.dart';
+import '../utils/map_utils.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -44,6 +46,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final themeMode = context.select<UserSettingsProvider, ThemeMode>(
+      (settings) => settings.themeMode,
+    );
     return Scaffold(
       key: _scaffoldKey,
       extendBodyBehindAppBar: true,
@@ -52,11 +59,13 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: Padding(
           padding: const EdgeInsets.all(10.0),
           child: FloatingActionButton(
+            heroTag: null,
             onPressed: () {
               _scaffoldKey.currentState?.openDrawer();
             },
-            backgroundColor: Colors.white,
-            child: const Icon(Icons.menu_rounded),
+            child: const Icon(
+              Icons.menu_rounded,
+            ),
           ),
         ),
         actions: [
@@ -71,8 +80,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     _mapController.move(
                         userLocation, _mapController.camera.zoom);
                   },
-                  backgroundColor: Colors.white,
-                  child: const Icon(Icons.arrow_back_rounded),
+                  child: const Icon(
+                    Icons.arrow_back_rounded,
+                  ),
                 ),
               );
             } else {
@@ -90,7 +100,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       userLocation = LatLng(pos.latitude, pos.longitude);
                     }
                   },
-                  backgroundColor: Colors.white,
                   child: const Icon(Icons.my_location_rounded),
                 ),
               );
@@ -125,6 +134,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     panBuffer: 0,
                     urlTemplate:
                         'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    tileBuilder: themeMode == ThemeMode.dark
+                        ? customDarkModeTileBuilder
+                        : null,
                     userAgentPackageName: 'com.example.admin_app',
                     tileProvider: _tileProvider,
                   ),
@@ -134,10 +146,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       markers: [
                         Marker(
                           point: userLocation,
-                          child: const Icon(
-                            Icons.location_pin,
-                            color: Colors.red,
-                            size: 30.0,
+                          child: Image.asset(
+                            "assets/icons/ic_user.png",
+                            width: 60.0,
+                            height: 60.0,
                           ),
                         ),
                       ],

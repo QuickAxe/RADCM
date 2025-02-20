@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 def get_path(long1, lat1, long2, lat2):
     with connection.cursor() as cursor:
-
+        # If you get an error her about geom in nodes or geom_way in edges check ./migrations.sql
         cursor.execute(
             """WITH source_id as (with s as (select %s as long , %s as lat)
                 select id from nodes,s
@@ -31,7 +31,11 @@ def get_path(long1, lat1, long2, lat2):
                 limit 1),
                 dr as (
                 select * FROM pgr_dijkstra(
-                    'SELECT id_new as id, source, target, length::double precision as cost FROM public.edges',
+                    'SELECT id_new as id, source, target, length::double precision as cost FROM public.edges as e, 
+	                (SELECT ST_Expand(ST_Extent(geom_way), 0.1) as box from edges as b
+	                WHERE b.source = '||(select id from source_id)|| '
+	                OR b.target= '||(select id from target_id)||'  )as box WHERE e.geom_way && box.box
+                    ',
                 	(select id from source_id),
                 	(select id from target_id))
                 	)

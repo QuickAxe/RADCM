@@ -4,12 +4,16 @@ class MyTextField extends StatelessWidget {
   final controller;
   final String hintText;
   final bool obscureText;
+  final Color borderColor;
+  final Color focusedBorderColor;
 
   const MyTextField({
     super.key,
     required this.controller,
     required this.hintText,
     required this.obscureText,
+    required this.borderColor,
+    required this.focusedBorderColor,
   });
 
   @override
@@ -20,16 +24,15 @@ class MyTextField extends StatelessWidget {
         controller: controller,
         obscureText: obscureText,
         decoration: InputDecoration(
-            enabledBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.white),
-            ),
-            focusedBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.white),
-            ),
-            fillColor: Colors.purple[50],
-            filled: true,
-            hintText: hintText,
-            hintStyle: TextStyle(color: Colors.grey[400])),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: borderColor),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: focusedBorderColor),
+          ),
+          filled: true,
+          hintText: hintText,
+        ),
       ),
     );
   }

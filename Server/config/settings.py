@@ -25,8 +25,8 @@ SECRET_KEY = 'django-insecure-g@33)mzroe##c@eaed%@6vrn)=)0u@78w6=#9@7hw9!0e-r@)*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# allow the fluuter app to access the local server 
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -38,8 +38,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'auth_app',
     'path',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

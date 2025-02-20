@@ -1,4 +1,5 @@
 import 'package:admin_app/services/providers/user_settings.dart';
+import 'package:admin_app/utils/map_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
@@ -15,6 +16,8 @@ class AnomalyMarkerLayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     // consumes filter because the markers displayed must react to change in filters
     return Consumer<UserSettingsProvider>(
       builder: (context, userSettings, child) {
@@ -37,11 +40,8 @@ class AnomalyMarkerLayer extends StatelessWidget {
                   ),
                 );
               },
-              child: Image.asset(
-                getAnomalyIcon(anomaly.category),
-                width: 20.0,
-                height: 20.0,
-              ),
+              child: mapMarkerIcon(
+                  getAnomalyIcon(anomaly.category), colorScheme.surfaceDim),
             ),
           );
         }).toList();

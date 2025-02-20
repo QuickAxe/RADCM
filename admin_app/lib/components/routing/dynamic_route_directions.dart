@@ -88,6 +88,8 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     if (widget.route.legs.isEmpty) {
       return const Center(child: Text("No directions available"));
     }
@@ -109,20 +111,25 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
     return ListView(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       children: [
         ListTile(
-          leading: Icon(getManeuverIcon(
-              widget.route.legs.first.steps[_currentStepIndex].maneuver.type,
-              widget.route.legs.first.steps[_currentStepIndex].maneuver
-                  .modifier)),
+          leading: Icon(
+            getManeuverIcon(
+                widget.route.legs.first.steps[_currentStepIndex].maneuver.type,
+                widget.route.legs.first.steps[_currentStepIndex].maneuver
+                    .modifier),
+            color: theme.colorScheme.primary,
+          ),
           title: Text(
             instruction,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: theme.textTheme.titleLarge
+                ?.copyWith(fontWeight: FontWeight.bold),
           ),
           subtitle: Text(
             "Distance: ${formatDistance(widget.route.legs.first.steps[_currentStepIndex].distance)} | Duration: ${formatDuration(widget.route.legs.first.steps[_currentStepIndex].duration)}",
-            style: TextStyle(color: Colors.grey[700]),
+            style: theme.textTheme.bodyLarge?.copyWith(
+                fontWeight: FontWeight.bold, color: colorScheme.secondary),
           ),
         ),
       ],

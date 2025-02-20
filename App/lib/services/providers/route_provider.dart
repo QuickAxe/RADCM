@@ -152,6 +152,10 @@ class MapRouteProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void flushRoutes() {
+    isLoading = true;
+  }
+
   /// Get the current RouteModel
   RouteModel get currentRoute =>
       (selectedRouteIndex >= 0 && selectedRouteIndex < routes.length)

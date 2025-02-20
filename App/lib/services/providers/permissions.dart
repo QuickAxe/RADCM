@@ -8,6 +8,7 @@ class Permissions extends ChangeNotifier with WidgetsBindingObserver {
   Position? position;
   bool locationAvailable = false;
   bool waitingForLocationSettings = false;
+  bool loadingLocation = false;
 
   // This is used to observe lifecycle changes for the app so when it returns from the settings screen we can detect it
   Permissions() {
@@ -57,6 +58,9 @@ class Permissions extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   Future<void> checkAndRequestLocationPermission() async {
+    loadingLocation = true;
+    notifyListeners();
+
     LocationPermission permission = await Geolocator.checkPermission();
     dev.log('I AM IN CHECK & REQUEST 1');
 
@@ -82,6 +86,7 @@ class Permissions extends ChangeNotifier with WidgetsBindingObserver {
     // fetches the current position
     position = await Geolocator.getCurrentPosition();
     locationAvailable = true;
+    loadingLocation = false;
     notifyListeners();
 
     // checkBatteryOptimizationStatus();

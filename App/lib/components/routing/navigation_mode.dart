@@ -1,15 +1,17 @@
 import 'package:app/components/routing/dynamic_route_directions.dart';
-import 'package:app/components/routing/route_directions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/providers/anomaly_marker_layer.dart';
 import '../../services/providers/route_provider.dart';
+import '../../services/providers/user_settings.dart';
+import '../../util/map_utils.dart';
 import '../../util/route_utils.dart';
 
 class NavigationMode extends StatelessWidget {
@@ -20,38 +22,33 @@ class NavigationMode extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeMode = context.select<UserSettingsProvider, ThemeMode>(
+      (settings) => settings.themeMode,
+    );
+
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return SlidingUpPanel(
+      color: Theme.of(context).colorScheme.surfaceContainer,
       borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(25.0), topRight: Radius.circular(25.0)),
       minHeight: 200,
-      maxHeight: 700,
+      maxHeight: 200,
       panel: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            // ListTile(
-            //   title: Text(
-            //     "Route ${mapProvider.selectedRouteIndex + 1}",
-            //     style: const TextStyle(fontWeight: FontWeight.bold),
-            //   ),
-            //   subtitle: Text(
-            //     "Distance: ${formatDistance(mapProvider.currentRoute.distance)} | Duration: ${formatDuration(mapProvider.currentRoute.duration)}",
-            //   ),
-            // ),
-            // const Divider(),
-            // const SizedBox(height: 10),
             Expanded(
-              // child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const Text(
-                      "Next Move",
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                    ),
-                    DynamicRouteDirections(route: mapProvider.currentRoute),
-                  ],
-                ),
+              child: Column(
+                children: [
+                  Text(
+                    "Next Move",
+                    style: theme.textTheme.headlineSmall
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  DynamicRouteDirections(route: mapProvider.currentRoute),
+                ],
+              ),
               // ),
             ),
           ],
@@ -68,6 +65,9 @@ class NavigationMode extends StatelessWidget {
           TileLayer(
             panBuffer: 0,
             urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            // retinaMode: true,
+            tileBuilder:
+                themeMode == ThemeMode.dark ? customDarkModeTileBuilder : null,
             userAgentPackageName: 'com.example.app',
             // This part allows caching tiles
             tileProvider: FMTCTileProvider(
@@ -90,14 +90,17 @@ class NavigationMode extends StatelessWidget {
             alignPositionOnUpdate: AlignOnUpdate.always,
             alignDirectionOnUpdate: AlignOnUpdate.always,
             alignDirectionAnimationCurve: Curves.easeInOut,
-            style: const LocationMarkerStyle(
+            style: LocationMarkerStyle(
+              accuracyCircleColor: colorScheme.primary.withOpacity(0.2),
+              headingSectorColor: colorScheme.primary.withOpacity(0.4),
               marker: DefaultLocationMarker(
+                color: colorScheme.primary,
                 child: Icon(
                   Icons.navigation,
-                  color: Colors.white,
+                  color: colorScheme.onPrimary,
                 ),
               ),
-              markerSize: Size(40, 40),
+              markerSize: const Size(40, 40),
             ),
           ),
           Positioned(

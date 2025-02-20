@@ -7,6 +7,8 @@ class NavigationPreferences extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // Get the current theme
+
     return Scaffold(
       appBar: AppBar(title: const Text('Navigation Preferences')),
       body: Padding(
@@ -16,9 +18,10 @@ class NavigationPreferences extends StatelessWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Select Transport Mode:',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: theme.textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 10),
                 Row(
@@ -70,6 +73,8 @@ class NavigationPreferences extends StatelessWidget {
     required bool selected,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -77,16 +82,18 @@ class NavigationPreferences extends StatelessWidget {
         width: MediaQuery.of(context).size.width / 3.5,
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: selected ? Colors.blue.shade100 : Colors.grey.shade200,
+          color: selected
+              ? theme.colorScheme.primaryContainer
+              : theme.colorScheme.surfaceVariant,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? Colors.blue : Colors.transparent,
+            color: selected ? theme.colorScheme.primary : Colors.transparent,
             width: 2,
           ),
           boxShadow: selected
               ? [
                   BoxShadow(
-                    color: Colors.blue.withOpacity(0.3),
+                    color: theme.colorScheme.primary.withOpacity(0.3),
                     blurRadius: 6,
                     offset: const Offset(0, 3),
                   ),
@@ -96,13 +103,24 @@ class NavigationPreferences extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon,
-                size: 32, color: selected ? Colors.blue : Colors.black54),
+            Icon(
+              icon,
+              size: 32,
+              color:
+                  selected ? theme.colorScheme.primary : theme.iconTheme.color,
+            ),
             const SizedBox(height: 8),
-            Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-            Text(subtitle,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12, color: Colors.black54)),
+            Text(
+              title,
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall
+                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
           ],
         ),
       ),

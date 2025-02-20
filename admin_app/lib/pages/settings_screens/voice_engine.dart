@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../../services/providers/user_settings.dart';
@@ -14,64 +15,150 @@ class _VoiceEngineScreenState extends State<VoiceEngineScreen> {
   @override
   Widget build(BuildContext context) {
     final settings = Provider.of<UserSettingsProvider>(context);
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: const Text('Voice Engine'),
       ),
-      body: Column(
-        children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Center(
-              child: Text(
-                'Choose the voice for your audio notifications while navigating.',
-              ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Choose the voice for your audio notifications while navigating',
+              style: theme.textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          RadioListTile<String>(
-            title: const Text('Male Voice'),
-            subtitle: const Text('A husky male voice'),
-            value: 'male',
-            groupValue: settings.selectedVoice,
-            onChanged: (value) => settings.setSelectedVoice(value!),
-          ),
-          RadioListTile<String>(
-            title: const Text('Female Voice'),
-            subtitle: const Text('A soft female voice'),
-            value: 'female',
-            groupValue: settings.selectedVoice,
-            onChanged: (value) => settings.setSelectedVoice(value!),
-          ),
-          RadioListTile<String>(
-            title: const Text('Default Voice'),
-            subtitle: const Text('Electronic Voice'),
-            value: 'default',
-            groupValue: settings.selectedVoice,
-            onChanged: (value) => settings.setSelectedVoice(value!),
-          ),
-          ListTile(
-            contentPadding: const EdgeInsets.only(left: 25),
-            title: Text(
+            const SizedBox(height: 15),
+
+            // Voice Selection Options
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _voiceOption(
+                  context,
+                  mode: "male",
+                  title: "Male Voice",
+                  subtitle: "A husky male voice",
+                  icon: Icons.person_4,
+                  selected: settings.selectedVoice == "male",
+                  onTap: () => settings.setSelectedVoice("male"),
+                ),
+                _voiceOption(
+                  context,
+                  mode: "female",
+                  title: "Female Voice",
+                  subtitle: "A soft female voice",
+                  icon: Icons.person_2,
+                  selected: settings.selectedVoice == "female",
+                  onTap: () => settings.setSelectedVoice("female"),
+                ),
+                _voiceOption(
+                  context,
+                  mode: "default",
+                  title: "Default Voice",
+                  subtitle: "Electronic Robo Voice",
+                  icon: LucideIcons.bot,
+                  selected: settings.selectedVoice == "default",
+                  onTap: () => settings.setSelectedVoice("default"),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
+            // Volume Control
+            Text(
               'Notification Volume',
-              style: Theme.of(context).textTheme.bodyLarge,
+              style: theme.textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
-            subtitle: Text(
+            const SizedBox(height: 8),
+            Text(
               'Adjust the volume of your notifications.',
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
+            const SizedBox(height: 12),
+
+            Slider(
+              value: settings.voiceVolume,
+              min: 0,
+              max: 1,
+              divisions: 10,
+              label: "${(settings.voiceVolume * 100).toInt()}%",
+              activeColor: theme.colorScheme.primary,
+              onChanged: (newValue) => settings.setVoiceVolume(newValue),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _voiceOption(
+    BuildContext context, {
+    required String mode,
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: MediaQuery.of(context).size.width / 3.5,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: selected
+              ? theme.colorScheme.primaryContainer
+              : theme.colorScheme.surfaceVariant,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? theme.colorScheme.primary : Colors.transparent,
+            width: 2,
           ),
-          const SizedBox(
-            height: 10,
-          ),
-          Slider(
-            value: settings.voiceVolume,
-            onChanged: (newValue) => settings.setVoiceVolume(newValue),
-          ),
-        ],
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: theme.colorScheme.primary.withOpacity(0.3),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : [],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon,
+                size: 32,
+                color: selected
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurface),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: theme.textTheme.bodyLarge
+                  ?.copyWith(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall
+                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
+          ],
+        ),
       ),
     );
   }

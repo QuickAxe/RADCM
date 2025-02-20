@@ -1,10 +1,14 @@
+import 'dart:convert';
+import 'dart:developer' as dev;
+
 import 'package:admin_app/pages/home_screen.dart';
 import 'package:flutter/material.dart';
-
-import '../components/sign_in_button.dart';
-import '../components/my_textfield.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../components/my_textfield.dart';
+import '../components/sign_in_button.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
@@ -16,31 +20,67 @@ class LoginPage extends StatelessWidget {
 
   // sign user in method
   Future<void> signUserIn() async {
-    if(usernameController.text.toString() == "USERNAME" && passwordController.text.toString() == "PASSWORD"){
+    // bypass for dev (backend apis wont be accessible)
+    if (usernameController.text.toString() == "dev" &&
+        passwordController.text.toString() == "dev") {
+      // save tokens (bypass)
       final prefs = await SharedPreferences.getInstance();
-
-      // update creds
-      await prefs.setString("username", usernameController.text.toString());
-      await prefs.setString("password", passwordController.text.toString());
+      await prefs.setString("accessToken", "bypass");
+      await prefs.setString("refreshToken", "bypass");
 
       Fluttertoast.showToast(
-        msg: "Starting App",
+        msg: "Starting App in dev mode",
         toastLength: Toast.LENGTH_LONG,
       );
 
-      Navigator.pushReplacement(appContext!, MaterialPageRoute(builder: (context) => HomeScreen()),);
-    }
-    else{
-      Fluttertoast.showToast(
-        msg: "Incorrect Credentials, try again.",
-        toastLength: Toast.LENGTH_LONG,
+      Navigator.pushReplacement(
+        appContext!,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
+    } else {
+      final url = Uri.parse('http://<your_ip>:8000/api/auth/token/');
+
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "username": usernameController.text.toString(),
+          "password": passwordController.text.toString()
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // decode the json resp
+        final responseData = jsonDecode(response.body);
+
+        // save tokens
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString("accessToken", responseData['access'].toString());
+        await prefs.setString(
+            "refreshToken", responseData['refresh'].toString());
+
+        Fluttertoast.showToast(
+          msg: "Starting App",
+          toastLength: Toast.LENGTH_LONG,
+        );
+
+        Navigator.pushReplacementNamed(appContext!, '/home');
+      } else {
+        Fluttertoast.showToast(
+          msg: "Incorrect Credentials",
+          toastLength: Toast.LENGTH_LONG,
+        );
+      }
     }
+
+    dev.log("-------IM OUT-------");
   }
 
   @override
   Widget build(BuildContext context) {
     appContext = context;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
       // backgroundColor: Theme.of(context).colorScheme.primaryFixedDim,
@@ -52,10 +92,10 @@ class LoginPage extends StatelessWidget {
               // const SizedBox(height: 50),
 
               // logo
-              const Icon(
+              Icon(
                 Icons.lock,
                 size: 100,
-                color: Colors.deepPurple,
+                color: colorScheme.primary,
               ),
 
               const SizedBox(height: 50),
@@ -64,7 +104,7 @@ class LoginPage extends StatelessWidget {
               Text(
                 'Welcome back you lil scoundrel!',
                 style: TextStyle(
-                  color: Colors.deepPurple[200],
+                  color: colorScheme.primary,
                   fontSize: 16,
                 ),
               ),
@@ -76,6 +116,8 @@ class LoginPage extends StatelessWidget {
                 controller: usernameController,
                 hintText: 'Username',
                 obscureText: false,
+                borderColor: colorScheme.outline,
+                focusedBorderColor: colorScheme.secondary,
               ),
 
               const SizedBox(height: 10),
@@ -85,6 +127,8 @@ class LoginPage extends StatelessWidget {
                 controller: passwordController,
                 hintText: 'Password',
                 obscureText: true,
+                borderColor: colorScheme.outline,
+                focusedBorderColor: colorScheme.secondary,
               ),
 
               const SizedBox(height: 10),
@@ -97,7 +141,7 @@ class LoginPage extends StatelessWidget {
                   children: [
                     Text(
                       'Reset Password?',
-                      style: TextStyle(color: Colors.deepPurple[600]),
+                      style: TextStyle(color: colorScheme.secondary),
                     ),
                   ],
                 ),
@@ -108,6 +152,8 @@ class LoginPage extends StatelessWidget {
               // sign in button
               SignInButton(
                 onTap: signUserIn,
+                buttonColor: colorScheme.primaryContainer,
+                textColor: colorScheme.onPrimaryContainer,
               ),
             ],
           ),
