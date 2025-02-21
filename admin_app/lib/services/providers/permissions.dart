@@ -20,6 +20,13 @@ class Permissions extends ChangeNotifier with WidgetsBindingObserver {
     super.dispose();
   }
 
+  void logout() {
+    position = null;
+    locationAvailable = false;
+    waitingForLocationSettings = false;
+    notifyListeners();
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && waitingForLocationSettings) {

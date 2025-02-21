@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -7,6 +9,12 @@ class UserSettingsProvider extends ChangeNotifier {
   String get selectedVoice => _selectedVoice;
   double _voiceVolume = 0.5; // TODO: Check back
   double get voiceVolume => _voiceVolume;
+
+  void logout() {
+    _selectedVoice = "default";
+    _voiceVolume = 0.5;
+    notifyListeners();
+  }
 
   void setSelectedVoice(String voice) {
     _selectedVoice = voice;

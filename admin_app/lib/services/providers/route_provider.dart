@@ -33,6 +33,24 @@ class MapRouteProvider with ChangeNotifier {
   // Store calculated bounds for the route
   late LatLngBounds bounds;
 
+  void logout() {
+    // Coordinates for start and destination.
+    startLat = 15.49613530624519;
+    startLng = 73.82646130357969;
+    endLat = 15.60000652430488;
+    endLng = 73.82570085490943;
+
+    // Data from the API
+    alternativeRoutes.clear();
+    routes.clear();
+
+    // UI state
+    bool isLoading = true;
+    int selectedRouteIndex = -1;
+    bool startNavigation = false;
+    notifyListeners();
+  }
+
   /// Initialize the provider by fetching routes.
   Future<void> initialize(
       BuildContext context, double newEndLat, double newEndLng) async {

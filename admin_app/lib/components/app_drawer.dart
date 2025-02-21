@@ -1,6 +1,11 @@
 import 'package:admin_app/components/restart_app.dart';
+import 'package:admin_app/services/providers/permissions.dart';
+import 'package:admin_app/services/providers/route_provider.dart';
+import 'package:admin_app/services/providers/search.dart';
+import 'package:admin_app/services/providers/user_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -37,6 +42,12 @@ class AppDrawer extends StatelessWidget {
             onTap: () async {
               final prefs = await SharedPreferences.getInstance();
               await prefs.clear();  // Removes all keys and values
+
+              // reset providers
+              Provider.of<Permissions>(context, listen: false).logout();
+              Provider.of<MapRouteProvider>(context, listen: false).logout();
+              Provider.of<Search>(context, listen: false).logout();
+              Provider.of<UserSettingsProvider>(context, listen: false).logout();
 
               RestartWidget.restartApp(context);
             },

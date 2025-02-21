@@ -7,6 +7,13 @@ class Search extends ChangeNotifier {
   bool isCurrentSelected = false;
   dynamic currentSelected;
 
+  void logout() {
+    searchSuggestions.clear();
+    isCurrentSelected = false;
+    currentSelected = null;
+    notifyListeners();
+  }
+
   // Fetch multiple places for a search query
   Future<void> getSuggestions(String query) async {
     final url = Uri.parse('https://nominatim.openstreetmap.org/search?q=$query&format=json&addressdetails=1&limit=50');
