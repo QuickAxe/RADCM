@@ -2,10 +2,13 @@
 #include <TinyGPSPlus.h>
 #include <MPU9250_WE.h>
 #include <SoftwareSerial.h>
-#include <Wire.h>
 #include "utils.h"
 
-
+// ### Blink ledPin n times, rapidly
+// ##### Make sure to set ledPin as output beforehand
+// #### Args:
+// ledPin: The pin number to blink 
+// n: The number of times to blink the led
 void blink(const uint8_t &ledPin, const uint8_t &n)
 {
     for(uint8_t i=0; i<n; i++)
@@ -17,15 +20,13 @@ void blink(const uint8_t &ledPin, const uint8_t &n)
     }
 }
 
-
+// ### Print whatever data the GPS object has currently, 
+// WITHOUT UPDATING IT
+// #### Args: 
+// GpsSerial: The soft serial object used for communicating with the gps
+// gps: The gps object of the tinyGPSPlus library
 void printGPS(SoftwareSerial &GpsSerial, TinyGPSPlus &gps)
-{
-    while(GpsSerial.available() > 0)
-    {
-        gps.encode(GpsSerial.read());
-        // Serial.print(char(GpsSerial.read()));
-    }
-    
+{   
     if(gps.location.isUpdated())
     {
         Serial.print("LAT: ");
@@ -47,11 +48,14 @@ void printGPS(SoftwareSerial &GpsSerial, TinyGPSPlus &gps)
 
 }
 
+// ### Print the current mpu values, 
+// WITHOUT UPDATING IT
+// #### Args: 
+// mpu: the mpu object
+// corrGyrRaw: the raw gyro values
+// aValues: the raw acceleration values in each axis, in m/s^2
 void printMpu(MPU9250_WE &mpu, xyzFloat &corrGyrRaw, xyzFloat &gValue)
 {
-    corrGyrRaw = mpu.getCorrectedGyrRawValues();
-    gValue = mpu.getGValues();
-  
     Serial.println("m/s values (x,y,z):");
     Serial.print(gValue.x * 9.806);
     Serial.print("   ");
@@ -66,4 +70,43 @@ void printMpu(MPU9250_WE &mpu, xyzFloat &corrGyrRaw, xyzFloat &gValue)
     Serial.print("   ");
     Serial.println(corrGyrRaw.z);
 
+}
+
+// ### update the gps object to the current values
+// #### Args: 
+// GpsSerial: The soft serial object used for communicating with the gps
+// gps: The gps object of the tinyGPSPlus library
+void updateGPS(SoftwareSerial &GpsSerial, TinyGPSPlus &gps)
+{
+    while(GpsSerial.available() > 0)
+    {
+        gps.encode(GpsSerial.read());
+    }
+}
+
+// ### Update the mpu values to the current values
+// #### Args: 
+// mpu: the mpu object
+// corrGyrRaw: the raw gyro values
+// aValues: the raw acceleration values in each axis, in m/s^2
+void updateMpu(MPU9250_WE &mpu, xyzFloat &corrGyrRaw, xyzFloat &aValue)
+{
+    corrGyrRaw = mpu.getCorrectedGyrRawValues();
+    aValue = mpu.getGValues();
+    
+    aValue.x *= 9.806;
+    aValue.y *= 9.806;
+    aValue.z *= 9.806;
+}
+
+// ### Checks if the current contents of the buffer have an anomaly or not
+// #### Args: 
+// accWindow: The datastructure used to store the sliding window over the accelerometer data
+// THRESHOLD: The threshold used for the Z Diff algorithm
+bool isAnomaly(const std::vector <xyzFloat> &accWindow, const uint8_t &THRESHOLD)
+{
+    if (abs(accWindow[103].z - accWindow[97].z) >= THRESHOLD)
+        return true;
+    else 
+        return false;
 }
