@@ -1,5 +1,7 @@
+import 'package:admin_app/components/restart_app.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -32,7 +34,12 @@ class AppDrawer extends StatelessWidget {
           ListTile(
             leading: const Icon(LucideIcons.logOut),
             title: const Text('Logout'),
-            onTap: () {},
+            onTap: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.clear();  // Removes all keys and values
+
+              RestartWidget.restartApp(context);
+            },
           ),
         ],
       ),

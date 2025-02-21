@@ -17,6 +17,8 @@ import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'components/restart_app.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // This allows flutter_map caching
@@ -28,16 +30,16 @@ Future<void> main() async {
   String? accessToken = prefs.getString("accessToken");
 
   runApp(
-    // registering providers here
-    MultiProvider(
-      providers: [
-        // permissions provider to handle permissions (location for now)
-        ChangeNotifierProvider(create: (context) => Permissions()),
-        ChangeNotifierProvider(create: (context) => Search()),
-        ChangeNotifierProvider(create: (context) => UserSettingsProvider()),
-        ChangeNotifierProvider(create: (context) => MapRouteProvider()),
-      ],
-      child: MyApp(accessToken: accessToken),
+    RestartWidget(  // Wrap the entire app inside RestartWidget
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (context) => Permissions()),
+          ChangeNotifierProvider(create: (context) => Search()),
+          ChangeNotifierProvider(create: (context) => UserSettingsProvider()),
+          ChangeNotifierProvider(create: (context) => MapRouteProvider()),
+        ],
+        child: MyApp(accessToken: accessToken),
+      ),
     ),
   );
 }
