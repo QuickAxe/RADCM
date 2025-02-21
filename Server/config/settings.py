@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +30,7 @@ SECRET_KEY = 'django-insecure-g@33)mzroe##c@eaed%@6vrn)=)0u@78w6=#9@7hw9!0e-r@)*
 DEBUG = True
 
 # allow the fluuter app to access the local server 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', os.environ.get('IP_ADDRESS')]
 
 # Application definition
 
