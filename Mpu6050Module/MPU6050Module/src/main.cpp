@@ -4,8 +4,9 @@
 #include <Wire.h>
 #include <MPU9250_WE.h>
 
+#include "utils.h"
+
 #define IMU_ADDRESS 0x68    //Change to the address of the IMU
-#define PERFORM_CALIBRATION //Comment out this line to skip calibration at start
 
 #define i2cSDA 4
 #define i2cSCL 5
@@ -28,121 +29,8 @@ xyzFloat gValue;
 TinyGPSPlus gps;
 SoftwareSerial GpsSerial( RX, TX);
 
-// ================================================================= Utility Functions ============================================================================
-void blink(uint8_t n)
-{
-    for(uint8_t i=0; i<n; i++)
-    {
-        digitalWrite(ledPin, HIGH);
-        delay(100);
-        digitalWrite(ledPin, LOW);
-        delay(50);
-    }
-}
-
-void displayInfo()
-{
-  Serial.print(F("Location: ")); 
-  if (gps.location.isValid())
-  {
-    Serial.print(gps.location.lat(), 6);
-    Serial.print(F(","));
-    Serial.print(gps.location.lng(), 6);
-  }
-  else
-  {
-    Serial.print(F("INVALID"));
-  }
-
-  Serial.print(F("  Date/Time: "));
-  if (gps.date.isValid())
-  {
-    Serial.print(gps.date.month());
-    Serial.print(F("/"));
-    Serial.print(gps.date.day());
-    Serial.print(F("/"));
-    Serial.print(gps.date.year());
-  }
-  else
-  {
-    Serial.print(F("INVALID"));
-  }
-
-  Serial.print(F(" "));
-  if (gps.time.isValid())
-  {
-    if (gps.time.hour() < 10) Serial.print(F("0"));
-    Serial.print(gps.time.hour());
-    Serial.print(F(":"));
-    if (gps.time.minute() < 10) Serial.print(F("0"));
-    Serial.print(gps.time.minute());
-    Serial.print(F(":"));
-    if (gps.time.second() < 10) Serial.print(F("0"));
-    Serial.print(gps.time.second());
-    Serial.print(F("."));
-    if (gps.time.centisecond() < 10) Serial.print(F("0"));
-    Serial.print(gps.time.centisecond());
-  }
-  else
-  {
-    Serial.print(F("INVALID"));
-  }
-
-  Serial.println();
-}
-
-void printGPS()
-{
-    while(GpsSerial.available() > 0)
-    {
-        gps.encode(GpsSerial.read());
-        // Serial.print(char(GpsSerial.read()));
-    }
-    
-    if(gps.location.isUpdated())
-    {
-        Serial.print("LAT: ");
-        Serial.println(gps.location.lat(), 6);
-        Serial.print("LONG: "); 
-        Serial.println(gps.location.lng(), 6);
-        Serial.print("SPEED (km/h) = "); 
-        Serial.println(gps.speed.kmph()); 
-        Serial.print("ALT (min)= "); 
-        Serial.println(gps.altitude.meters());
-        Serial.print("HDOP = "); 
-        Serial.println(gps.hdop.value() / 100.0); 
-        Serial.print("Satellites = "); 
-        Serial.println(gps.satellites.value()); 
-        Serial.print("Time in UTC: ");
-        Serial.println(String(gps.date.year()) + "/" + String(gps.date.month()) + "/" + String(gps.date.day()) + "," + String(gps.time.hour()) + ":" + String(gps.time.minute()) + ":" + String(gps.time.second()));
-        Serial.println("");
-    }
-
-}
-
-void printMpu()
-{
-    corrGyrRaw = mpu.getCorrectedGyrRawValues();
-    gValue = mpu.getGValues();
-  
-    Serial.println("m/s values (x,y,z):");
-    Serial.print(gValue.x * 9.806);
-    Serial.print("   ");
-    Serial.print(gValue.y * 9.806);
-    Serial.print("   ");
-    Serial.println(gValue.z * 9.806);
- 
-    Serial.println("Gyroscope raw values with offset:");
-    Serial.print(corrGyrRaw.x);
-    Serial.print("   ");
-    Serial.print(corrGyrRaw.y);
-    Serial.print("   ");
-    Serial.println(corrGyrRaw.z);
-
-}
 
 // ============================================================================ Setup ==================================================================================
-
 void setup() 
 {
     Wire.begin(i2cSDA, i2cSCL);
@@ -162,7 +50,7 @@ void setup()
         Serial.println("Error initialising MPU");
         // while(true)
         {
-            blink(6);
+            blink(ledPin, 6);
             delay(500);
         }
     }
@@ -200,7 +88,6 @@ void loop()
         Serial.println(".........................................................heartbeat...............................................................");
     }
 
-    printGPS();
-    printMpu();
-
+    printGPS(GpsSerial, gps);
+    printMpu(mpu, corrGyrRaw, gValue);
 }
