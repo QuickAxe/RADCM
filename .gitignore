@@ -8,6 +8,7 @@ Server/TilingServer/*.poly
 Server/SensorModel/model_visualization*
 
 # Django #
+**/.env
 *.log
 *.pot
 *.pyc

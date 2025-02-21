@@ -55,4 +55,6 @@ class AnomalyService {
         location: const LatLng(15.424183719267909, 73.97882496054558),
         category: "Pothole"),
   ];
+
+
 }

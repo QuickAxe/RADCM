@@ -146,7 +146,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             rotate: true,
                             point: userLocation,
                             child: mapMarkerIcon("assets/icons/ic_user.png",
-                                Theme.of(context).colorScheme.outlineVariant)),
+                                Theme.of(context).colorScheme.outlineVariant)
+                        ),
                       ],
                     ),
                   const AnomalyMarkerLayer(),

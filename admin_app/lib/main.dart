@@ -13,6 +13,7 @@ import 'package:admin_app/services/providers/user_settings.dart';
 import 'package:admin_app/theme/theme.dart';
 import 'package:admin_app/theme/util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,6 +22,10 @@ import 'components/restart_app.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // to use .env
+  await dotenv.load(fileName: ".env");
+
   // This allows flutter_map caching
   await FMTCObjectBoxBackend().initialise();
   // mapStore is a specialized container that is used to store Tiles (caching)

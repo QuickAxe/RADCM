@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer' as dev;
 
 import 'package:admin_app/pages/home_screen.dart';
+import 'package:admin_app/services/api%20services/authority_service.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
@@ -9,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../components/my_textfield.dart';
 import '../components/sign_in_button.dart';
+import '../services/api services/dio_client_service.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
@@ -38,27 +40,11 @@ class LoginPage extends StatelessWidget {
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     } else {
-      final url = Uri.parse('http://<your_ip>:8000/api/auth/token/');
+      final authService = AuthorityService(DioClient());
+      bool isAuthenticated = await authService.login(usernameController.text.toString(), passwordController.text.toString());
 
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "username": usernameController.text.toString(),
-          "password": passwordController.text.toString()
-        }),
-      );
 
-      if (response.statusCode == 200) {
-        // decode the json resp
-        final responseData = jsonDecode(response.body);
-
-        // save tokens
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString("accessToken", responseData['access'].toString());
-        await prefs.setString(
-            "refreshToken", responseData['refresh'].toString());
-
+      if (isAuthenticated) {
         Fluttertoast.showToast(
           msg: "Starting App",
           toastLength: Toast.LENGTH_LONG,
