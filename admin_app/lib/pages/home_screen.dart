@@ -1,3 +1,5 @@
+import 'package:admin_app/components/OSM_Attribution.dart';
+import 'package:admin_app/components/UI/blur_with_loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
@@ -155,6 +157,11 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   const AnomalyMarkerLayer(),
+                  const Positioned(
+                    left: 200,
+                    bottom: 200,
+                    child: Attribution(),
+                  ),
                 ],
               );
             },
@@ -165,9 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
               return Consumer<Search>(
                 builder: (context, search, child) {
                   if (permissions.loadingLocation) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
+                    return const BlurWithLoading();
                   } else if (search.isCurrentSelected) {
                     return BottomPanelNav(mapController: _mapController);
                   } else {

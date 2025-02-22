@@ -1,7 +1,7 @@
 // used prefix here to avoid conflict between android inbuilt NavigationMode
-import 'dart:ui';
-
-import 'package:admin_app/components/routing/navigation_mode.dart' as prefix;
+import 'package:admin_app/components/UI/blur_with_loading.dart';
+import 'package:admin_app/components/routing/bottom_panel_navigation_mode.dart'
+    as prefix;
 import 'package:admin_app/components/routing/route_selection_mode.dart';
 import 'package:admin_app/utils/fix_anomaly_dialog.dart';
 import 'package:flutter/material.dart' hide Step;
@@ -43,6 +43,7 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
           extendBodyBehindAppBar: true,
           appBar: AppBar(
             backgroundColor: Colors.transparent,
+            scrolledUnderElevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () {
@@ -111,20 +112,7 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
                         mapController: _mapController,
                         mapProvider: mapProvider),
               ),
-              if (mapProvider.isLoading)
-                Positioned.fill(
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                    child: Container(
-                      color: Colors.black.withOpacity(0.3),
-                    ),
-                  ),
-                ),
-              if (mapProvider.isLoading)
-                const Center(
-                  child:
-                      CircularProgressIndicator(), // Default loading animation
-                ),
+              if (mapProvider.isLoading) const BlurWithLoading(),
             ],
           ),
         );

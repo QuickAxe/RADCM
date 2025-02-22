@@ -35,7 +35,8 @@ Future<void> main() async {
   String? isDev = prefs.getString("isDev");
 
   runApp(
-    RestartWidget(  // Wrap the entire app inside RestartWidget
+    RestartWidget(
+      // Wrap the entire app inside RestartWidget
       child: MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (context) => Permissions()),

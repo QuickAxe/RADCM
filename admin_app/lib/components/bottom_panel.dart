@@ -34,7 +34,7 @@ class _BottomPanelState extends State<BottomPanel> {
       maxHeight: 700,
       panel: Column(
         children: [
-          // Drag Indicator
+          /// Drag Indicator
           Padding(
             padding: const EdgeInsets.all(10.0),
             child: Container(
@@ -46,14 +46,16 @@ class _BottomPanelState extends State<BottomPanel> {
               ),
             ),
           ),
-          // Search Bar
+
+          /// Search Bar
           Padding(
             padding: const EdgeInsets.fromLTRB(10.0, 8.0, 10.0, 10.0),
             child: SearchPlace(
               mapController: widget.mapController,
             ),
           ),
-          // Choice Chips for filtering anomalies
+
+          /// Choice Chips for filtering anomalies
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 5.0),
             child: SizedBox(

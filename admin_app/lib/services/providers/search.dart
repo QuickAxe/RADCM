@@ -1,6 +1,7 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class Search extends ChangeNotifier {
   List<dynamic> searchSuggestions = [];
@@ -15,7 +16,7 @@ class Search extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Fetch multiple places for a search query
+  /// Fetch multiple places for a search query
   Future<void> getSuggestions(String query) async {
     loadingResults = true;
     notifyListeners();
@@ -32,6 +33,7 @@ class Search extends ChangeNotifier {
       loadingResults = false;
       notifyListeners();
       throw Exception('Failed to fetch search results');
+      // TODO: Handle this gracefully to show an error on the screen
     }
   }
 

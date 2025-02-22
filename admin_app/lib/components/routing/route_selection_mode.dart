@@ -1,10 +1,10 @@
+import 'package:admin_app/components/OSM_Attribution.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/providers/anomaly_marker_layer.dart';
 import '../../services/providers/route_provider.dart';
@@ -145,18 +145,10 @@ class RouteSelectionMode extends StatelessWidget {
             ],
           ),
           const AnomalyMarkerLayer(),
-          Positioned(
+          const Positioned(
             left: 200,
             bottom: 200,
-            child: RichAttributionWidget(
-              attributions: [
-                TextSourceAttribution(
-                  'OpenStreetMap contributors',
-                  onTap: () => launchUrl(
-                      Uri.parse('https://openstreetmap.org/copyright')),
-                ),
-              ],
-            ),
+            child: Attribution(),
           ),
         ],
       ),

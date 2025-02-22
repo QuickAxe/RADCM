@@ -1,4 +1,5 @@
 import 'package:admin_app/components/transport_profile_selector_row.dart';
+import 'package:admin_app/pages/map_route_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:provider/provider.dart';
@@ -34,45 +35,63 @@ class _BottomPanelState extends State<BottomPanelNav> {
         topRight: Radius.circular(25.0),
       ),
       minHeight: 250,
-      maxHeight: 250,
+      maxHeight: 400,
+      // NOTE: Change the maxHeight if content overflows (Alternatively, adjust the text style)
       panel: Column(
         children: [
           const SizedBox(
             height: 25,
           ),
+
+          /// Name and address of the currently selected place
           if (searchProvider.isCurrentSelected)
-            // Currently selected place
             Column(
               children: [
                 ListTile(
                   leading: Icon(Icons.location_on_rounded,
-                      color: colorScheme.primary), // Themed icon color
+                      color: colorScheme.primary),
                   title: Text(
-                    searchProvider.currentSelected['name'],
+                    searchProvider.currentSelected['name'] ??
+                        'Unknown Location',
                     style: theme.textTheme.titleLarge
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        capitalize(
-                            searchProvider.currentSelected['type'].toString()),
-                        style: TextStyle(color: colorScheme.onSurfaceVariant),
-                      ),
-                      Text(
-                        "${searchProvider.currentSelected['address']['road']}, ${searchProvider.currentSelected['address']['suburb']}, ${searchProvider.currentSelected['address']['postcode']}",
-                        style: TextStyle(
-                            fontSize: 12, color: colorScheme.onSurfaceVariant),
-                      ),
+                      if (searchProvider.currentSelected['type'] != null)
+                        Text(
+                          capitalize(searchProvider.currentSelected['type']
+                              .toString()),
+                          style: TextStyle(color: colorScheme.onSurfaceVariant),
+                        ),
+                      if (searchProvider.currentSelected['address'] != null)
+                        Text(
+                          [
+                            searchProvider.currentSelected['address']
+                                    ?['road'] ??
+                                '',
+                            searchProvider.currentSelected['address']
+                                    ?['suburb'] ??
+                                '',
+                            searchProvider.currentSelected['address']
+                                    ?['postcode'] ??
+                                ''
+                          ].where((element) => element.isNotEmpty).join(', '),
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: colorScheme.onSurfaceVariant),
+                        ),
                     ],
                   ),
                 ),
               ],
             ),
-          // Transport options
+
+          /// Transport options
           const TransportProfileSelectorRow(),
-          // CTA -> Go to
+
+          /// CTA -> Go to
           Padding(
             padding: const EdgeInsets.fromLTRB(10.0, 8.0, 10.0, 10.0),
             child: ElevatedButton(
@@ -80,7 +99,15 @@ class _BottomPanelState extends State<BottomPanelNav> {
                 backgroundColor: colorScheme.primary,
                 minimumSize: const Size.fromHeight(40),
               ),
-              onPressed: () => Navigator.pushNamed(context, '/map_route'),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MapRouteScreen(
+                    endLat: double.parse(searchProvider.currentSelected['lat']),
+                    endLng: double.parse(searchProvider.currentSelected['lon']),
+                  ),
+                ),
+              ),
               child: Text(
                 "Get Routes",
                 style: theme.textTheme.labelLarge?.copyWith(

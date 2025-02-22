@@ -20,13 +20,14 @@ class SearchPlace extends StatefulWidget {
 class _SearchPlaceState extends State<SearchPlace> {
   late SearchController _searchController;
 
+  /// Initializes the Search Controller
   @override
   void initState() {
     super.initState();
     _searchController = SearchController();
   }
 
-  // returns a single suggestion ListTile
+  /// Returns a single suggestion ListTile
   ListTile buildPlaceItem(dynamic place, SearchController controller) {
     return ListTile(
       title: Text(
@@ -36,19 +37,23 @@ class _SearchPlaceState extends State<SearchPlace> {
       subtitle: Text(
         place['address']?['country'] ?? 'Address not available',
       ),
-      leading: const Icon(Icons.location_on, color: Colors.blue),
+      leading: Icon(
+        Icons.location_on_rounded,
+        color: Theme.of(context).colorScheme.primary,
+      ),
       onTap: () {
         userTapsSearchResult(place, controller);
       },
     );
   }
 
+  /// Callback when user taps a search result
   void userTapsSearchResult(dynamic place, SearchController controller) {
     dev.log(place.toString());
 
     Provider.of<Search>(context, listen: false).performSelection(place);
 
-    // bounding box
+    // Fits the currently selected place on the screen
     LatLngBounds bounds = LatLngBounds(
       LatLng(double.parse(place['boundingbox'][0]),
           double.parse(place['boundingbox'][2])),
