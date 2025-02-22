@@ -7,4 +7,10 @@ void printGPS(SoftwareSerial &GpsSerial, TinyGPSPlus &gps);
 void updateMpu(MPU9250_WE &mpu, xyzFloat &corrGyrRaw, xyzFloat &gValue);
 void updateGPS(SoftwareSerial &GpsSerial, TinyGPSPlus &gps);
 
-bool isAnomaly(const std::vector <xyzFloat> &accWindow, const uint8_t &);
+bool isAnomaly(const std::vector<xyzFloat> &accWindow, const uint8_t &);
+
+struct gpsLocation
+{
+    double lat;
+    double lng;
+};
