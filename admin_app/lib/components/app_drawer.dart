@@ -1,4 +1,5 @@
 import 'package:admin_app/components/restart_app.dart';
+import 'package:admin_app/services/api%20services/dio_client_service.dart';
 import 'package:admin_app/services/providers/permissions.dart';
 import 'package:admin_app/services/providers/route_provider.dart';
 import 'package:admin_app/services/providers/search.dart';
@@ -48,6 +49,9 @@ class AppDrawer extends StatelessWidget {
               Provider.of<MapRouteProvider>(context, listen: false).logout();
               Provider.of<Search>(context, listen: false).logout();
               Provider.of<UserSettingsProvider>(context, listen: false).logout();
+
+              // clear keys
+              DioClient().logout();
 
               RestartWidget.restartApp(context);
             },

@@ -25,10 +25,9 @@ class LoginPage extends StatelessWidget {
     // bypass for dev (backend apis wont be accessible)
     if (usernameController.text.toString() == "dev" &&
         passwordController.text.toString() == "dev") {
-      // save tokens (bypass)
+      // save token (bypass)
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString("accessToken", "bypass");
-      await prefs.setString("refreshToken", "bypass");
+      await prefs.setString("isDev", "yes");
 
       Fluttertoast.showToast(
         msg: "Starting App in dev mode",

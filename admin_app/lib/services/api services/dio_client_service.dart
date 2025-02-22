@@ -7,6 +7,10 @@ class DioClient {
   final storage = const FlutterSecureStorage();
   static String baseUrl = "http://${dotenv.env['IP_ADDRESS']}:8000/api/auth/";
 
+  void logout() {
+    storage.deleteAll();
+  }
+
   DioClient() {
     dio.options.baseUrl = baseUrl;
 
