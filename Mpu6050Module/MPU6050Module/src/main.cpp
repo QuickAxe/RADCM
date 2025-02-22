@@ -9,7 +9,7 @@
 
 // ==================================================================== Params ========================================================================
 
-#define IMU_ADDRESS 0x68 // Change to the address of the IMU
+#define IMU_ADDRESS 0x68
 
 // I2C pins for the mpu6500 Module
 #define i2cSDA 4
@@ -19,7 +19,6 @@
 #define RX 14
 #define TX 12
 
-//! configure this later
 // Status LED pin
 #define ledPin 2
 
@@ -55,6 +54,7 @@ xyzFloat accValues;
 std::vector<xyzFloat> gyroWindow(200);
 std::vector<xyzFloat> accWindow(200);
 
+// ! I'll change this later to write to the file system instead, as a csv
 std::vector<std::vector<xyzFloat>> gyroBuffer(POTENTIAL_ANOMALY_BUFFER_SIZE, std::vector<xyzFloat>(200));
 std::vector<std::vector<xyzFloat>> accBuffer(POTENTIAL_ANOMALY_BUFFER_SIZE, std::vector<xyzFloat>(200));
 std::vector<gpsLocation> gpsBuffer(POTENTIAL_ANOMALY_BUFFER_SIZE);
@@ -74,17 +74,17 @@ bool heartBeat = false;
 void setup()
 {
 
-    // !---------------------------------------------------------- Memory allocation Test, REMOVE LATER --------------------------------------------------
-    // currently each anomaly needs 4808 Bytes of memory
-    // This esp8266 has about 4,77,889 Bytes of usable flash memory.. hmm
-    // that means we could store about 99 anomalies in memory
-    // ! OH wait I forgot to acount for the wifi libraries that we'll need at some point.... ugh
-    // on further research I found out that it can have a max flash size of 512KB.... ugh
-    // which means max flash size = 5,24,288 B ... uhh... WHAT?
-    // ! mahu has shown me the way
-    // correct max number of anomalies that can be stored, using the max possible flash size (for my chip) of 512KB:
-    // new max number of anomalies that can be stored:
-    // 109 anomalies approx... hmm
+    // todo ---------------------------------------------------------- Memory allocation Test, REMOVE LATER --------------------------------------------------
+    //  currently each anomaly needs 4808 Bytes of memory
+    //  This esp8266 has about 4,77,889 Bytes of usable flash memory.. hmm
+    //  that means we could store about 99 anomalies in memory
+    //  OH wait I forgot to acount for the wifi libraries that we'll need at some point.... ugh
+    //  on further research I found out that it can have a max flash size of 512KB.... ugh
+    //  which means max flash size = 5,24,288 B ... uhh... WHAT?
+    //  ! mahu has shown me the way
+    //  correct max number of anomalies that can be stored, using the max possible flash size (for my chip) of 512KB:
+    //  new max number of anomalies that can be stored:
+    //  109 anomalies approx... hmm
 
     for (uint8_t i = 0; i < POTENTIAL_ANOMALY_BUFFER_SIZE; i++)
     {
@@ -95,7 +95,7 @@ void setup()
     gyroWindow.reserve(200);
     accWindow.reserve(200);
     gpsBuffer.reserve(POTENTIAL_ANOMALY_BUFFER_SIZE);
-    // !---------------------------------------------------------------------------------------------------------------------------------------------------
+    // todod ---------------------------------------------------------------------------------------------------------------------------------------------------
 
     Wire.begin(i2cSDA, i2cSCL);
     Serial.begin(19200);
@@ -112,11 +112,9 @@ void setup()
     else
     {
         Serial.println("Error initialising MPU");
-        // while(true)
-        {
-            blink(ledPin, 9);
-            delay(500);
-        }
+
+        blink(ledPin, 9);
+        delay(500);
     }
 
     Serial.println("Calibrating MPU, keep it level and DONT MOVE IT");
