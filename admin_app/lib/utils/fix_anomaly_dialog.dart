@@ -3,7 +3,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../services/api services/authority_service.dart';
+import '../services/api services/dio_client_service.dart';
 import '../services/providers/permissions.dart';
 
 // util to show the dialog box and fix anomaly
@@ -57,7 +60,7 @@ Future<void> showAnomalyDialog(
                   Expanded(
                     child: ElevatedButton(
                       onPressed: (checkboxOne && checkboxTwo)
-                          ? () {
+                          ? () async {
                               Position? pos = Provider.of<Permissions>(context,
                                       listen: false)
                                   .position;
@@ -76,16 +79,44 @@ Future<void> showAnomalyDialog(
                                   msg: "Anomaly is more than 250m away!!",
                                   toastLength: Toast.LENGTH_LONG,
                                 );
+                                Navigator.pop(context);
                               } else {
-                                Fluttertoast.showToast(
-                                  msg: "Anomaly Fixed!",
-                                  toastLength: Toast.LENGTH_LONG,
-                                );
+                                final prefs =
+                                    await SharedPreferences.getInstance();
+                                print(prefs.getString("--------------------------------------------------"));
 
-                                // perform map updates here
+                                print(prefs.getString("isDev"));
+                                print(prefs.getString("isUser"));
+                                if (prefs.getString("isDev") == "true") {
+                                  Fluttertoast.showToast(
+                                    msg: "No server, brother. Don't be silly!",
+                                    toastLength: Toast.LENGTH_LONG,
+                                  );
+                                  Navigator.pop(context);
+                                  Navigator.pop(context);
+                                } else {
+                                  // perform anomaly fix
+                                  final authService =
+                                      AuthorityService(DioClient());
+                                  bool isAuthenticated =
+                                      await authService.fixAnomaly(lat, lon);
 
-                                Navigator.pop(context);
-                                Navigator.pop(context);
+                                  if (isAuthenticated) {
+                                    Fluttertoast.showToast(
+                                      msg: "Anomaly Fixed!",
+                                      toastLength: Toast.LENGTH_LONG,
+                                    );
+
+                                    Navigator.pop(context);
+                                    Navigator.pop(context);
+                                  } else {
+                                    Fluttertoast.showToast(
+                                      msg:
+                                          "Internal issue, please try again later",
+                                      toastLength: Toast.LENGTH_LONG,
+                                    );
+                                  }
+                                }
                               }
                             }
                           : null,

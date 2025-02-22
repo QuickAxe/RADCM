@@ -59,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
       });
 
       if (isAuthenticated) {
-        await prefs.setString("isDev", "true");
+        await prefs.setString("isUser", "true");
         Fluttertoast.showToast(
           msg: "Starting App",
           toastLength: Toast.LENGTH_LONG,
