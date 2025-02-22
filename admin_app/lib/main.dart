@@ -6,6 +6,7 @@ import 'package:admin_app/pages/settings_screens/navigation_preferences.dart';
 import 'package:admin_app/pages/settings_screens/routines.dart';
 import 'package:admin_app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:admin_app/pages/settings_screens/voice_engine.dart';
+import 'package:admin_app/services/api%20services/dio_client_service.dart';
 import 'package:admin_app/services/providers/permissions.dart';
 import 'package:admin_app/services/providers/route_provider.dart';
 import 'package:admin_app/services/providers/search.dart';
@@ -18,41 +19,44 @@ import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'components/restart_app.dart';
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // to use .env
+  // Load .env
   await dotenv.load(fileName: ".env");
 
-  // This allows flutter_map caching
+  // Flutter Map Caching
   await FMTCObjectBoxBackend().initialise();
-  // mapStore is a specialized container that is used to store Tiles (caching)
   await const FMTCStore('mapStore').manage.create();
 
-  final prefs = await SharedPreferences.getInstance();
-  String? isDev = prefs.getString("isDev");
+  Future<Map<String, String?>> loadPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    return {
+      "isDev": prefs.getString("isDev"),
+      "isUser": prefs.getString("isUser"),
+    };
+  }
+
+  Map<String, String?> currentPrefs = await loadPrefs();
 
   runApp(
-    RestartWidget(
-      // Wrap the entire app inside RestartWidget
-      child: MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (context) => Permissions()),
-          ChangeNotifierProvider(create: (context) => Search()),
-          ChangeNotifierProvider(create: (context) => UserSettingsProvider()),
-          ChangeNotifierProvider(create: (context) => MapRouteProvider()),
-        ],
-        child: MyApp(isDev: isDev),
-      ),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => Permissions()),
+        ChangeNotifierProvider(create: (context) => Search()),
+        ChangeNotifierProvider(create: (context) => UserSettingsProvider()),
+        ChangeNotifierProvider(create: (context) => MapRouteProvider()),
+      ],
+      child:
+          MyApp(isDev: currentPrefs["isDev"], isUser: currentPrefs["isUser"]),
     ),
   );
 }
 
 class MyApp extends StatefulWidget {
-  final String? isDev;
-  const MyApp({super.key, required this.isDev});
+  final String? isDev, isUser;
+
+  const MyApp({super.key, required this.isDev, required this.isUser});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -69,7 +73,9 @@ class _MyAppState extends State<MyApp> {
         theme: theme.light(),
         darkTheme: theme.dark(),
         debugShowCheckedModeBanner: false,
-        home: widget.isDev == null ? LoginPage() : const HomeScreen(),
+        home: widget.isDev == null && widget.isUser == null
+            ? LoginPage()
+            : const HomeScreen(),
         routes: {
           '/login': (context) => LoginPage(),
           '/home': (context) => const HomeScreen(),
