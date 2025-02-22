@@ -1,7 +1,9 @@
 import 'dart:developer' as dev;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../services/providers/search.dart';
@@ -42,35 +44,56 @@ class _SearchPlaceState extends State<SearchPlace> {
   }
 
   void userTapsSearchResult(dynamic place, SearchController controller) {
-    LatLng loc = LatLng(double.parse(place['lat']), double.parse(place['lon']));
+    dev.log(place.toString());
+
     Provider.of<Search>(context, listen: false).performSelection(place);
-    widget.mapController.move(loc, widget.mapController.camera.zoom);
+
+    // bounding box
+    LatLngBounds bounds = LatLngBounds(
+      LatLng(double.parse(place['boundingbox'][0]),
+          double.parse(place['boundingbox'][2])),
+      LatLng(double.parse(place['boundingbox'][1]),
+          double.parse(place['boundingbox'][3])),
+    );
+
+    widget.mapController.fitCamera(
+        CameraFit.bounds(bounds: bounds, padding: const EdgeInsets.all(50.0)));
+    widget.mapController.rotate(0);
     controller.closeView(place['display_name']);
   }
 
   @override
   Widget build(BuildContext context) {
+    // hello darkness
     return Consumer<Search>(builder: (context, search, child) {
       return SearchAnchor(
         builder: (BuildContext context, SearchController controller) {
           _searchController = controller;
-          return SearchBar(
-            controller: controller,
-            onSubmitted: (_) async {
-              await search.getSuggestions(controller.text.toString());
-              controller.openView();
-            },
-            trailing: [
-              IconButton(
-                  onPressed: () async {
+          return search.loadingResults
+              ? Center(
+                  child: LoadingAnimationWidget.waveDots(
+                    color: Theme.of(context).hintColor,
+                    size: 65,
+                  ),
+                )
+              : SearchBar(
+                  controller: controller,
+                  onSubmitted: (_) async {
                     await search.getSuggestions(controller.text.toString());
                     controller.openView();
                   },
-                  icon: const Icon(Icons.search)),
-            ],
-            hintText: "Search Map",
-            elevation: WidgetStateProperty.all(0), // Remove shadow
-          );
+                  trailing: [
+                    IconButton(
+                        onPressed: () async {
+                          await search
+                              .getSuggestions(controller.text.toString());
+                          controller.openView();
+                        },
+                        icon: const Icon(Icons.search)),
+                  ],
+                  hintText: "Search Map",
+                  elevation: WidgetStateProperty.all(0), // Remove shadow
+                );
         },
         suggestionsBuilder:
             (BuildContext context, SearchController controller) {

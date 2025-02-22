@@ -32,7 +32,7 @@ Future<void> main() async {
   await const FMTCStore('mapStore').manage.create();
 
   final prefs = await SharedPreferences.getInstance();
-  String? accessToken = prefs.getString("accessToken");
+  String? isDev = prefs.getString("isDev");
 
   runApp(
     RestartWidget(  // Wrap the entire app inside RestartWidget
@@ -43,15 +43,15 @@ Future<void> main() async {
           ChangeNotifierProvider(create: (context) => UserSettingsProvider()),
           ChangeNotifierProvider(create: (context) => MapRouteProvider()),
         ],
-        child: MyApp(accessToken: accessToken),
+        child: MyApp(isDev: isDev),
       ),
     ),
   );
 }
 
 class MyApp extends StatefulWidget {
-  final String? accessToken;
-  const MyApp({super.key, required this.accessToken});
+  final String? isDev;
+  const MyApp({super.key, required this.isDev});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -68,7 +68,7 @@ class _MyAppState extends State<MyApp> {
         theme: theme.light(),
         darkTheme: theme.dark(),
         debugShowCheckedModeBanner: false,
-        home: widget.accessToken == null ? LoginPage() : const HomeScreen(),
+        home: widget.isDev == null ? LoginPage() : const HomeScreen(),
         routes: {
           '/login': (context) => LoginPage(),
           '/home': (context) => const HomeScreen(),

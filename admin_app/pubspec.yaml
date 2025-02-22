@@ -68,6 +68,8 @@ dependencies:
   dio:
   flutter_secure_storage:
   flutter_dotenv:
+  loading_animation_widget:
+
 
 
 dev_dependencies:

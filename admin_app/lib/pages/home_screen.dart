@@ -160,13 +160,23 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
 
-          Consumer<Search>(builder: (context, search, child) {
-            if (search.isCurrentSelected) {
-              return BottomPanelNav(mapController: _mapController);
-            } else {
-              return BottomPanel(mapController: _mapController);
-            }
-          })
+          Consumer<Permissions>(
+            builder: (context, permissions, child) {
+              return Consumer<Search>(
+                builder: (context, search, child) {
+                  if (permissions.loadingLocation) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  } else if (search.isCurrentSelected) {
+                    return BottomPanelNav(mapController: _mapController);
+                  } else {
+                    return BottomPanel(mapController: _mapController);
+                  }
+                },
+              );
+            },
+          )
         ],
       ),
     );
