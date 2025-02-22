@@ -34,7 +34,7 @@ class _BottomPanelState extends State<BottomPanelNav> {
         topRight: Radius.circular(25.0),
       ),
       minHeight: 250,
-      maxHeight: 250,
+      maxHeight: 400,
       panel: Column(
         children: [
           const SizedBox(
@@ -46,25 +46,39 @@ class _BottomPanelState extends State<BottomPanelNav> {
               children: [
                 ListTile(
                   leading: Icon(Icons.location_on_rounded,
-                      color: colorScheme.primary), // Themed icon color
+                      color: colorScheme.primary),
                   title: Text(
-                    searchProvider.currentSelected['name'],
+                    searchProvider.currentSelected['name'] ??
+                        'Unknown Location',
                     style: theme.textTheme.titleLarge
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        capitalize(
-                            searchProvider.currentSelected['type'].toString()),
-                        style: TextStyle(color: colorScheme.onSurfaceVariant),
-                      ),
-                      Text(
-                        "${searchProvider.currentSelected['address']['road']}, ${searchProvider.currentSelected['address']['suburb']}, ${searchProvider.currentSelected['address']['postcode']}",
-                        style: TextStyle(
-                            fontSize: 12, color: colorScheme.onSurfaceVariant),
-                      ),
+                      if (searchProvider.currentSelected['type'] != null)
+                        Text(
+                          capitalize(searchProvider.currentSelected['type']
+                              .toString()),
+                          style: TextStyle(color: colorScheme.onSurfaceVariant),
+                        ),
+                      if (searchProvider.currentSelected['address'] != null)
+                        Text(
+                          [
+                            searchProvider.currentSelected['address']
+                                    ?['road'] ??
+                                '',
+                            searchProvider.currentSelected['address']
+                                    ?['suburb'] ??
+                                '',
+                            searchProvider.currentSelected['address']
+                                    ?['postcode'] ??
+                                ''
+                          ].where((element) => element.isNotEmpty).join(', '),
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: colorScheme.onSurfaceVariant),
+                        ),
                     ],
                   ),
                 ),

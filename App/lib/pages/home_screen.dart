@@ -1,3 +1,4 @@
+import 'package:app/components/UI/blur_with_loading.dart';
 import 'package:app/components/app_drawer.dart';
 import 'package:app/components/bottom_panel_nav.dart';
 import 'package:app/services/providers/anomaly_marker_layer.dart';
@@ -8,8 +9,8 @@ import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
+import '../components/OSM_Attribution.dart';
 import '../components/bottom_panel.dart';
 import '../services/providers/permissions.dart';
 import '../services/providers/search.dart';
@@ -146,23 +147,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             rotate: true,
                             point: userLocation,
                             child: mapMarkerIcon("assets/icons/ic_user.png",
-                                Theme.of(context).colorScheme.outlineVariant)
-                        ),
+                                Theme.of(context).colorScheme.outlineVariant)),
                       ],
                     ),
                   const AnomalyMarkerLayer(),
-                  Positioned(
+                  const Positioned(
                     left: 200,
-                    bottom: 200,
-                    child: RichAttributionWidget(
-                      attributions: [
-                        TextSourceAttribution(
-                          'OpenStreetMap contributors',
-                          onTap: () => launchUrl(
-                              Uri.parse('https://openstreetmap.org/copyright')),
-                        ),
-                      ],
-                    ),
+                    bottom: 250,
+                    child: Attribution(),
                   ),
                 ],
               );
@@ -173,9 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
               return Consumer<Search>(
                 builder: (context, search, child) {
                   if (permissions.loadingLocation) {
-                    return const Center(
-                      child: CircularProgressIndicator(),
-                    );
+                    return const BlurWithLoading();
                   } else if (search.isCurrentSelected) {
                     return BottomPanelNav(mapController: _mapController);
                   } else {

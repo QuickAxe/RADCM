@@ -30,7 +30,7 @@ class _BottomPanelState extends State<BottomPanel> {
         topLeft: Radius.circular(25.0),
         topRight: Radius.circular(25.0),
       ),
-      minHeight: 200,
+      minHeight: 250,
       maxHeight: 700,
       panel: Column(
         children: [
