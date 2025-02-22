@@ -81,6 +81,10 @@ Future<void> showAnomalyDialog(
                                   msg: "Anomaly Fixed!",
                                   toastLength: Toast.LENGTH_LONG,
                                 );
+
+                                // perform map updates here
+
+                                Navigator.pop(context);
                                 Navigator.pop(context);
                               }
                             }

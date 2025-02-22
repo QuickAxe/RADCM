@@ -12,16 +12,27 @@ import '../components/my_textfield.dart';
 import '../components/sign_in_button.dart';
 import '../services/api services/dio_client_service.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   LoginPage({super.key});
 
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
   // text editing controllers
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
-  late final BuildContext? appContext;
+
+  // late final BuildContext? appContext;
+  bool isLoading = false;
 
   // sign user in method
   Future<void> signUserIn() async {
+    setState(() {
+      isLoading = true;
+    });
+
     // bypass for dev (backend apis wont be accessible)
     if (usernameController.text.toString() == "dev" &&
         passwordController.text.toString() == "dev") {
@@ -35,13 +46,18 @@ class LoginPage extends StatelessWidget {
       );
 
       Navigator.pushReplacement(
-        appContext!,
+        context,
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     } else {
       final authService = AuthorityService(DioClient());
-      bool isAuthenticated = await authService.login(usernameController.text.toString(), passwordController.text.toString());
+      bool isAuthenticated = await authService.login(
+          usernameController.text.toString(),
+          passwordController.text.toString());
 
+      setState(() {
+        isLoading = false;
+      });
 
       if (isAuthenticated) {
         Fluttertoast.showToast(
@@ -49,7 +65,7 @@ class LoginPage extends StatelessWidget {
           toastLength: Toast.LENGTH_LONG,
         );
 
-        Navigator.pushReplacementNamed(appContext!, '/home');
+        Navigator.pushReplacementNamed(context, '/home');
       } else {
         Fluttertoast.showToast(
           msg: "Incorrect Credentials",
@@ -63,87 +79,90 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    appContext = context;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Scaffold(
-      // backgroundColor: Theme.of(context).colorScheme.primaryFixedDim,
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // const SizedBox(height: 50),
-
-              // logo
-              Icon(
-                Icons.lock,
-                size: 100,
-                color: colorScheme.primary,
-              ),
-
-              const SizedBox(height: 50),
-
-              // welcome back, you've been missed!
-              Text(
-                'Welcome back you lil scoundrel!',
-                style: TextStyle(
-                  color: colorScheme.primary,
-                  fontSize: 16,
-                ),
-              ),
-
-              const SizedBox(height: 25),
-
-              // username textfield
-              MyTextField(
-                controller: usernameController,
-                hintText: 'Username',
-                obscureText: false,
-                borderColor: colorScheme.outline,
-                focusedBorderColor: colorScheme.secondary,
-              ),
-
-              const SizedBox(height: 10),
-
-              // password textfield
-              MyTextField(
-                controller: passwordController,
-                hintText: 'Password',
-                obscureText: true,
-                borderColor: colorScheme.outline,
-                focusedBorderColor: colorScheme.secondary,
-              ),
-
-              const SizedBox(height: 10),
-
-              // forgot password?
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 25.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+    return isLoading
+        ? const Center(
+            child: CircularProgressIndicator(),
+          )
+        : Scaffold(
+            // backgroundColor: Theme.of(context).colorScheme.primaryFixedDim,
+            body: SafeArea(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    // const SizedBox(height: 50),
+
+                    // logo
+                    Icon(
+                      Icons.lock,
+                      size: 100,
+                      color: colorScheme.primary,
+                    ),
+
+                    const SizedBox(height: 50),
+
+                    // welcome back, you've been missed!
                     Text(
-                      'Reset Password?',
-                      style: TextStyle(color: colorScheme.secondary),
+                      'Welcome back you lil scoundrel!',
+                      style: TextStyle(
+                        color: colorScheme.primary,
+                        fontSize: 16,
+                      ),
+                    ),
+
+                    const SizedBox(height: 25),
+
+                    // username textfield
+                    MyTextField(
+                      controller: usernameController,
+                      hintText: 'Username',
+                      obscureText: false,
+                      borderColor: colorScheme.outline,
+                      focusedBorderColor: colorScheme.secondary,
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // password textfield
+                    MyTextField(
+                      controller: passwordController,
+                      hintText: 'Password',
+                      obscureText: true,
+                      borderColor: colorScheme.outline,
+                      focusedBorderColor: colorScheme.secondary,
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // forgot password?
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text(
+                            'Reset Password?',
+                            style: TextStyle(color: colorScheme.secondary),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 25),
+
+                    // sign in button
+                    SignInButton(
+                      onTap: signUserIn,
+                      buttonColor: colorScheme.primaryContainer,
+                      textColor: colorScheme.onPrimaryContainer,
                     ),
                   ],
                 ),
               ),
-
-              const SizedBox(height: 25),
-
-              // sign in button
-              SignInButton(
-                onTap: signUserIn,
-                buttonColor: colorScheme.primaryContainer,
-                textColor: colorScheme.onPrimaryContainer,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+            ),
+          );
   }
 }
