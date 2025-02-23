@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer' as dev;
 
+import 'package:app/services/api_service/dio_client_user_service.dart';
 import 'package:flutter_rotation_sensor/flutter_rotation_sensor.dart' as frs;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
@@ -29,7 +30,7 @@ Future<void> theDataCollector() async {
         samplingPeriod: SensorInterval.fastestInterval), // Stream 0
     frs.RotationSensor.orientationStream, // Stream 1
     getLocationUpdates(), // Stream 2
-  ]).throttleTime(const Duration(milliseconds: 20)).listen((data) {
+  ]).throttleTime(const Duration(milliseconds: 20)).listen((data) async {
     // data[i] corresponds to the ith stream
     final accEvent = data[0] as AccelerometerEvent;
     final frsEvent = data[1] as frs.OrientationEvent;
@@ -40,7 +41,7 @@ Future<void> theDataCollector() async {
     if (currentWindow.accReadings.length == 200 &&
         now.difference(lastAnomaly).inMilliseconds >= 5000) {
       bool isAnomaly =
-          checkWindow(currentWindow, probableAnomalyBuffer, locEvent);
+          await checkWindow(currentWindow, probableAnomalyBuffer, locEvent);
       if (isAnomaly) {
         lastAnomaly = DateTime.now();
       }
@@ -98,8 +99,8 @@ List<double> reorientAccelerometer(
 }
 
 // ----------------------------------- Checks if the read block is an anomaly -----------------------------------------
-bool checkWindow(Anomaly currentWindow, List<Anomaly> probableAnomalyBuffer,
-    Position position) {
+Future<bool> checkWindow(Anomaly currentWindow, List<Anomaly> probableAnomalyBuffer,
+    Position position) async {
   double accelLeft = currentWindow.accReadings.elementAt(97)[2];
   double accelRight = currentWindow.accReadings.elementAt(103)[2];
   double threshold = 18.0;
@@ -124,7 +125,7 @@ bool checkWindow(Anomaly currentWindow, List<Anomaly> probableAnomalyBuffer,
   }
 
   if (probableAnomalyBuffer.length == maxBufferSize) {
-    flushBuffer(probableAnomalyBuffer);
+    await flushBuffer(probableAnomalyBuffer);
   }
 
   currentWindow.accReadings.removeFirst();
@@ -132,8 +133,39 @@ bool checkWindow(Anomaly currentWindow, List<Anomaly> probableAnomalyBuffer,
 }
 
 // ----------------------------------- When anomaly buffer has reached its limit and needs to be emptied --------------
-void flushBuffer(List<Anomaly> probableAnomalyBuffer) {
+Future<void> flushBuffer(List<Anomaly> probableAnomalyBuffer) async {
   // send data to backend..
   dev.log("Buffer Flushed.. ");
+
+  dev.log('BEFORE ------------------------> ${DateTime.now()}');
+  formatAndPost(probableAnomalyBuffer);
+  dev.log('AFTER ------------------------> ${DateTime.now()}');
+
   probableAnomalyBuffer.clear();
+
+  Fluttertoast.showToast(
+    msg: "Buffer Flushed!",
+    toastLength: Toast.LENGTH_LONG,
+  );
+}
+
+Future<void> formatAndPost(probableAnomalyBuffer) async {
+  Map<String, dynamic> data = formatAnomalyData(probableAnomalyBuffer);
+  await DioClientUser().postRequest('data/anomalies/', data);
+}
+
+Map<String, dynamic> formatAnomalyData(List<Anomaly> probableAnomalyBuffer) {
+  Map<String, dynamic> anomalyData = {};
+
+  for (int i = 0; i < probableAnomalyBuffer.length; i++) {
+    Anomaly anomaly = probableAnomalyBuffer[i];
+
+    anomalyData["anomaly_${i + 1}"] = {
+      "latitude": anomaly.latitude,
+      "longitude": anomaly.longitude,
+      "window": anomaly.accReadings.toList(), // Convert ListQueue to List
+    };
+  }
+
+  return {"anomaly_data": anomalyData};
 }
