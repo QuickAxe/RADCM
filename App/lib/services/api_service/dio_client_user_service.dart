@@ -1,6 +1,15 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+class DioResponse {
+  final bool success;
+  final dynamic data;
+  final String? errorMessage;
+
+  DioResponse({required this.success, this.data, this.errorMessage});
+}
+
+
 class DioClientUser {
   final Dio _dio = Dio(
     BaseOptions(
@@ -11,38 +20,50 @@ class DioClientUser {
   );
 
   // GET request
-  Future<Response> getRequest(String endpoint) async {
+  Future<DioResponse> getRequest(String endpoint) async {
     try {
-      return await _dio.get(endpoint);
+      Response response = await _dio.get(endpoint);
+      return DioResponse(success: true, data: response.data);
+    } on DioException catch (e) {
+      return DioResponse(success: false, errorMessage: e.response?.statusMessage ?? e.message);
     } catch (e) {
-      throw Exception("Error fetching data: $e");
+      return DioResponse(success: false, errorMessage: "Unexpected error: $e");
     }
   }
 
   // POST request
-  Future<Response> postRequest(String endpoint, Map<String, dynamic> data) async {
+  Future<DioResponse> postRequest(String endpoint, Map<String, dynamic> data) async {
     try {
-      return await _dio.post(endpoint, data: data);
+      Response response = await _dio.post(endpoint, data: data);
+      return DioResponse(success: true, data: response.data);
+    } on DioException catch (e) {
+      return DioResponse(success: false, errorMessage: e.response?.statusMessage ?? e.message);
     } catch (e) {
-      throw Exception("Error posting data: $e");
+      return DioResponse(success: false, errorMessage: "Unexpected error: $e");
     }
   }
 
   // PUT request
-  Future<Response> putRequest(String endpoint, Map<String, dynamic> data) async {
+  Future<DioResponse> putRequest(String endpoint, Map<String, dynamic> data) async {
     try {
-      return await _dio.put(endpoint, data: data);
+      Response response = await _dio.put(endpoint, data: data);
+      return DioResponse(success: true, data: response.data);
+    } on DioException catch (e) {
+      return DioResponse(success: false, errorMessage: e.response?.statusMessage ?? e.message);
     } catch (e) {
-      throw Exception("Error updating data: $e");
+      return DioResponse(success: false, errorMessage: "Unexpected error: $e");
     }
   }
 
   // DELETE request
-  Future<Response> deleteRequest(String endpoint) async {
+  Future<DioResponse> deleteRequest(String endpoint) async {
     try {
-      return await _dio.delete(endpoint);
+      Response response = await _dio.delete(endpoint);
+      return DioResponse(success: true, data: response.data);
+    } on DioException catch (e) {
+      return DioResponse(success: false, errorMessage: e.response?.statusMessage ?? e.message);
     } catch (e) {
-      throw Exception("Error deleting data: $e");
+      return DioResponse(success: false, errorMessage: "Unexpected error: $e");
     }
   }
 }

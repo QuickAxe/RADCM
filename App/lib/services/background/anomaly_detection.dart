@@ -138,20 +138,30 @@ Future<void> flushBuffer(List<Anomaly> probableAnomalyBuffer) async {
   dev.log("Buffer Flushed.. ");
 
   dev.log('BEFORE ------------------------> ${DateTime.now()}');
-  formatAndPost(probableAnomalyBuffer);
+  bool isSuccess = await formatAndPost(probableAnomalyBuffer);
   dev.log('AFTER ------------------------> ${DateTime.now()}');
 
   probableAnomalyBuffer.clear();
 
-  Fluttertoast.showToast(
-    msg: "Buffer Flushed!",
-    toastLength: Toast.LENGTH_LONG,
-  );
+  if(isSuccess) {
+    Fluttertoast.showToast(
+      msg: "Data sent successfully, buffer flushed!",
+      toastLength: Toast.LENGTH_LONG,
+    );
+  }
+  else {
+    Fluttertoast.showToast(
+      msg: "Server issue: Couldn't send data, buffer flushed anyway",
+      toastLength: Toast.LENGTH_LONG,
+    );
+  }
 }
 
-Future<void> formatAndPost(probableAnomalyBuffer) async {
+Future<bool> formatAndPost(probableAnomalyBuffer) async {
   Map<String, dynamic> data = formatAnomalyData(probableAnomalyBuffer);
-  await DioClientUser().postRequest('data/anomalies/', data);
+  DioResponse response = await DioClientUser().postRequest('data/anomalies/', data);
+
+  return response.success == true;
 }
 
 Map<String, dynamic> formatAnomalyData(List<Anomaly> probableAnomalyBuffer) {
