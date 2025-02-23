@@ -2,11 +2,15 @@ import 'dart:async';
 
 import 'package:app/util/route_utils.dart';
 import 'package:app/util/string_utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
 
 import '../../data/models/osrm_models.dart';
+import '../../services/providers/user_settings.dart';
+import '../../services/tbt_location_service.dart';
+import '../../services/tts_service.dart';
 
 /// A widget that displays the next valid turn-by-turn direction dynamically.
 class DynamicRouteDirections extends StatefulWidget {
@@ -19,48 +23,38 @@ class DynamicRouteDirections extends StatefulWidget {
 }
 
 class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
+  final TbtLocationService _locationService = TbtLocationService();
+  late TtsService _ttsService;
+
   StreamSubscription<Position>? posStream;
   int _currentStepIndex = 0;
-
-  // text to speech
-  late FlutterTts flutterTts;
 
   @override
   void initState() {
     super.initState();
-    flutterTts = FlutterTts();
+    final userSettings =
+        Provider.of<UserSettingsProvider>(context, listen: false);
+    _ttsService = TtsService(userSettings);
     _updateCurrentStep();
   }
 
   @override
   void dispose() {
-    posStream?.cancel();
+    _locationService.cancelStream();
     super.dispose();
   }
 
-  Future<void> _speak(String text) async {
-    // 1sec delay to avoid collisions during route alignment
-    await Future.delayed(const Duration(milliseconds: 1000));
-    print(await flutterTts.getVoices);
-
-    await flutterTts.setLanguage("en-US"); // Set language
-    await flutterTts.setPitch(1.0); // Adjust pitch
-    await flutterTts.setSpeechRate(0.4); // Adjust speed
-    await flutterTts.speak(text); // Speak the text
-  }
-
   void _updateCurrentStep() {
-    posStream = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.best,
-      ),
-    ).listen((Position position) {
+    posStream =
+        _locationService.getPositionStream().listen((Position position) {
       double userLat = position.latitude;
       double userLng = position.longitude;
 
       int bestIndex = _currentStepIndex;
 
-      print("User Location: $userLng, $userLat");
+      if (kDebugMode) {
+        print("User Location: $userLng, $userLat");
+      }
 
       if (_currentStepIndex < widget.route.legs.first.steps.length - 1) {
         final step1 = widget.route.legs.first.steps[_currentStepIndex];
@@ -106,6 +100,7 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
     if (widget.route.legs.isEmpty) {
       return const Center(child: Text("No directions available"));
     }
@@ -123,8 +118,8 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
 
     String instruction =
         generateVerboseInstruction(maneuverType, maneuverModifier, roadName);
-
-    _speak(instruction);
+    _ttsService.speak(instruction);
+    _ttsService.getVoices();
 
     return ListView(
       shrinkWrap: true,

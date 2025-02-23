@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../../services/providers/user_settings.dart';
@@ -37,7 +36,7 @@ class _VoiceEngineScreenState extends State<VoiceEngineScreen> {
 
             // Voice Selection Options
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 _voiceOption(
                   context,
@@ -45,8 +44,11 @@ class _VoiceEngineScreenState extends State<VoiceEngineScreen> {
                   title: "Male Voice",
                   subtitle: "A husky male voice",
                   icon: Icons.person_4,
-                  selected: settings.selectedVoice == "male",
-                  onTap: () => settings.setSelectedVoice("male"),
+                  selected: settings.selectedVoice == "en-gb-x-gbb-local",
+                  onTap: () {
+                    settings.setSelectedVoice("en-gb-x-gbb-local");
+                    settings.setSelectedLocale("en-GB");
+                  },
                 ),
                 _voiceOption(
                   context,
@@ -54,18 +56,24 @@ class _VoiceEngineScreenState extends State<VoiceEngineScreen> {
                   title: "Female Voice",
                   subtitle: "A soft female voice",
                   icon: Icons.person_2,
-                  selected: settings.selectedVoice == "female",
-                  onTap: () => settings.setSelectedVoice("female"),
+                  selected: settings.selectedVoice == "en-gb-x-gba-local",
+                  onTap: () {
+                    settings.setSelectedVoice("en-gb-x-gba-local");
+                    settings.setSelectedLocale("en-GB");
+                  },
                 ),
-                _voiceOption(
-                  context,
-                  mode: "default",
-                  title: "Default Voice",
-                  subtitle: "Electronic Robo Voice",
-                  icon: LucideIcons.bot,
-                  selected: settings.selectedVoice == "default",
-                  onTap: () => settings.setSelectedVoice("default"),
-                ),
+                // _voiceOption(
+                //   context,
+                //   mode: "default",
+                //   title: "Kawaii",
+                //   subtitle: "UwU~",
+                //   icon: LucideIcons.bot,
+                //   selected: settings.selectedVoice == "ja-JP-x-jaa-local",
+                //   onTap: () {
+                //     settings.setSelectedVoice("ja-JP-x-jaa-local");
+                //     settings.setSelectedLocale("ja-JP");
+                //   },
+                // ),
               ],
             ),
 
@@ -93,6 +101,31 @@ class _VoiceEngineScreenState extends State<VoiceEngineScreen> {
               label: "${(settings.voiceVolume * 100).toInt()}%",
               activeColor: theme.colorScheme.primary,
               onChanged: (newValue) => settings.setVoiceVolume(newValue),
+            ),
+
+            // Pitch Control
+            // Volume Control
+            Text(
+              'Control Speech Rate',
+              style: theme.textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Adjust the speech rate of your notifications.',
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
+            const SizedBox(height: 12),
+
+            Slider(
+              value: settings.speechRate,
+              min: 0,
+              max: 1,
+              divisions: 10,
+              label: "${(settings.speechRate * 100).toInt()}%",
+              activeColor: theme.colorScheme.primary,
+              onChanged: (newValue) => settings.setSpeechRate(newValue),
             ),
           ],
         ),
