@@ -13,9 +13,11 @@ def get_anomalies_by_location(
     #  - random_anomalies.sql # Add random fake data
     with connection.cursor() as cursor:
         query = """SELECT 
-                        ST_X(p_geom) as longitude,
-                        ST_Y(p_geom) as latitude,
-                        a_type AS category
+                        json_agg(json_build_object(
+	                'longitude',ST_X(p_geom),
+	                'latitude', ST_Y(p_geom),
+	                'category', a_type
+	                )  )
                 FROM mv_clustered_anomalies
                 WHERE 
                     ST_DWithin(
@@ -26,17 +28,23 @@ def get_anomalies_by_location(
                         %s)
                 ;"""
         cursor.execute(query, [long_, lat_, distance_in_degrees])
-        results = cursor.fetchall()
-        results = [
-            {
-                "longitude": tup[0],
-                "latitude": tup[1],
-                "category": tup[2],
-            }
-            for tup in results
-        ]
-        print(type(results), type(results[0]))
-        return results
+
+        # Result processing needed for non json sql query
+        # results = [
+        #     {
+        #         "longitude": tup[0],
+        #         "latitude": tup[1],
+        #         "category": tup[2],
+        #     }
+        #     for tup in results
+        # ]
+        # print(type(results), type(results[0]))
+
+        # Note: query is written in a way to return a json array.
+        results = cursor.fetchone()
+        # Note: Query returns 1 item which is a json array.
+        #       destructing it here
+        return results[0]
 
 
 @api_view(["GET"])
