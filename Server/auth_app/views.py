@@ -54,9 +54,7 @@ def fixed_anomaly_view(request):
         
         return Response(
             {
-                "message": "Coordinates received successfully!",
-                "latitude": latitude,
-                "longitude": longitude,
+                "message": "Coordinates received successfully!"
             },
             status=status.HTTP_200_OK,
         )

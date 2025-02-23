@@ -39,35 +39,38 @@ def anomalies_in_region_view(request):
         # the function will return a list of anomalies (list of dictionaires - check below) in a region around (lattitude, longitude)
 
         # list of dictionaries for the content (remove hardcoded content and assign it accordingly)
-        anomalies = [
-            {
-                "latitude": 15.591181864471721,
-                "longitude": 73.81062185333096,
-                "category": "Speedbreaker",
-            },
-            {
-                "latitude": 15.588822298730122,
-                "longitude": 73.81307154458827,
-                "category": "Rumbler",
-            },
-            {
-                "latitude": 15.593873211033117,
-                "longitude": 73.81406673161777,
-                "category": "Obstacle",
-            },
-            {
-                "latitude": 15.594893209859874,
-                "longitude": 73.80957563101596,
-                "category": "Speedbreaker",
-            },
-        ]
+        anomalies_data = {
+            "anomalies": [
+                {
+                    "latitude": 15.591181864471721,
+                    "longitude": 73.81062185333096,
+                    "category": "Speedbreaker"
+                },
+                {
+                    "latitude": 15.588822298730122,
+                    "longitude": 73.81307154458827,
+                    "category": "Rumbler"
+                },
+                {
+                    "latitude": 15.593873211033117,
+                    "longitude": 73.81406673161777,
+                    "category": "Obstacle"
+                },
+                {
+                    "latitude": 15.594893209859874,
+                    "longitude": 73.80957563101596,
+                    "category": "Speedbreaker"
+                }
+            ]
+        }
+
         #  <---------------------------------------------------------------------------------- /modify this
 
         # Success response
         print("go sing a song.. it works")
 
         return Response(
-            {"message": "Coordinates received successfully!", "anomalies": anomalies},
+            {"message": "Coordinates received successfully!", "anomalies": anomalies_data},
             status=status.HTTP_200_OK,
         )
 
@@ -118,14 +121,16 @@ def routes_view(request):
         # the function will return a list of routes (list of dictionaires - check below) from (lattitudeStart, longitudeStart) to (lattitudeEnd, longitudeEnd)
 
         # list of dictionaries for the content (remove hardcoded content and assign it accordingly)
-        routes = [
-            {
-                "route": 1,
-            },
-            {
-                "route": 2,
-            },
-        ]
+        routes_data = {
+            "routes": [
+                {
+                    "route": 1
+                },
+                {
+                    "route": 2
+                }
+            ]
+        }
         #  <---------------------------------------------------------------------------------- /modify this
 
         # Success response
@@ -134,7 +139,7 @@ def routes_view(request):
         return Response(
             {
                 "message": "Coordinates received successfully!",
-                "routes": routes,
+                "routes": routes_data,
             },
             status=status.HTTP_200_OK,
         )

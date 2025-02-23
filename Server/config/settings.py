@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'auth_app',
     'navigation_app',
+    'data_collection_app',
     'path',
 ]
 
