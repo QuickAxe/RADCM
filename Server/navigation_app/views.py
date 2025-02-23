@@ -36,9 +36,9 @@ def anomalies_in_region_view(request):
 
         #  <---------------------------------------------------------------------------------- modify this
         # Shantanu shall add a function call here
-        # the function will return a list of anomalies (list of dictionaires - check below) in a region around (lattitude, longitude)
+        # the function will return a dictionary of anomalies (dictionary of dictionaires - check below) in a region around (lattitude, longitude)
 
-        # list of dictionaries for the content (remove hardcoded content and assign it accordingly)
+        # dictionary of dictionaries for the content (remove hardcoded content and assign it accordingly)
         anomalies_data = {
             "anomalies": [
                 {
@@ -118,9 +118,9 @@ def routes_view(request):
 
         #  <---------------------------------------------------------------------------------- modify this
         # Shantanu shall add a function call here
-        # the function will return a list of routes (list of dictionaires - check below) from (lattitudeStart, longitudeStart) to (lattitudeEnd, longitudeEnd)
+        # the function will return a dictionary of routes (dictionary of dictionaires - check below) from (lattitudeStart, longitudeStart) to (lattitudeEnd, longitudeEnd)
 
-        # list of dictionaries for the content (remove hardcoded content and assign it accordingly)
+        # dictionary of dictionaries for the content (remove hardcoded content and assign it accordingly)
         routes_data = {
             "routes": [
                 {
