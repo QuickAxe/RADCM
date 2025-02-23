@@ -6,7 +6,8 @@
 ALTER TABLE IF EXISTS public.nodes DROP COLUMN IF EXISTS geom;
 
 ALTER TABLE IF EXISTS public.nodes
-    ADD COLUMN geom geometry GENERATED ALWAYS AS (st_setsrid(st_makepoint(longitude, latitude), 4326)) STORED;
+    ADD COLUMN geom geometry GENERATED ALWAYS AS (
+        st_setsrid(st_makepoint(longitude, latitude), 4326)) STORED;
 
 DROP INDEX IF EXISTS public.nodes_geom_idx;
 
@@ -19,7 +20,7 @@ CLUSTER nodes USING nodes_geom_idx;
 ALTER TABLE IF EXISTS public.edges DROP COLUMN IF EXISTS geom_way;
 
 ALTER TABLE IF EXISTS public.edges
-    ADD COLUMN geom_way geometry GENERATED ALWAYS AS (st_geomfromtext(wkt, 4269)) STORED;
+    ADD COLUMN geom_way geometry GENERATED ALWAYS AS (st_geomfromtext(wkt, 4326)) STORED;
 
 DROP INDEX IF EXISTS public.edges_geom_way_idx;
 

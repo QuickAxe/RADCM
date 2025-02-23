@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'auth_app',
+    'navigation_app',
+    'data_collection_app',
     'path',
 ]
 

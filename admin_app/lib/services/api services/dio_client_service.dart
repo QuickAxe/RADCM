@@ -7,8 +7,8 @@ class DioClient {
   final storage = const FlutterSecureStorage();
   static String baseUrl = "http://${dotenv.env['IP_ADDRESS']}:8000/api/auth/";
 
-  void logout() {
-    storage.deleteAll();
+  Future<void> logout() async {
+    await storage.deleteAll();
   }
 
   DioClient() {
@@ -42,10 +42,13 @@ class DioClient {
       String? refreshToken = await storage.read(key: 'refresh_token');
       if (refreshToken == null) return false;
 
-      final response = await dio.post("token/refresh/", data: {"refresh": refreshToken});
+      final response =
+          await dio.post("token/refresh/", data: {"refresh": refreshToken});
       if (response.statusCode == 200) {
-        await storage.write(key: 'access_token', value: response.data['access']);
-        await storage.write(key: 'refresh_token', value: response.data['refresh']);
+        await storage.write(
+            key: 'access_token', value: response.data['access']);
+        await storage.write(
+            key: 'refresh_token', value: response.data['refresh']);
         return true;
       }
     } catch (e) {

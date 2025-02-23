@@ -23,8 +23,6 @@ class _LoginPageState extends State<LoginPage> {
   // text editing controllers
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
-
-  // late final BuildContext? appContext;
   bool isLoading = false;
 
   // sign user in method
@@ -33,12 +31,13 @@ class _LoginPageState extends State<LoginPage> {
       isLoading = true;
     });
 
+    final prefs = await SharedPreferences.getInstance();
+
     // bypass for dev (backend apis wont be accessible)
     if (usernameController.text.toString() == "dev" &&
         passwordController.text.toString() == "dev") {
       // save token (bypass)
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString("isDev", "yes");
+      await prefs.setString("isDev", "true");
 
       Fluttertoast.showToast(
         msg: "Starting App in dev mode",
@@ -60,6 +59,7 @@ class _LoginPageState extends State<LoginPage> {
       });
 
       if (isAuthenticated) {
+        await prefs.setString("isUser", "true");
         Fluttertoast.showToast(
           msg: "Starting App",
           toastLength: Toast.LENGTH_LONG,
