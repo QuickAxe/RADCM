@@ -1,4 +1,4 @@
-import 'package:admin_app/services/api%20services/dio_client_service.dart';
+import 'package:admin_app/services/api%20services/dio_client_auth_service.dart';
 import 'package:admin_app/services/providers/permissions.dart';
 import 'package:admin_app/services/providers/route_provider.dart';
 import 'package:admin_app/services/providers/search.dart';
@@ -42,7 +42,7 @@ class AppDrawer extends StatelessWidget {
             title: const Text('Logout'),
             onTap: () async {
               // clear storage
-              await DioClient().logout();
+              await DioClientAuth().logout();
 
               final prefs = await SharedPreferences.getInstance();
               await prefs.remove("isDev");

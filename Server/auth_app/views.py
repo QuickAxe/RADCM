@@ -17,7 +17,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
 
 
-@api_view(["PUT"])
+@api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
 def fixed_anomaly_view(request):
     try:

@@ -6,7 +6,7 @@ import 'package:admin_app/pages/settings_screens/navigation_preferences.dart';
 import 'package:admin_app/pages/settings_screens/routines.dart';
 import 'package:admin_app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:admin_app/pages/settings_screens/voice_engine.dart';
-import 'package:admin_app/services/api%20services/dio_client_service.dart';
+import 'package:admin_app/services/api%20services/dio_client_auth_service.dart';
 import 'package:admin_app/services/providers/permissions.dart';
 import 'package:admin_app/services/providers/route_provider.dart';
 import 'package:admin_app/services/providers/search.dart';

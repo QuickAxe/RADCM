@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
-import 'dio_client_service.dart';
+import 'dio_client_auth_service.dart';
 
 class AuthorityService {
-  final DioClient dioClient;
+  final DioClientAuth dioClient;
 
   // we already have sorage in dio client so we shall use that
   AuthorityService(this.dioClient);
@@ -30,7 +30,7 @@ class AuthorityService {
 
   Future<bool> fixAnomaly(double latitude, double longitude) async {
     try {
-      Response response = await dioClient.dio.put(
+      Response response = await dioClient.dio.delete(
         "anomaly/",
         data: {
           "latitude": latitude,

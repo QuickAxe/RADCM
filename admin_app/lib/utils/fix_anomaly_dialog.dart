@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/api services/authority_service.dart';
-import '../services/api services/dio_client_service.dart';
+import '../services/api services/dio_client_auth_service.dart';
 import '../services/providers/permissions.dart';
 
 // util to show the dialog box and fix anomaly
@@ -97,7 +97,7 @@ Future<void> showAnomalyDialog(
                                 } else {
                                   // perform anomaly fix
                                   final authService =
-                                      AuthorityService(DioClient());
+                                      AuthorityService(DioClientAuth());
                                   bool isAuthenticated =
                                       await authService.fixAnomaly(lat, lon);
 

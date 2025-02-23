@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../components/my_textfield.dart';
 import '../components/sign_in_button.dart';
-import '../services/api services/dio_client_service.dart';
+import '../services/api services/dio_client_auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({super.key});
@@ -49,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
         MaterialPageRoute(builder: (context) => const HomeScreen()),
       );
     } else {
-      final authService = AuthorityService(DioClient());
+      final authService = AuthorityService(DioClientAuth());
       bool isAuthenticated = await authService.login(
           usernameController.text.toString(),
           passwordController.text.toString());
