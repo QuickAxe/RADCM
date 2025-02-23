@@ -2,6 +2,42 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.response import Response
 
+from django.db import connection
+
+
+def get_anomalies_by_location(
+    long_: float, lat_: float, distance_in_degrees: float = 0.01
+):
+    # If you can't run this, check Server/anomalies
+    #  - migrations.sql       # Update the database schema
+    #  - random_anomalies.sql # Add random fake data
+    with connection.cursor() as cursor:
+        query = """SELECT 
+                        ST_X(p_geom) as longitude,
+                        ST_Y(p_geom) as latitude,
+                        a_type AS category
+                FROM mv_clustered_anomalies
+                WHERE 
+                    ST_DWithin(
+                        p_geom, 
+                        st_setsrid(
+                            st_makepoint(%s, %s), 
+                                    4326),
+                        %s)
+                ;"""
+        cursor.execute(query, [long_, lat_, distance_in_degrees])
+        results = cursor.fetchall()
+        results = [
+            {
+                "longitude": tup[0],
+                "latitude": tup[1],
+                "category": tup[2],
+            }
+            for tup in results
+        ]
+        print(type(results), type(results[0]))
+        return results
+
 
 @api_view(["GET"])
 def anomalies_in_region_view(request):
@@ -33,36 +69,36 @@ def anomalies_in_region_view(request):
                 {"error": "Invalid latitude or longitude values."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
+        anomalies_data = get_anomalies_by_location(longitude, latitude)
         #  <---------------------------------------------------------------------------------- modify this
         # Shantanu shall add a function call here
         # the function will return a dictionary of anomalies (dictionary of dictionaires - check below) in a region around (lattitude, longitude)
 
         # dictionary of dictionaries for the content (remove hardcoded content and assign it accordingly)
-        anomalies_data = {
-            "anomalies": [
-                {
-                    "latitude": 15.591181864471721,
-                    "longitude": 73.81062185333096,
-                    "category": "Speedbreaker"
-                },
-                {
-                    "latitude": 15.588822298730122,
-                    "longitude": 73.81307154458827,
-                    "category": "Rumbler"
-                },
-                {
-                    "latitude": 15.593873211033117,
-                    "longitude": 73.81406673161777,
-                    "category": "Obstacle"
-                },
-                {
-                    "latitude": 15.594893209859874,
-                    "longitude": 73.80957563101596,
-                    "category": "Speedbreaker"
-                }
-            ]
-        }
+        # anomalies_data = {
+        #     "anomalies": [
+        #         {
+        #             "latitude": 15.591181864471721,
+        #             "longitude": 73.81062185333096,
+        #             "category": "Speedbreaker"
+        #         },
+        #         {
+        #             "latitude": 15.588822298730122,
+        #             "longitude": 73.81307154458827,
+        #             "category": "Rumbler"
+        #         },
+        #         {
+        #             "latitude": 15.593873211033117,
+        #             "longitude": 73.81406673161777,
+        #             "category": "Obstacle"
+        #         },
+        #         {
+        #             "latitude": 15.594893209859874,
+        #             "longitude": 73.80957563101596,
+        #             "category": "Speedbreaker"
+        #         }
+        #     ]
+        # }
 
         #  <---------------------------------------------------------------------------------- /modify this
 
