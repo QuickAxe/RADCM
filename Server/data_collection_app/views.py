@@ -20,7 +20,9 @@ from rest_framework.response import Response
 # }
 #
 # Note: it is enforced that windwo should contain 200 sublists.. bcoz thats what it should
-# source - "mobile" / "jimmy"
+# source - "mobile" / "jimmy" 
+
+# jimmy => Jiggle Intensity Mpu Module Yes
 
 
 @api_view(["POST"])
@@ -86,7 +88,7 @@ def anomaly_data_collection_view(request):
                 )
                 
         
-        #  <---------------------------------------------------------------------------------- modify this
+        #todo  <---------------------------------------------------------------------------------- modify this
         if source == "jimmy":
             print("recieved data from jimmy")
             # handle data from jimmy
@@ -97,7 +99,7 @@ def anomaly_data_collection_view(request):
         # Someone will call a function that exposes the ML. model here..
         # it will take the anomalies.. classify them.. update the db.. and whatever
 
-        #  <---------------------------------------------------------------------------------- /modify this
+        #todo  <---------------------------------------------------------------------------------- /modify this
 
         # Success response
         return Response(

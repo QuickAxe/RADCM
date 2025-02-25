@@ -2,6 +2,12 @@
 #include <TinyGPSPlus.h>
 #include <MPU9250_WE.h>
 #include <SoftwareSerial.h>
+#include <FS.h>
+
+#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
+#include <WiFiClient.h>
+
 #include "utils.h"
 
 // ### Blink ledPin n times, rapidly
@@ -107,4 +113,74 @@ bool isAnomaly(const std::vector<xyzFloat> &accWindow, const uint8_t &THRESHOLD)
         return true;
     else
         return false;
+}
+
+// ### Adds the current acceleration and gyro windows to the Buffer (A simple text file in the flash filesystem)
+// #### Args:
+// pretty self explanatory I think?
+bool addToBuffer(const std::vector<xyzFloat> &accWindow, const std::vector<xyzFloat> &gyroWindow, TinyGPSPlus &gps, fs::FS &fs, const char *path)
+{
+    File file = fs.open(path, "a");
+
+    if (!file)
+    {
+        // failed to open file
+        return false;
+    }
+
+    for (uint8_t i = 0; i < accWindow.size(); i++)
+    {
+        file.print(accWindow[i].x);
+        file.print(" ");
+        file.print(accWindow[i].y);
+        file.print(" ");
+        file.print(accWindow[i].z);
+        file.print(" ");
+
+        file.print(gyroWindow[i].x);
+        file.print(" ");
+        file.print(gyroWindow[i].y);
+        file.print(" ");
+        file.print(gyroWindow[i].z);
+        file.print("\n");
+    }
+
+    file.print(float(gps.location.lat()));
+    file.print(" ");
+    file.print(float(gps.location.lng()));
+    file.print("\n");
+
+    file.close();
+    return true;
+}
+
+int sendData(const ESP8266WiFiClass &wifi, const char *url, fs::FS &fs, const char *path)
+{
+    if (WiFi.status() == WL_CONNECTED)
+    {
+        WiFiClient client;
+        HTTPClient http;
+
+        http.begin(client, url);
+
+        // ! ======================== add parsing here, to convert the txt from the buffer to a json =======================================
+        String json = "";
+        // !================================================================================================================================
+
+        http.addHeader("Content-Type", "application/json");
+        int httpResponseCode = http.POST(json);
+
+        Serial.print("HTTP Response code: ");
+        Serial.println(httpResponseCode);
+
+        // Free resources
+        http.end();
+
+        return httpResponseCode;
+    }
+    else
+    {
+        Serial.println("WiFi Disconnected");
+        return 0;
+    }
 }

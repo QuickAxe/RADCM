@@ -9,6 +9,7 @@ void updateGPS(SoftwareSerial &GpsSerial, TinyGPSPlus &gps);
 
 bool isAnomaly(const std::vector<xyzFloat> &accWindow, const uint8_t &);
 
+bool addToBuffer(const std::vector<xyzFloat> &accWindow, const std::vector<xyzFloat> &gyroWindow, TinyGPSPlus &gps, fs::FS &fs, const char *path);
 struct gpsLocation
 {
     double lat;

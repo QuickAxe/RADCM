@@ -1,9 +1,17 @@
 #include <Arduino.h>
+
 #include <TinyGPSPlus.h>
+#include <MPU9250_WE.h>
+
 #include <SoftwareSerial.h>
 #include <Wire.h>
-#include <MPU9250_WE.h>
+
 #include <vector>
+
+#include <FS.h>
+#include <LittleFS.h>
+
+#include <ESP8266WiFi.h>
 
 #include "utils.h"
 
@@ -38,7 +46,7 @@
 #define ANOMALY_DETECTION_COOLDOWN 5000
 
 // The number of potential anomalies to store in a buffer before sending all back
-#define POTENTIAL_ANOMALY_BUFFER_SIZE 6
+#define ANOMALY_BUFFER_SIZE 50
 
 // ----------------------------------------------------------------- Declarations ----------------------------------------------------------------------
 
@@ -54,27 +62,37 @@ xyzFloat accValues;
 std::vector<xyzFloat> gyroWindow(200);
 std::vector<xyzFloat> accWindow(200);
 
-// ! I'll change this later to write to the file system instead, as a csv
-std::vector<std::vector<xyzFloat>> gyroBuffer(POTENTIAL_ANOMALY_BUFFER_SIZE, std::vector<xyzFloat>(200));
-std::vector<std::vector<xyzFloat>> accBuffer(POTENTIAL_ANOMALY_BUFFER_SIZE, std::vector<xyzFloat>(200));
-std::vector<gpsLocation> gpsBuffer(POTENTIAL_ANOMALY_BUFFER_SIZE);
-
 // init the gps object and set its uart pins
 TinyGPSPlus gps;
 SoftwareSerial GpsSerial(RX, TX);
 
+// counters to store timer values
 unsigned long heartbeatStart = 0;
 unsigned long mpuStart = 0;
 unsigned long anomalyLastDetected = 0;
 
+// some flags to store some states for using non-blocking stuff in the main loop
 bool notFirst = false;
 bool heartBeat = false;
+
+// counter for storing how many anomalies have been detected
+uint8_t anomalyCounter = 0;
+
+// path to store the detected anomalies in
+const char *filePath = "anomalies.txt";
+
+// wifi credentials, replace with what's appropriate:
+const char *ssid = "Error 404!";
+const char *password = "whitehouse";
+
+// ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// Server URL:
+const char *url = "ADD SERVER URL HERE";
 
 // ============================================================================ Setup ==================================================================================
 void setup()
 {
 
-    // todo ---------------------------------------------------------- Memory allocation Test, REMOVE LATER --------------------------------------------------
     //  currently each anomaly needs 4808 Bytes of memory
     //  This esp8266 has about 4,77,889 Bytes of usable flash memory.. hmm
     //  that means we could store about 99 anomalies in memory
@@ -86,16 +104,8 @@ void setup()
     //  new max number of anomalies that can be stored:
     //  109 anomalies approx... hmm
 
-    for (uint8_t i = 0; i < POTENTIAL_ANOMALY_BUFFER_SIZE; i++)
-    {
-        gyroBuffer[i].reserve(200);
-        accBuffer[i].reserve(200);
-    }
-
-    gyroWindow.reserve(200);
-    accWindow.reserve(200);
-    gpsBuffer.reserve(POTENTIAL_ANOMALY_BUFFER_SIZE);
-    // todod ---------------------------------------------------------------------------------------------------------------------------------------------------
+    LittleFS.format();
+    LittleFS.begin();
 
     Wire.begin(i2cSDA, i2cSCL);
     Serial.begin(19200);
@@ -104,18 +114,11 @@ void setup()
     pinMode(ledPin, OUTPUT);
     digitalWrite(ledPin, HIGH);
 
-    delay(500);
+    delay(1500);
     Serial.println("Serial communication Begun:");
 
-    if (mpu.init())
-        Serial.println("MPU initialised");
-    else
-    {
-        Serial.println("Error initialising MPU");
-
-        blink(ledPin, 9);
-        delay(500);
-    }
+    mpu.init();
+    delay(100);
 
     Serial.println("Calibrating MPU, keep it level and DONT MOVE IT");
     delay(1000);
@@ -129,6 +132,15 @@ void setup()
     mpu.setAccRange(MPU9250_ACC_RANGE_4G);
     mpu.enableAccDLPF(true);
     mpu.setAccDLPF(MPU9250_DLPF_6); // lowest noise
+
+    WiFi.begin(ssid, password);
+    Serial.println("Connecting");
+    while (WiFi.status() != WL_CONNECTED)
+    {
+        delay(500);
+        Serial.print(".");
+    }
+    blink(ledPin, 6);
 }
 
 // ================================================================================== MAIN LOOP ============================================================================
@@ -150,10 +162,10 @@ void loop()
     if (heartBeat)
     {
         if ((millis() - heartbeatStart) <= 100)
-            digitalWrite(ledPin, HIGH);
+            digitalWrite(ledPin, LOW);
         else
         {
-            digitalWrite(ledPin, LOW);
+            digitalWrite(ledPin, HIGH);
             heartBeat = false;
         }
     }
@@ -175,16 +187,27 @@ void loop()
         {
             if (notFirst)
             {
-                // ! do something here
                 updateGPS(GpsSerial, gps);
                 // send window somehow
                 // ! REMOVE BEFORE DEPLOYING
                 Serial.println("========================================================================================================================");
                 Serial.println("===========================================   anomaly detected   =======================================================");
                 Serial.println("========================================================================================================================");
-
                 anomalyLastDetected = millis();
                 blink(ledPin, 3);
+
+                addToBuffer(accWindow, gyroWindow, gps, LittleFS, filePath);
+
+                // if the anomaly buffer is full, send all the anomalies:
+                anomalyCounter++;
+                if (anomalyCounter >= ANOMALY_BUFFER_SIZE)
+                {
+                    // send all the anomalies now:
+                    // ! do something here later
+                    // ....
+
+                    anomalyCounter = 0;
+                }
             }
             notFirst = true;
         }
