@@ -4,6 +4,7 @@ from rest_framework.response import Response
 
 # Response data format:
 # {
+#     "source": "mobile",
 #     "anomaly_data": {
 #         "anomaly_1": {
 #             "latitude": 15.591181864471721,
@@ -19,6 +20,7 @@ from rest_framework.response import Response
 # }
 #
 # Note: it is enforced that windwo should contain 200 sublists.. bcoz thats what it should
+# source - "mobile" / "jimmy"
 
 
 @api_view(["POST"])
@@ -26,6 +28,7 @@ def anomaly_data_collection_view(request):
     try:
         # Extract anomaly data from request body
         anomaly_data = request.data.get("anomaly_data")
+        source = request.data.get("source")
 
         # Validate that anomaly_data is a dictionary
         if not isinstance(anomaly_data, dict):
@@ -81,8 +84,15 @@ def anomaly_data_collection_view(request):
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-
+                
+        
         #  <---------------------------------------------------------------------------------- modify this
+        if source == "jimmy":
+            print("recieved data from jimmy")
+            # handle data from jimmy
+        else:
+            print("recieved data from mobile")
+            # handle data from mobile
 
         # Someone will call a function that exposes the ML. model here..
         # it will take the anomalies.. classify them.. update the db.. and whatever
