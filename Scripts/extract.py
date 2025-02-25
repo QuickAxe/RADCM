@@ -1,73 +1,46 @@
-# Helper script to extract event windows from dataset
-
-import pandas as pd
+import json
 import os
-import uuid
 import glob
+import uuid
+import csv
 
-csv_directory = "./"
+sample_num = 200
 
-target_values = {0: "Flat", 1: "Pothole", 2: "Breaker"}
-target_column_idx = -1
+# Spanish to English mapping
+s2e = {
+    "Bordo" : "Breaker",
+    "Bache" : "Pothole",
+}
 
-labels = []
+for label in s2e.values():
+    os.makedirs(label, exist_ok = True)
 
-for label in target_values.values():
-    if not os.path.exists(label):
-        os.makedirs(label)
+json_files = glob.glob(os.path.join("./", "*.json"))
 
-csv_files = glob.glob(os.path.join(csv_directory, "*.csv"))
-
-for csv_file in csv_files:
-    # print(f"File: {csv_file}")
+with open("labels.csv",'a') as label_csv_file:
+    label_writer = csv.writer(label_csv_file)
     
-    df = pd.read_csv(csv_file, header=None)
-    
-    column_indices = [0, 1, 2, 20]
-    df = df.iloc[:, column_indices]
+    for json_file in json_files:
+        with open(json_file) as f:
+            data = json.load(f)
 
-    for target_value, label in target_values.items():
-        target_indices = df[df.iloc[:, target_column_idx] == target_value].index
-
-        # Helpful to check if things are messed up
-        if len(target_indices) == 0:
-            print(f"Target value {target_value} ({label}) not found!!!!.")
-            continue
-
-        groups = []
-        current_group = [target_indices[0]]
-
-        for i in range(1, len(target_indices)):
-            if target_indices[i] == target_indices[i - 1] + 1:
-                current_group.append(target_indices[i])
-            else:
-                groups.append(current_group)
-                current_group = [target_indices[i]]
-        groups.append(current_group)
-
-        for group_idx, group in enumerate(groups):
-            start_idx = group[0]
-            end_idx = group[-1]
-
-            window_df = df.iloc[start_idx:end_idx + 1]
-
-            middle_idx = start_idx + (len(window_df) // 2)
-
-            final_start_idx = max(0, middle_idx - 99)
-            final_end_idx = min(len(df), middle_idx + 100)
-
-            final_df = df.iloc[final_start_idx:final_end_idx + 1]
-            if final_end_idx - final_start_idx != 199:
-                continue
+        for anomaly in data['anomalies']:
+            if anomaly["type"] in s2e:
+                label = s2e[anomaly["type"]]
+                file_name = str(uuid.uuid4())+".csv"
+                
+                mid_point = (anomaly["start"] + anomaly["end"])//2
+                
+                with open(os.path.join("./",f"{label}",f"{file_name}"),'w') as sample_csv_file:
+                    sample_writer = csv.writer(sample_csv_file)
+                    
+                    for rows in range(mid_point - (sample_num)//2 + 1, mid_point + (sample_num)//2 + 1):
+                        acc_x = data['rot_acc_x'][rows]
+                        acc_y = data['rot_acc_y'][rows]
+                        acc_z = data['rot_acc_z'][rows]
+                        sample_writer.writerows([[f'{acc_x}', f'{acc_y}', f'{acc_z}']])
+                    
+                
+                label_writer.writerows([[f"./{label}/{file_name}", f"{label}"]])
             
-            final_df.pop(final_df.columns[-1])    
-            output_folder = label
-            file_name = f"{output_folder}/{uuid.uuid4()}.csv"
-
-            final_df.to_csv(file_name, index=False, header=False)
-
-            labels.append([file_name, label])
-
-labels_df = pd.DataFrame(labels, columns=["filePath", "classLabel"])
-labels_df.to_csv("labels.csv", mode='a', index=False, header=False)
-
+    
