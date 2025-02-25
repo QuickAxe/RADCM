@@ -10,16 +10,22 @@ import 'package:sensors_plus/sensors_plus.dart';
 
 import '../../data/models/bg_anomaly.dart';
 
+// to make sure no other processing happens while buffer is getting flushed
+bool isBufferFlushing = false;
+
 // ----------------------------------- Heard abt tax collector? -------------------------------------------------------
 // @pragma('vm:entry-point')
 Future<void> theDataCollector() async {
   frs.Matrix3 rotationMatrix = frs.Matrix3(0, 0, 0, 0, 0, 0, 0, 0, 0);
 
-  List<Anomaly> probableAnomalyBuffer =
-      []; // the buffer that contains probable anomalies
-  Anomaly currentWindow = Anomaly(); // the sliding window
-  DateTime lastAnomaly = DateTime(
-      2023, 12, 25, 0, 0, 0); // to set time delay between consecutive anomalies
+  // the buffer that contains probable anomalies
+  List<Anomaly> probableAnomalyBuffer = [];
+
+  // the sliding window
+  Anomaly currentWindow = Anomaly();
+
+  // to set time delay between consecutive anomalies
+  DateTime lastAnomaly = DateTime(2023, 12, 25, 0, 0, 0);
 
   // set sampling period for the guy that gives rotation matrix
   frs.RotationSensor.samplingPeriod = frs.SensorInterval.fastestInterval;
@@ -31,6 +37,8 @@ Future<void> theDataCollector() async {
     frs.RotationSensor.orientationStream, // Stream 1
     getLocationUpdates(), // Stream 2
   ]).throttleTime(const Duration(milliseconds: 20)).listen((data) async {
+    if (isBufferFlushing) return;
+
     // data[i] corresponds to the ith stream
     final accEvent = data[0] as AccelerometerEvent;
     final frsEvent = data[1] as frs.OrientationEvent;
@@ -99,8 +107,8 @@ List<double> reorientAccelerometer(
 }
 
 // ----------------------------------- Checks if the read block is an anomaly -----------------------------------------
-Future<bool> checkWindow(Anomaly currentWindow, List<Anomaly> probableAnomalyBuffer,
-    Position position) async {
+Future<bool> checkWindow(Anomaly currentWindow,
+    List<Anomaly> probableAnomalyBuffer, Position position) async {
   double accelLeft = currentWindow.accReadings.elementAt(97)[2];
   double accelRight = currentWindow.accReadings.elementAt(103)[2];
   double threshold = 18.0;
@@ -125,10 +133,12 @@ Future<bool> checkWindow(Anomaly currentWindow, List<Anomaly> probableAnomalyBuf
   }
 
   if (probableAnomalyBuffer.length == maxBufferSize) {
+    isBufferFlushing = true;
     await flushBuffer(probableAnomalyBuffer);
+    isBufferFlushing = false;
   }
 
-  currentWindow.accReadings.removeFirst();
+  // currentWindow.accReadings.removeFirst();
   return isAnomaly;
 }
 
@@ -143,24 +153,25 @@ Future<void> flushBuffer(List<Anomaly> probableAnomalyBuffer) async {
 
   probableAnomalyBuffer.clear();
 
-  if(isSuccess) {
+  if (isSuccess) {
     Fluttertoast.showToast(
       msg: "Data sent successfully, buffer flushed!",
       toastLength: Toast.LENGTH_LONG,
     );
-  }
-  else {
+  } else {
     Fluttertoast.showToast(
       msg: "Server issue: Couldn't send data, buffer flushed anyway",
       toastLength: Toast.LENGTH_LONG,
     );
   }
+
+  return;
 }
 
 Future<bool> formatAndPost(probableAnomalyBuffer) async {
   Map<String, dynamic> data = formatAnomalyData(probableAnomalyBuffer);
-  DioResponse response = await DioClientUser().postRequest('data/anomalies/', data);
-
+  DioResponse response =
+      await DioClientUser().postRequest('data/anomalies/', data);
   return response.success == true;
 }
 
@@ -177,5 +188,5 @@ Map<String, dynamic> formatAnomalyData(List<Anomaly> probableAnomalyBuffer) {
     };
   }
 
-  return {"anomaly_data": anomalyData};
+  return {"source": "mobile", "anomaly_data": anomalyData};
 }
