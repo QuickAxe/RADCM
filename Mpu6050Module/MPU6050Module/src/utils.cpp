@@ -8,6 +8,8 @@
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
 
+#include <ArduinoJson.h>
+
 #include "utils.h"
 
 // ### Blink ledPin n times, rapidly
@@ -59,7 +61,7 @@ void printGPS(SoftwareSerial &GpsSerial, TinyGPSPlus &gps)
 // mpu: the mpu object
 // corrGyrRaw: the raw gyro values
 // aValues: the raw acceleration values in each axis, in m/s^2
-void printMpu(MPU9250_WE &mpu, xyzFloat &corrGyrRaw, xyzFloat &gValue)
+void printMpu(MPU9250_WE &mpu, xyzFloat &gValue)
 {
     Serial.println("m/s values (x,y,z):");
     Serial.print(gValue.x * 9.806);
@@ -67,13 +69,6 @@ void printMpu(MPU9250_WE &mpu, xyzFloat &corrGyrRaw, xyzFloat &gValue)
     Serial.print(gValue.y * 9.806);
     Serial.print("   ");
     Serial.println(gValue.z * 9.806);
-
-    Serial.println("Gyroscope raw values with offset:");
-    Serial.print(corrGyrRaw.x);
-    Serial.print("   ");
-    Serial.print(corrGyrRaw.y);
-    Serial.print("   ");
-    Serial.println(corrGyrRaw.z);
 }
 
 // ### update the gps object to the current values
@@ -93,9 +88,8 @@ void updateGPS(SoftwareSerial &GpsSerial, TinyGPSPlus &gps)
 // mpu: the mpu object
 // corrGyrRaw: the raw gyro values
 // aValues: the raw acceleration values in each axis, in m/s^2
-void updateMpu(MPU9250_WE &mpu, xyzFloat &corrGyrRaw, xyzFloat &aValue)
+void updateMpu(MPU9250_WE &mpu, xyzFloat &aValue)
 {
-    corrGyrRaw = mpu.getCorrectedGyrRawValues();
     aValue = mpu.getGValues();
 
     aValue.x *= 9.806;
@@ -118,7 +112,7 @@ bool isAnomaly(const std::vector<xyzFloat> &accWindow, const uint8_t &THRESHOLD)
 // ### Adds the current acceleration and gyro windows to the Buffer (A simple text file in the flash filesystem)
 // #### Args:
 // pretty self explanatory I think?
-bool addToBuffer(const std::vector<xyzFloat> &accWindow, const std::vector<xyzFloat> &gyroWindow, TinyGPSPlus &gps, fs::FS &fs, const char *path)
+bool addToBuffer(const std::vector<xyzFloat> &accWindow, TinyGPSPlus &gps, fs::FS &fs, const char *path)
 {
     File file = fs.open(path, "a");
 
@@ -136,51 +130,119 @@ bool addToBuffer(const std::vector<xyzFloat> &accWindow, const std::vector<xyzFl
         file.print(" ");
         file.print(accWindow[i].z);
         file.print(" ");
-
-        file.print(gyroWindow[i].x);
-        file.print(" ");
-        file.print(gyroWindow[i].y);
-        file.print(" ");
-        file.print(gyroWindow[i].z);
         file.print("\n");
     }
 
     file.print(float(gps.location.lat()));
     file.print(" ");
     file.print(float(gps.location.lng()));
+    file.print(" ");
     file.print("\n");
 
     file.close();
     return true;
 }
 
-int sendData(const ESP8266WiFiClass &wifi, const char *url, fs::FS &fs, const char *path)
+// ### Send *ALL* the anomalies back to the server, batchSize number at a time, so that it fits in RAM
+// ### Make sure a wifi connection has been instantiated before, I think? should I do it here?
+// #### Returns:
+// http response code if everything goes ok (should be 200)
+// -1 if there's no active wifi network connected to
+// -2 if there's an error sending any batch of anomalies
+// #### Args:
+// wifi: wifi object
+// url: url of the server to send the POST request to
+// fs: the fs object
+// path: path to the buffer file
+// anomalycounter: self explanatory
+// batchSize: How many anomalies to sent in one POST request
+int sendData(const char *url, fs::FS &fs, const char *path, const uint8_t &anomalyCounter, const uint8_t &batchSize)
 {
     if (WiFi.status() == WL_CONNECTED)
     {
         WiFiClient client;
         HTTPClient http;
 
+        int httpResponseCode;
+
         http.begin(client, url);
 
-        // ! ======================== add parsing here, to convert the txt from the buffer to a json =======================================
-        String json = "";
-        // !================================================================================================================================
+        File file = fs.open(path, "r");
 
-        http.addHeader("Content-Type", "application/json");
-        int httpResponseCode = http.POST(json);
+        if (!file)
+        {
+            // failed to open file
+            return false;
+        }
 
-        Serial.print("HTTP Response code: ");
-        Serial.println(httpResponseCode);
+        // loop to send all anomalies in the buffer, one batchSize at a time
+        for (uint8_t i = 0; i < anomalyCounter; i++)
+        {
+            // make the json doc and pack it with anomalies
+            DynamicJsonDocument doc(4900);
+            doc["source"] = "jimmy";
+
+            // now add batchSize number of anomalies to the json doc:
+            for (uint8_t j = 0; j < batchSize; j++)
+            {
+                String temp;
+
+                // read one anomaly at a time
+                for (uint8_t k = 0; k < 200; k++)
+                {
+                    // read each of the axes from the file, separated by a ' '
+
+                    // x
+                    temp = file.readStringUntil(' ');
+                    doc["anomaly_data"][j]["window"][k][0] = temp.toFloat();
+
+                    // y
+                    temp = file.readStringUntil(' ');
+                    doc["anomaly_data"][j]["window"][k][1] = temp.toFloat();
+
+                    // z
+                    temp = file.readStringUntil(' ');
+                    doc["anomaly_data"][j]["window"][k][2] = temp.toFloat();
+
+                    // discard that \n at the end
+                    file.read();
+                }
+
+                // read the GPS location now
+                temp = file.readStringUntil(' ');
+                doc["anomaly_data"][j]["Latitude"] = temp.toFloat();
+                temp = file.readStringUntil(' ');
+                doc["anomaly_data"][j]["Longitude"] = temp.toFloat();
+
+                // increment the anomaly counter as an anomaly hath been read
+                i++;
+            }
+
+            // adding braces here so as to destroy buffer ( the string) as soon as it's done being used, to save memory
+            // some hacks using a weird scope, I know, but this must be done :)
+            {
+                String buffer;
+                serializeJson(doc, buffer);
+
+                // send the data to the server now:
+                http.addHeader("Content-Type", "application/json");
+                httpResponseCode = http.POST(buffer);
+
+                // Serial.print("HTTP Response code: ");
+                // Serial.println(httpResponseCode);
+            }
+
+            if (httpResponseCode != 200)
+                return -2;
+        }
 
         // Free resources
         http.end();
-
         return httpResponseCode;
     }
     else
     {
-        Serial.println("WiFi Disconnected");
-        return 0;
+        // Serial.println("WiFi Disconnected");
+        return -1;
     }
 }

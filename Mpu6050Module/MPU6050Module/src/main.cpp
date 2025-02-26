@@ -48,6 +48,9 @@
 // The number of potential anomalies to store in a buffer before sending all back
 #define ANOMALY_BUFFER_SIZE 50
 
+// The number of anomalies to send in one batch, back to the server in a single POST request
+#define ANOMALY_BATCH_SIZE 3
+
 // ----------------------------------------------------------------- Declarations ----------------------------------------------------------------------
 
 MPU9250_WE mpu = MPU9250_WE(IMU_ADDRESS);
@@ -55,11 +58,10 @@ MPU9250_WE mpu = MPU9250_WE(IMU_ADDRESS);
 // custom struct for storing the gps location, and only location
 gpsLocation gpsLoc;
 
-// stuff for storing the mpu values
-xyzFloat gyroValues;
+// struct for storing the mpu values
 xyzFloat accValues;
 
-std::vector<xyzFloat> gyroWindow(200);
+// vector to act as a sliding window to store the acc values
 std::vector<xyzFloat> accWindow(200);
 
 // init the gps object and set its uart pins
@@ -103,6 +105,7 @@ void setup()
     //  correct max number of anomalies that can be stored, using the max possible flash size (for my chip) of 512KB:
     //  new max number of anomalies that can be stored:
     //  109 anomalies approx... hmm
+    // now using only acc data, so it should be about double this, approximately
 
     LittleFS.format();
     LittleFS.begin();
@@ -173,14 +176,12 @@ void loop()
     // poll mpu sensors every POLL_INTERVAL ms
     if ((millis() - mpuStart) >= POLL_INTERVAL)
     {
-        updateMpu(mpu, gyroValues, accValues);
+        updateMpu(mpu, accValues);
 
         // add new values to the window
-        gyroWindow.push_back(gyroValues);
         accWindow.push_back(accValues);
 
         // remove old values from the window
-        gyroWindow.erase(gyroWindow.begin());
         accWindow.erase(accWindow.begin());
 
         if (isAnomaly(accWindow, THRESHOLD) and ((millis() - anomalyLastDetected) >= ANOMALY_DETECTION_COOLDOWN))
@@ -188,7 +189,7 @@ void loop()
             if (notFirst)
             {
                 updateGPS(GpsSerial, gps);
-                // send window somehow
+
                 // ! REMOVE BEFORE DEPLOYING
                 Serial.println("========================================================================================================================");
                 Serial.println("===========================================   anomaly detected   =======================================================");
@@ -196,16 +197,14 @@ void loop()
                 anomalyLastDetected = millis();
                 blink(ledPin, 3);
 
-                addToBuffer(accWindow, gyroWindow, gps, LittleFS, filePath);
+                addToBuffer(accWindow, gps, LittleFS, filePath);
 
                 // if the anomaly buffer is full, send all the anomalies:
                 anomalyCounter++;
                 if (anomalyCounter >= ANOMALY_BUFFER_SIZE)
                 {
                     // send all the anomalies now:
-                    // ! do something here later
-                    // ....
-
+                    sendData(url, LittleFS, filePath, anomalyCounter, ANOMALY_BATCH_SIZE);
                     anomalyCounter = 0;
                 }
             }
