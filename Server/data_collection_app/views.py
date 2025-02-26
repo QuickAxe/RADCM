@@ -102,7 +102,6 @@ def anomaly_data_collection_view(request):
         #todo  <---------------------------------------------------------------------------------- /modify this
 
         # Success response
-        print(anomaly_data)
         return Response(
             {
                 "message": "Anomaly data received successfully!",
