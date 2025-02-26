@@ -176,16 +176,16 @@ Future<bool> formatAndPost(probableAnomalyBuffer) async {
 }
 
 Map<String, dynamic> formatAnomalyData(List<Anomaly> probableAnomalyBuffer) {
-  Map<String, dynamic> anomalyData = {};
+  List<dynamic> anomalyData = [];
 
   for (int i = 0; i < probableAnomalyBuffer.length; i++) {
     Anomaly anomaly = probableAnomalyBuffer[i];
 
-    anomalyData["anomaly_${i + 1}"] = {
+    anomalyData.add({
       "latitude": anomaly.latitude,
       "longitude": anomaly.longitude,
       "window": anomaly.accReadings.toList(), // Convert ListQueue to List
-    };
+    });
   }
 
   return {"source": "mobile", "anomaly_data": anomalyData};

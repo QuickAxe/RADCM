@@ -5,18 +5,18 @@ from rest_framework.response import Response
 # Response data format:
 # {
 #     "source": "mobile",
-#     "anomaly_data": {
-#         "anomaly_1": {
+#     "anomaly_data": [
+#         {
 #             "latitude": 15.591181864471721,
 #             "longitude": 73.81062185333096,
 #             "window": [[1.2, 2.3, 4.2], [5.6, 7.8, 9.0]],
 #         },
-#         "anomaly_2": {
+#         {
 #             "latitude": 15.588822298730122,
 #             "longitude": 73.81307154458827,
 #             "window": [[2.3, 3.4, 5.6], [6.7, 8.9, 1.2]],
 #         },
-#     }
+#     ]
 # }
 #
 # Note: it is enforced that windwo should contain 200 sublists.. bcoz thats what it should
@@ -32,21 +32,21 @@ def anomaly_data_collection_view(request):
         anomaly_data = request.data.get("anomaly_data")
         source = request.data.get("source")
 
-        # Validate that anomaly_data is a dictionary
-        if not isinstance(anomaly_data, dict):
+        # Validate that anomaly_data is a list
+        if not isinstance(anomaly_data, list):
             return Response(
                 {
-                    "error": "Invalid format. anomaly_data should be a dictionary of anomalies."
+                    "error": "Invalid format. anomaly_data should be a list of anomalies."
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         # Process each anomaly
-        for key, anomaly in anomaly_data.items():
+        for anomaly in anomaly_data:
             if not isinstance(anomaly, dict):
                 return Response(
                     {
-                        "error": f"Each anomaly entry must be a dictionary. Error in {key}"
+                        "error": "Each anomaly entry must be a dictionary."
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
@@ -63,7 +63,7 @@ def anomaly_data_collection_view(request):
                     raise ValueError
             except (TypeError, ValueError):
                 return Response(
-                    {"error": f"Invalid latitude/longitude in anomaly {key}"},
+                    {"error": f"Invalid latitude/longitude in anomaly"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -73,7 +73,7 @@ def anomaly_data_collection_view(request):
             ):
                 return Response(
                     {
-                        "error": f"Invalid window format in anomaly {key}. Must be a list of lists."
+                        "error": f"Invalid window format in anomaly. Must be a list of lists."
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
@@ -82,11 +82,11 @@ def anomaly_data_collection_view(request):
             if len(window) != 200:
                 return Response(
                     {
-                        "error": f"Invalid window length in anomaly {key}. Must contain exactly 200 sublists, but got {len(window)}."
+                        "error": f"Invalid window length in anomaly. Must contain exactly 200 sublists, but got {len(window)}."
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-                
+
         
         #todo  <---------------------------------------------------------------------------------- modify this
         if source == "jimmy":
@@ -102,6 +102,7 @@ def anomaly_data_collection_view(request):
         #todo  <---------------------------------------------------------------------------------- /modify this
 
         # Success response
+        print(anomaly_data)
         return Response(
             {
                 "message": "Anomaly data received successfully!",
