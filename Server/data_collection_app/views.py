@@ -7,13 +7,13 @@ from rest_framework.response import Response
 #     "source": "mobile",
 #     "anomaly_data": [
 #         {
-#             "latitude": 15.591181864471721,
-#             "longitude": 73.81062185333096,
+#             "latitude": 15.600218,
+#             "longitude": 73.826060,
 #             "window": [[1.2, 2.3, 4.2], [5.6, 7.8, 9.0]],
 #         },
 #         {
-#             "latitude": 15.588822298730122,
-#             "longitude": 73.81307154458827,
+#             "latitude": 15.600219,
+#             "longitude": 73.826061,
 #             "window": [[2.3, 3.4, 5.6], [6.7, 8.9, 1.2]],
 #         },
 #     ]
