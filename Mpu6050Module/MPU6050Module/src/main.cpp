@@ -46,10 +46,10 @@
 #define ANOMALY_DETECTION_COOLDOWN 5000
 
 // The number of potential anomalies to store in a buffer before sending all back
-#define ANOMALY_BUFFER_SIZE 50
+#define ANOMALY_BUFFER_SIZE 1
 
 // The number of anomalies to send in one batch, back to the server in a single POST request
-#define ANOMALY_BATCH_SIZE 3
+#define ANOMALY_BATCH_SIZE 1
 
 // ----------------------------------------------------------------- Declarations ----------------------------------------------------------------------
 
@@ -84,12 +84,12 @@ uint8_t anomalyCounter = 0;
 const char *filePath = "anomalies.txt";
 
 // wifi credentials, replace with what's appropriate:
-const char *ssid = "Error 404!";
+const char *ssid = "Error 404 !";
 const char *password = "whitehouse";
 
 // ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Server URL:
-const char *url = "ADD SERVER URL HERE";
+const char *url = "http://192.168.1.9:8000";
 
 // ============================================================================ Setup ==================================================================================
 void setup()
@@ -107,7 +107,7 @@ void setup()
     //  109 anomalies approx... hmm
     // now using only acc data, so it should be about double this, approximately
 
-    LittleFS.format();
+    // LittleFS.format();
     LittleFS.begin();
 
     Wire.begin(i2cSDA, i2cSCL);
@@ -138,11 +138,24 @@ void setup()
 
     WiFi.begin(ssid, password);
     Serial.println("Connecting");
+
+    uint8_t i = 0;
+
     while (WiFi.status() != WL_CONNECTED)
     {
         delay(500);
         Serial.print(".");
+        i++;
+        if (i > 100)
+        {
+            Serial.print("failed to connect, restarting esp");
+            ESP.restart();
+            break;
+        }
     }
+
+    Serial.println(WiFi.localIP());
+
     blink(ledPin, 6);
 }
 
@@ -204,7 +217,13 @@ void loop()
                 if (anomalyCounter >= ANOMALY_BUFFER_SIZE)
                 {
                     // send all the anomalies now:
-                    sendData(url, LittleFS, filePath, anomalyCounter, ANOMALY_BATCH_SIZE);
+                    int response = sendData(url, LittleFS, filePath, anomalyCounter, ANOMALY_BATCH_SIZE);
+
+                    if (response != 200)
+                    {
+                        Serial.println("ERROR SENDING DATA with error code: " + response);
+                    }
+
                     anomalyCounter = 0;
                 }
             }

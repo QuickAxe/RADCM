@@ -149,6 +149,7 @@ bool addToBuffer(const std::vector<xyzFloat> &accWindow, TinyGPSPlus &gps, fs::F
 // http response code if everything goes ok (should be 200)
 // -1 if there's no active wifi network connected to
 // -2 if there's an error sending any batch of anomalies
+// -3 if the buffer file failed to be deleted
 // #### Args:
 // wifi: wifi object
 // url: url of the server to send the POST request to
@@ -238,6 +239,16 @@ int sendData(const char *url, fs::FS &fs, const char *path, const uint8_t &anoma
 
         // Free resources
         http.end();
+
+        if (httpResponseCode == 200)
+        {
+            // delete the buffer file
+            if (!fs.remove(path))
+            {
+                return -3;
+            }
+        }
+
         return httpResponseCode;
     }
     else
