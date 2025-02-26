@@ -1,4 +1,5 @@
 # a simple http server to print POST requests in the terminal
+#! not my code, borrowed from: https://gist.github.com/hawkins/36b7d781d8fa5277d4cb29b6906abe57
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 class S(BaseHTTPRequestHandler):
