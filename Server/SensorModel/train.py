@@ -20,7 +20,7 @@ from tqdm import tqdm
 
 # need I explain these?
 batchSize = 64
-EPOCHS = 50
+EPOCHS = 100
 
 # the factor to smoothen the interpolated data by, duh!
 #! determine a good smoothing factor
@@ -35,7 +35,7 @@ interpolationFactor = 5
 numWorkers = 0
 
 # run number to save to its corresponding folder (yes yes, I know, but I'm too lazy to do this in code automatically)
-runNo = "CnnBigger-Baseline"
+runNo = "Cnn5-Carlos75"
 
 
 # ================================================== initialising =========================================================
@@ -93,8 +93,8 @@ print("Validation set has {} instances".format(len(validationSet)))
 
 # =============================================== training loop part now ================================================
 
-# model = CnnLSTM(256, 3, 3)
-model = CnnBigger(3)
+# model = CnnLSTM(256, 3, 2)
+model = Cnn5(2)
 
 model = model.to(device)
 

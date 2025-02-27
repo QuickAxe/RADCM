@@ -12,8 +12,8 @@
 
 #include "utils.h"
 
-// ### Blink ledPin n times, rapidly
-// ##### Make sure to set ledPin as output beforehand
+// Blink ledPin n times, rapidly
+// Make sure to set ledPin as output beforehand
 // #### Args:
 // ledPin: The pin number to blink
 // n: The number of times to blink the led
@@ -28,7 +28,7 @@ void blink(const uint8_t &ledPin, const uint8_t &n)
     }
 }
 
-// ### Print whatever data the GPS object has currently,
+// Print whatever data the GPS object has currently,
 // WITHOUT UPDATING IT
 // #### Args:
 // GpsSerial: The soft serial object used for communicating with the gps
@@ -55,7 +55,7 @@ void printGPS(SoftwareSerial &GpsSerial, TinyGPSPlus &gps)
     }
 }
 
-// ### Print the current mpu values,
+// Print the current mpu values,
 // WITHOUT UPDATING IT
 // #### Args:
 // mpu: the mpu object
@@ -71,7 +71,7 @@ void printMpu(MPU9250_WE &mpu, xyzFloat &gValue)
     Serial.println(gValue.z * 9.806);
 }
 
-// ### update the gps object to the current values
+// Update the gps object to the current values
 // #### Args:
 // GpsSerial: The soft serial object used for communicating with the gps
 // gps: The gps object of the tinyGPSPlus library
@@ -83,7 +83,7 @@ void updateGPS(SoftwareSerial &GpsSerial, TinyGPSPlus &gps)
     }
 }
 
-// ### Update the mpu values to the current values
+// Update the mpu values to the current values
 // #### Args:
 // mpu: the mpu object
 // corrGyrRaw: the raw gyro values
@@ -97,7 +97,7 @@ void updateMpu(MPU9250_WE &mpu, xyzFloat &aValue)
     aValue.z *= 9.806;
 }
 
-// ### Checks if the current contents of the buffer have an anomaly or not
+// Checks if the current contents of the buffer have an anomaly or not
 // #### Args:
 // accWindow: The datastructure used to store the sliding window over the accelerometer data
 // THRESHOLD: The threshold used for the Z Diff algorithm
@@ -109,7 +109,7 @@ bool isAnomaly(const std::vector<xyzFloat> &accWindow, const uint8_t &THRESHOLD)
         return false;
 }
 
-// ### Adds the current acceleration and gyro windows to the Buffer (A simple text file in the flash filesystem)
+// Adds the current acceleration and gyro windows to the Buffer (A simple text file in the flash filesystem)
 // #### Args:
 // pretty self explanatory I think?
 bool addToBuffer(const std::vector<xyzFloat> &accWindow, TinyGPSPlus &gps, fs::FS &fs, const char *path)
@@ -143,14 +143,14 @@ bool addToBuffer(const std::vector<xyzFloat> &accWindow, TinyGPSPlus &gps, fs::F
     return true;
 }
 
-// ### Send *ALL* the anomalies back to the server, batchSize number at a time, so that it fits in RAM
-// ### Make sure a wifi connection has been instantiated before, I think? should I do it here?
+// Send *ALL* the anomalies back to the server, batchSize number at a time, so that it fits in RAM. Then delete the buffer file once successfully done
+// Make sure a wifi connection has been instantiated before, I think? should I do it here?
 // #### Returns:
-// http response code if everything goes ok (should be 200)
-// -1 if there's no active wifi network connected to
-// -2 if there's an error sending any batch of anomalies
+// http response code:  if everything goes ok (should be 200)
+// -1                :  if there's no active wifi network connected to
+// -2                :  if there's an error sending any batch of anomalies
+// -3                :  if the buffer file failed to be deleted
 // #### Args:
-// wifi: wifi object
 // url: url of the server to send the POST request to
 // fs: the fs object
 // path: path to the buffer file
@@ -238,6 +238,16 @@ int sendData(const char *url, fs::FS &fs, const char *path, const uint8_t &anoma
 
         // Free resources
         http.end();
+
+        if (httpResponseCode == 200)
+        {
+            // delete the buffer file
+            if (!fs.remove(path))
+            {
+                return -3;
+            }
+        }
+
         return httpResponseCode;
     }
     else
