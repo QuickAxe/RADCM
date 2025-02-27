@@ -39,40 +39,7 @@ def anomalies_in_region_view(request):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         anomalies_data = sp.get_anomalies_by_longlat(longitude, latitude)
-        #  <---------------------------------------------------------------------------------- modify this
-        # Shantanu shall add a function call here
-        # the function will return a dictionary of anomalies (dictionary of dictionaires - check below) in a region around (lattitude, longitude)
-
-        # dictionary of dictionaries for the content (remove hardcoded content and assign it accordingly)
-        # anomalies_data = {
-        #     "anomalies": [
-        #         {
-        #             "latitude": 15.591181864471721,
-        #             "longitude": 73.81062185333096,
-        #             "category": "Speedbreaker"
-        #         },
-        #         {
-        #             "latitude": 15.588822298730122,
-        #             "longitude": 73.81307154458827,
-        #             "category": "Rumbler"
-        #         },
-        #         {
-        #             "latitude": 15.593873211033117,
-        #             "longitude": 73.81406673161777,
-        #             "category": "Obstacle"
-        #         },
-        #         {
-        #             "latitude": 15.594893209859874,
-        #             "longitude": 73.80957563101596,
-        #             "category": "Speedbreaker"
-        #         }
-        #     ]
-        # }
-
-        #  <---------------------------------------------------------------------------------- /modify this
-
-        # Success response
-        print("go sing a song.. it works")
+        
 
         return Response(
             {"message": "Coordinates received successfully!", "anomalies": anomalies_data},
@@ -125,24 +92,13 @@ def routes_view(request):
              longitudeEnd, latitudeEnd,
         )
         route = sp.get_path_by_nodeid(node1, node2)
-        # return Response({"node1": node1, "node2":node2})
-        #  <---------------------------------------------------------------------------------- modify this
-        # Shantanu shall add a function call here
-        # the function will return a dictionary of routes (dictionary of dictionaires - check below) from (lattitudeStart, longitudeStart) to (lattitudeEnd, longitudeEnd)
+        
 
-        # dictionary of dictionaries for the content (remove hardcoded content and assign it accordingly)
-        routes_data = {
-            "routes": [route]
-        }
-        #  <---------------------------------------------------------------------------------- /modify this
-
-        # Success response
-        print("go sing a song.. it works")
 
         return Response(
             {
                 "message": "Coordinates received successfully!",
-                "routes": routes_data,
+                "routes": [route],
             },
             status=status.HTTP_200_OK,
         )
