@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  test:
+  user-app-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,8 +22,8 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
-        working-directory: app
+        working-directory: App
 
       - name: Run Flutter tests
         run: flutter test
-        working-directory: app
+        working-directory: App
