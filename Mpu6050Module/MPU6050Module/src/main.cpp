@@ -231,6 +231,7 @@ void loop()
                     conservativeMode = true;
                 }
 
+                addToBuffer(accWindow, gps, LittleFS, anomalyCounter, ANOMALY_BUFFER_SIZE);
                 // if (addToBuffer(accWindow, gps, LittleFS, anomalyCounter, ANOMALY_BUFFER_SIZE) == -5)
                 //     Serial.println("Error adding to bffer");
 
