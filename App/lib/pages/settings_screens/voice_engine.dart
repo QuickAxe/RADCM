@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../services/providers/user_settings.dart';
+import '../../services/tts_service.dart';
 
 class VoiceEngineScreen extends StatefulWidget {
   const VoiceEngineScreen({super.key});
@@ -26,107 +27,95 @@ class _VoiceEngineScreenState extends State<VoiceEngineScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Choose the voice for your audio notifications while navigating',
-              style: theme.textTheme.titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+            SwitchListTile(
+              title: const Text("Enable Voice Notifications"),
+              value: settings.voiceEnabled,
+              onChanged: (value) => settings.toggleVoiceEnabled(),
             ),
             const SizedBox(height: 15),
+            Opacity(
+              opacity: settings.voiceEnabled ? 1.0 : 0.5,
+              child: AbsorbPointer(
+                absorbing: settings.voiceEnabled == false,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Choose the voice for your audio notifications while navigating',
+                      style: theme.textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 15),
 
-            // Voice Selection Options
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                _voiceOption(
-                  context,
-                  mode: "male",
-                  title: "Male Voice",
-                  subtitle: "A husky male voice",
-                  icon: Icons.person_4,
-                  selected: settings.selectedVoice == "en-gb-x-gbb-local",
-                  onTap: () {
-                    settings.setSelectedVoice("en-gb-x-gbb-local");
-                    settings.setSelectedLocale("en-GB");
-                  },
+                    // Voice Selection Options
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        _voiceOption(
+                          context,
+                          mode: "male",
+                          title: "Male Voice",
+                          subtitle: "A husky male voice",
+                          icon: Icons.person_4,
+                          selected:
+                              settings.selectedVoice == "en-gb-x-gbb-local",
+                          onTap: () {
+                            settings.setSelectedVoice("en-gb-x-gbb-local");
+                            settings.setSelectedLocale("en-GB");
+                            TtsService(settings).speak(
+                              "Got it. I'll watch for road anomalies and guide you with turn-by-turn directions, so 'YOU' can enjoy your drive.",
+                            );
+                          },
+                        ),
+                        _voiceOption(
+                          context,
+                          mode: "female",
+                          title: "Female Voice",
+                          subtitle: "A soft female voice",
+                          icon: Icons.person_2,
+                          selected:
+                              settings.selectedVoice == "en-gb-x-gba-local",
+                          onTap: () {
+                            settings.setSelectedVoice("en-gb-x-gba-local");
+                            settings.setSelectedLocale("en-GB");
+                            TtsService(settings).speak(
+                                "Alright! I’ll watch out for anomalies and guide you along the way, so 'YOU' can enjoy your drive!");
+                          },
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 30),
+                    _sliderWithText(
+                      context,
+                      title: "Notification Volume",
+                      description: "Adjust the volume of your notifications.",
+                      value: settings.voiceVolume,
+                      min: 0,
+                      max: 1,
+                      onChanged: (newValue) =>
+                          settings.setVoiceVolume(newValue),
+                      onChangeEnd: (newValue) => TtsService(settings).speak(
+                          "The volume is now at ${(newValue * 100).toInt()}%"),
+                    ),
+                    const SizedBox(height: 24),
+                    _sliderWithText(
+                      context,
+                      title: "Control Speech Rate",
+                      description:
+                          "Adjust the speech rate of your notifications.",
+                      value: settings.speechRate,
+                      min: 0,
+                      max: 1,
+                      onChanged: (newValue) => settings.setSpeechRate(newValue),
+                      onChangeEnd: (newValue) => TtsService(settings)
+                          .speak("This is how fast I'll speak!"),
+                    ),
+                  ],
                 ),
-                _voiceOption(
-                  context,
-                  mode: "female",
-                  title: "Female Voice",
-                  subtitle: "A soft female voice",
-                  icon: Icons.person_2,
-                  selected: settings.selectedVoice == "en-gb-x-gba-local",
-                  onTap: () {
-                    settings.setSelectedVoice("en-gb-x-gba-local");
-                    settings.setSelectedLocale("en-GB");
-                  },
-                ),
-                // _voiceOption(
-                //   context,
-                //   mode: "default",
-                //   title: "Kawaii",
-                //   subtitle: "UwU~",
-                //   icon: LucideIcons.bot,
-                //   selected: settings.selectedVoice == "ja-JP-x-jaa-local",
-                //   onTap: () {
-                //     settings.setSelectedVoice("ja-JP-x-jaa-local");
-                //     settings.setSelectedLocale("ja-JP");
-                //   },
-                // ),
-              ],
-            ),
-
-            const SizedBox(height: 24),
-
-            // Volume Control
-            Text(
-              'Notification Volume',
-              style: theme.textTheme.titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Adjust the volume of your notifications.',
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-            ),
-            const SizedBox(height: 12),
-
-            Slider(
-              value: settings.voiceVolume,
-              min: 0,
-              max: 1,
-              divisions: 10,
-              label: "${(settings.voiceVolume * 100).toInt()}%",
-              activeColor: theme.colorScheme.primary,
-              onChanged: (newValue) => settings.setVoiceVolume(newValue),
-            ),
-
-            // Pitch Control
-            // Volume Control
-            Text(
-              'Control Speech Rate',
-              style: theme.textTheme.titleMedium
-                  ?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Adjust the speech rate of your notifications.',
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-            ),
-            const SizedBox(height: 12),
-
-            Slider(
-              value: settings.speechRate,
-              min: 0,
-              max: 1,
-              divisions: 10,
-              label: "${(settings.speechRate * 100).toInt()}%",
-              activeColor: theme.colorScheme.primary,
-              onChanged: (newValue) => settings.setSpeechRate(newValue),
-            ),
+              ),
+            )
           ],
         ),
       ),
@@ -143,7 +132,6 @@ class _VoiceEngineScreenState extends State<VoiceEngineScreen> {
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
-
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -193,6 +181,46 @@ class _VoiceEngineScreenState extends State<VoiceEngineScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _sliderWithText(
+    BuildContext context, {
+    required String title,
+    required String description,
+    required double value,
+    required double min,
+    required double max,
+    required ValueChanged<double> onChanged,
+    required ValueChanged<double> onChangeEnd,
+  }) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: theme.textTheme.titleMedium
+              ?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          description,
+          style: theme.textTheme.bodyMedium
+              ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: 12),
+        Slider(
+          value: value,
+          min: min,
+          max: max,
+          divisions: 10,
+          label: "${(value * 100).toInt()}%",
+          activeColor: theme.colorScheme.primary,
+          onChanged: onChanged,
+          onChangeEnd: onChangeEnd,
+        ),
+      ],
     );
   }
 }

@@ -1,9 +1,14 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
 
 import '../../data/models/osrm_models.dart';
+import '../../services/providers/user_settings.dart';
+import '../../services/tbt_location_service.dart';
+import '../../services/tts_service.dart';
 import '../../utils/route_utils.dart';
 import '../../utils/string_utils.dart';
 
@@ -18,58 +23,64 @@ class DynamicRouteDirections extends StatefulWidget {
 }
 
 class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
+  final TbtLocationService _locationService = TbtLocationService();
+  late TtsService _ttsService;
+
   StreamSubscription<Position>? posStream;
   int _currentStepIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    final userSettings =
+        Provider.of<UserSettingsProvider>(context, listen: false);
+    _ttsService = TtsService(userSettings);
     _updateCurrentStep();
   }
 
   @override
   void dispose() {
-    posStream?.cancel();
+    _locationService.cancelStream();
     super.dispose();
   }
 
   void _updateCurrentStep() {
-    posStream = Geolocator.getPositionStream(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.best,
-      ),
-    ).listen((Position position) {
-      double userLat = position.latitude;
-      double userLng = position.longitude;
+    posStream = _locationService.getPositionStream().listen(
+      (Position position) {
+        double userLat = position.latitude;
+        double userLng = position.longitude;
 
-      int bestIndex = _currentStepIndex;
+        int bestIndex = _currentStepIndex;
 
-      print("User Location: $userLng, $userLat");
-
-      if (_currentStepIndex < widget.route.legs.first.steps.length - 1) {
-        final step1 = widget.route.legs.first.steps[_currentStepIndex];
-        final step2 = widget.route.legs.first.steps[_currentStepIndex + 1];
-
-        double step1Lat = step1.maneuver.location[1];
-        double step1Lng = step1.maneuver.location[0];
-        double step2Lat = step2.maneuver.location[1];
-        double step2Lng = step2.maneuver.location[0];
-
-        if (_hasPassedCheckpoint(
-            step1Lat, step1Lng, step2Lat, step2Lng, userLat, userLng)) {
-          bestIndex = _currentStepIndex + 1;
+        if (kDebugMode) {
+          print("User Location: $userLng, $userLat");
         }
-      } else {
-        // dont need stream after user reaches da last
-        posStream!.cancel();
-      }
 
-      if (bestIndex != _currentStepIndex) {
-        setState(() {
-          _currentStepIndex = bestIndex;
-        });
-      }
-    });
+        if (_currentStepIndex < widget.route.legs.first.steps.length - 1) {
+          final step1 = widget.route.legs.first.steps[_currentStepIndex];
+          final step2 = widget.route.legs.first.steps[_currentStepIndex + 1];
+
+          double step1Lat = step1.maneuver.location[1];
+          double step1Lng = step1.maneuver.location[0];
+          double step2Lat = step2.maneuver.location[1];
+          double step2Lng = step2.maneuver.location[0];
+
+          if (_hasPassedCheckpoint(
+              step1Lat, step1Lng, step2Lat, step2Lng, userLat, userLng)) {
+            bestIndex = _currentStepIndex + 1;
+          }
+        } else {
+          // dont need stream after user reaches da last
+          posStream!.cancel();
+        }
+
+        if (bestIndex != _currentStepIndex) {
+          setState(() {
+            _currentStepIndex = bestIndex;
+          });
+        }
+      },
+    );
   }
 
   bool _hasPassedCheckpoint(double step1Lat, double step1Lng, double step2Lat,
@@ -90,6 +101,7 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
     if (widget.route.legs.isEmpty) {
       return const Center(child: Text("No directions available"));
     }
@@ -107,6 +119,7 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
 
     String instruction =
         generateVerboseInstruction(maneuverType, maneuverModifier, roadName);
+    _ttsService.speak(instruction);
 
     return ListView(
       shrinkWrap: true,

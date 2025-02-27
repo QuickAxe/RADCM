@@ -1,18 +1,22 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserSettingsProvider extends ChangeNotifier {
   // Voice engine settings
-  String _selectedVoice = "default";
+  bool _voiceEnabled = true;
+  bool get voiceEnabled => _voiceEnabled;
+  String _selectedVoice = "en-gb-x-gbb-local";
   String get selectedVoice => _selectedVoice;
-  double _voiceVolume = 0.5; // TODO: Check back
+  String _selectedLocale = "en-GB";
+  String get selectedLocale => _selectedLocale;
+  double _voiceVolume = 1.0;
   double get voiceVolume => _voiceVolume;
+  double _speechRate = 0.6;
+  double get speechRate => _speechRate;
 
-  void logout() {
-    _selectedVoice = "default";
-    _voiceVolume = 0.5;
+  void toggleVoiceEnabled() {
+    _voiceEnabled = !_voiceEnabled;
+    _savePreference("voiceEnabled", _voiceEnabled);
     notifyListeners();
   }
 
@@ -22,13 +26,33 @@ class UserSettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setSelectedLocale(String locale) {
+    _selectedLocale = locale;
+    _savePreference("selectedLocale", locale);
+    notifyListeners();
+  }
+
   void setVoiceVolume(double volume) {
     _voiceVolume = volume;
     _savePreference("notificationVolume", volume);
     notifyListeners();
   }
 
-  // Toggle anomalies provider
+  void setSpeechRate(double rate) {
+    _speechRate = rate;
+    _savePreference("speechRate", rate);
+    notifyListeners();
+  }
+
+  void logout() {
+    _selectedVoice = "en-gb-x-gbb-local";
+    _voiceVolume = 0.5;
+    _speechRate = 0.5;
+    _selectedLocale = "en-GB";
+    notifyListeners();
+  }
+
+  /// Toggle anomalies provider
   final Map<String, bool> _showOnMap = {
     "Speedbreaker": true,
     "Rumbler": true,
@@ -101,8 +125,11 @@ class UserSettingsProvider extends ChangeNotifier {
 
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    _selectedVoice = prefs.getString("selectedVoice") ?? "default";
-    _voiceVolume = prefs.getDouble("voiceVolume") ?? 0.5;
+    _voiceEnabled = prefs.getBool("voiceEnabled") ?? true;
+    _selectedVoice = prefs.getString("selectedVoice") ?? "en-gb-x-gbb-local";
+    _selectedLocale = prefs.getString("selectedLocale") ?? "en-GB";
+    _voiceVolume = prefs.getDouble("voiceVolume") ?? 1.0;
+    _speechRate = prefs.getDouble("speechRate") ?? 0.6;
 
     for (var anomaly in _showOnMap.keys) {
       _showOnMap[anomaly] = prefs.getBool("showOnMap_$anomaly") ?? true;

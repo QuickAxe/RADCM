@@ -4,14 +4,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 class UserSettingsProvider extends ChangeNotifier {
   // Voice engine settings
   // gba means female and gbb means male
+  bool _voiceEnabled = true;
+  bool get voiceEnabled => _voiceEnabled;
   String _selectedVoice = "en-gb-x-gbb-local";
   String get selectedVoice => _selectedVoice;
   String _selectedLocale = "en-GB";
   String get selectedLocale => _selectedLocale;
-  double _voiceVolume = 0.5;
+  double _voiceVolume = 1.0;
   double get voiceVolume => _voiceVolume;
-  double _speechRate = 0.4;
+  double _speechRate = 0.6;
   double get speechRate => _speechRate;
+
+  void toggleVoiceEnabled() {
+    _voiceEnabled = !_voiceEnabled;
+    _savePreference("voiceEnabled", _voiceEnabled);
+    notifyListeners();
+  }
 
   void setSelectedVoice(String voice) {
     _selectedVoice = voice;
@@ -110,10 +118,11 @@ class UserSettingsProvider extends ChangeNotifier {
 
   Future<void> _loadPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    _selectedVoice = prefs.getString("selectedVoice") ?? "default";
+    _voiceEnabled = prefs.getBool("voiceEnabled") ?? true;
+    _selectedVoice = prefs.getString("selectedVoice") ?? "en-gb-x-gbb-local";
     _selectedLocale = prefs.getString("selectedLocale") ?? "en-GB";
-    _voiceVolume = prefs.getDouble("voiceVolume") ?? 0.5;
-    _speechRate = prefs.getDouble("speechRate") ?? 0.5;
+    _voiceVolume = prefs.getDouble("voiceVolume") ?? 1.0;
+    _speechRate = prefs.getDouble("speechRate") ?? 0.6;
 
     for (var anomaly in _showOnMap.keys) {
       _showOnMap[anomaly] = prefs.getBool("showOnMap_$anomaly") ?? true;

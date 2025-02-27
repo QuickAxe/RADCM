@@ -70,6 +70,7 @@ dependencies:
   flutter_secure_storage:
   flutter_dotenv:
   loading_animation_widget:
+  flutter_tts: ^4.2.2
 
 
 

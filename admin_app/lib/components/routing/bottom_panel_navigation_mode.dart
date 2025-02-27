@@ -11,15 +11,28 @@ import 'package:sliding_up_panel/sliding_up_panel.dart';
 import '../../services/providers/anomaly_marker_layer.dart';
 import '../../services/providers/route_provider.dart';
 import '../../services/providers/user_settings.dart';
+import '../../utils/fix_anomaly_dialog.dart';
 import '../../utils/map_utils.dart';
 import '../../utils/route_utils.dart';
 
-class NavigationMode extends StatelessWidget {
+class NavigationMode extends StatefulWidget {
   final MapRouteProvider mapProvider;
   final MapController mapController;
-  const NavigationMode(
-      {super.key, required this.mapController, required this.mapProvider});
+  final double endLat;
+  final double endLng;
+  const NavigationMode({
+    super.key,
+    required this.mapController,
+    required this.mapProvider,
+    required this.endLat,
+    required this.endLng,
+  });
 
+  @override
+  State<NavigationMode> createState() => _NavigationModeState();
+}
+
+class _NavigationModeState extends State<NavigationMode> {
   @override
   Widget build(BuildContext context) {
     final themeMode = context.select<UserSettingsProvider, ThemeMode>(
@@ -27,6 +40,7 @@ class NavigationMode extends StatelessWidget {
     );
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final settings = Provider.of<UserSettingsProvider>(context, listen: false);
     return SlidingUpPanel(
       color: Theme.of(context).colorScheme.surfaceContainer,
       borderRadius: const BorderRadius.only(
@@ -46,7 +60,8 @@ class NavigationMode extends StatelessWidget {
                     style: theme.textTheme.headlineSmall
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
-                  DynamicRouteDirections(route: mapProvider.currentRoute),
+                  DynamicRouteDirections(
+                      route: widget.mapProvider.currentRoute),
                 ],
               ),
             ),
@@ -54,9 +69,10 @@ class NavigationMode extends StatelessWidget {
         ),
       ),
       body: FlutterMap(
-        mapController: mapController,
+        mapController: widget.mapController,
         options: MapOptions(
-          initialCenter: LatLng(mapProvider.startLat, mapProvider.startLng),
+          initialCenter:
+              LatLng(widget.mapProvider.startLat, widget.mapProvider.startLng),
           initialZoom: 18.0,
           minZoom: 3.0,
         ),
@@ -76,9 +92,9 @@ class NavigationMode extends StatelessWidget {
           PolylineLayer(
             polylines: [
               Polyline(
-                points: mapProvider.currentRoutePoints,
+                points: widget.mapProvider.currentRoutePoints,
                 strokeWidth: 6.0,
-                color: getColorForRoute(mapProvider.selectedRouteIndex)
+                color: getColorForRoute(widget.mapProvider.selectedRouteIndex)
                     .withOpacity(0.8),
               ),
             ],
@@ -105,6 +121,44 @@ class NavigationMode extends StatelessWidget {
             left: 200,
             bottom: 200,
             child: Attribution(),
+          ),
+          Positioned(
+            left: 85,
+            bottom: 210,
+            child: FloatingActionButton(
+              heroTag: "voice_toggle",
+              onPressed: () => settings.toggleVoiceEnabled(),
+              backgroundColor: settings.voiceEnabled
+                  ? colorScheme.secondaryContainer
+                  : colorScheme.tertiaryContainer,
+              tooltip: settings.voiceEnabled
+                  ? "Mute Voice Notifications"
+                  : "Enable Voice Notifications",
+              elevation: 6,
+              child: Icon(
+                settings.voiceEnabled
+                    ? Icons.volume_up_rounded
+                    : Icons.volume_off_rounded,
+                color: settings.voiceEnabled
+                    ? colorScheme.onSecondaryContainer
+                    : colorScheme.onTertiaryContainer,
+              ),
+            ),
+          ),
+          Positioned(
+            left: 16,
+            bottom: 210,
+            child: FloatingActionButton(
+              heroTag: "fix_anomaly",
+              onPressed: () {
+                showAnomalyDialog(context, widget.endLat, widget.endLng);
+              },
+              tooltip: "Fix Anomaly",
+              elevation: 6,
+              child: const Icon(
+                Icons.construction_rounded,
+              ),
+            ),
           ),
         ],
       ),
