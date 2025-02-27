@@ -249,6 +249,9 @@ void loop()
                     }
 
                     anomalyCounter = 0;
+
+                    // unset conservative mode
+                    conservativeMode = false;
                 }
             }
             notFirst = true;
