@@ -163,5 +163,5 @@ def get_path_by_nodeid(source_id:int,target_id:int):
         )
 
         # Fetch the results
-        results = cursor.fetchall()
-        return results
+        results = cursor.fetchone()
+        return results[0]
