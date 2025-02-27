@@ -32,7 +32,7 @@ class RouteSelectionMode extends StatelessWidget {
       color: Theme.of(context).colorScheme.surfaceContainer,
       borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(25.0), topRight: Radius.circular(25.0)),
-      minHeight: 250,
+      minHeight: 200,
       maxHeight: 700,
       panel: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -148,7 +148,7 @@ class RouteSelectionMode extends StatelessWidget {
           ),
           const AnomalyMarkerLayer(),
           const Positioned(
-            left: 250,
+            left: 200,
             bottom: 200,
             child: Attribution(),
           ),

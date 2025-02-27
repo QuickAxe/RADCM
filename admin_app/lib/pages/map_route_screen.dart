@@ -3,7 +3,6 @@ import 'package:admin_app/components/UI/blur_with_loading.dart';
 import 'package:admin_app/components/routing/bottom_panel_navigation_mode.dart'
     as prefix;
 import 'package:admin_app/components/routing/route_selection_mode.dart';
-import 'package:admin_app/utils/fix_anomaly_dialog.dart';
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -58,6 +57,8 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
                 Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: FloatingActionButton(
+                    heroTag: "start_navigation",
+                    tooltip: "Start Navigation",
                     onPressed: () {
                       _mapController.moveAndRotate(
                         LatLng(mapProvider.startLat, mapProvider.startLng),
@@ -75,25 +76,17 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
                 Row(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(5.0, 10.0, 5.0, 10.0),
-                      child: FloatingActionButton(
-                        onPressed: () {
-                          showAnomalyDialog(
-                              context, widget.endLat, widget.endLng);
-                        },
-                        child: const Icon(
-                          Icons.construction_rounded,
-                        ),
-                      ),
-                    ),
-                    Padding(
                       padding: const EdgeInsets.all(10.0),
                       child: FloatingActionButton(
+                        heroTag: "stop_navigation",
+                        tooltip: "Stop Navigation",
                         onPressed: () {
                           mapProvider.stopRouteNavigation();
                         },
-                        child: const Icon(
-                          Icons.stop,
+                        backgroundColor: colorScheme.errorContainer,
+                        child: Icon(
+                          Icons.stop_rounded,
+                          color: colorScheme.onErrorContainer,
                         ),
                       ),
                     ),
@@ -107,7 +100,11 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
               Positioned.fill(
                 child: mapProvider.startNavigation
                     ? prefix.NavigationMode(
-                        mapProvider: mapProvider, mapController: _mapController)
+                        mapProvider: mapProvider,
+                        mapController: _mapController,
+                        endLat: widget.endLat,
+                        endLng: widget.endLng,
+                      )
                     : RouteSelectionMode(
                         mapController: _mapController,
                         mapProvider: mapProvider),

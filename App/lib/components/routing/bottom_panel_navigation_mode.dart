@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:app/components/OSM_Attribution.dart';
 import 'package:app/components/routing/dynamic_route_directions.dart';
 import 'package:flutter/material.dart';
@@ -17,8 +19,11 @@ import '../../util/route_utils.dart';
 class NavigationMode extends StatelessWidget {
   final MapRouteProvider mapProvider;
   final MapController mapController;
-  const NavigationMode(
-      {super.key, required this.mapController, required this.mapProvider});
+  const NavigationMode({
+    super.key,
+    required this.mapController,
+    required this.mapProvider,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,12 +33,14 @@ class NavigationMode extends StatelessWidget {
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final settings = Provider.of<UserSettingsProvider>(context);
+    log("Voice Enabled? ${settings.voiceEnabled}");
     return SlidingUpPanel(
       color: Theme.of(context).colorScheme.surfaceContainer,
       borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(25.0), topRight: Radius.circular(25.0)),
-      minHeight: 250,
-      maxHeight: 200,
+      minHeight: 200,
+      maxHeight: 400,
       panel: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -105,8 +112,34 @@ class NavigationMode extends StatelessWidget {
           ),
           const Positioned(
             left: 200,
-            bottom: 250,
+            bottom: 200,
             child: Attribution(),
+          ),
+          Positioned(
+            left: 16,
+            bottom: 210,
+            child: FloatingActionButton(
+              heroTag: "voice_toggle",
+              onPressed: () {
+                settings.toggleVoiceEnabled();
+                log("Inside onPressed: Voice Enabled? ${settings.voiceEnabled}");
+              },
+              backgroundColor: settings.voiceEnabled
+                  ? colorScheme.primaryContainer
+                  : colorScheme.secondaryContainer,
+              tooltip: settings.voiceEnabled
+                  ? "Mute Voice Notifications"
+                  : "Enable Voice Notifications",
+              elevation: 6,
+              child: Icon(
+                settings.voiceEnabled
+                    ? Icons.volume_up_rounded
+                    : Icons.volume_off_rounded,
+                color: settings.voiceEnabled
+                    ? colorScheme.onPrimaryContainer
+                    : colorScheme.onSecondaryContainer,
+              ),
+            ),
           ),
         ],
       ),

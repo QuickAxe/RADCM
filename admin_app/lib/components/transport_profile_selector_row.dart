@@ -32,21 +32,6 @@ class TransportProfileSelectorRow extends StatelessWidget {
                     ? theme.colorScheme.primaryContainer
                     : theme.colorScheme.surfaceVariant,
                 borderRadius: BorderRadius.circular(12),
-                // border: Border.all(
-                //   color: isSelected
-                //       ? theme.colorScheme.primary
-                //       : Colors.transparent,
-                //   width: 2,
-                // ),
-                // boxShadow: isSelected
-                //     ? [
-                //         BoxShadow(
-                //           color: colorScheme.primary.withOpacity(0.3),
-                //           blurRadius: 2,
-                //           offset: const Offset(0, 3),
-                //         ),
-                //       ]
-                //     : [],
               ),
               child: Row(
                 children: [

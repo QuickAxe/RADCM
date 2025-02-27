@@ -1,4 +1,4 @@
-import 'package:app/services/providers/user_settings.dart';
+import 'package:admin_app/services/providers/user_settings.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 

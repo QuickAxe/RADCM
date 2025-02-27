@@ -153,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const AnomalyMarkerLayer(),
                   const Positioned(
                     left: 200,
-                    bottom: 250,
+                    bottom: 200,
                     child: Attribution(),
                   ),
                 ],

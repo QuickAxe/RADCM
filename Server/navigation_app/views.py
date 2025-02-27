@@ -4,47 +4,8 @@ from rest_framework.response import Response
 
 from django.db import connection
 
+from path import spatial_database_queries as sp
 
-def get_anomalies_by_location(
-    long_: float, lat_: float, distance_in_degrees: float = 0.01
-):
-    # If you can't run this, check Server/anomalies
-    #  - migrations.sql       # Update the database schema
-    #  - random_anomalies.sql # Add random fake data
-    with connection.cursor() as cursor:
-        query = """SELECT 
-                        json_agg(json_build_object(
-	                'longitude',ST_X(p_geom),
-	                'latitude', ST_Y(p_geom),
-	                'category', a_type
-	                )  )
-                FROM mv_clustered_anomalies
-                WHERE 
-                    ST_DWithin(
-                        p_geom, 
-                        st_setsrid(
-                            st_makepoint(%s, %s), 
-                                    4326),
-                        %s)
-                ;"""
-        cursor.execute(query, [long_, lat_, distance_in_degrees])
-
-        # Result processing needed for non json sql query
-        # results = [
-        #     {
-        #         "longitude": tup[0],
-        #         "latitude": tup[1],
-        #         "category": tup[2],
-        #     }
-        #     for tup in results
-        # ]
-        # print(type(results), type(results[0]))
-
-        # Note: query is written in a way to return a json array.
-        results = cursor.fetchone()
-        # Note: Query returns 1 item which is a json array.
-        #       destructing it here
-        return results[0]
 
 
 @api_view(["GET"])
@@ -77,41 +38,8 @@ def anomalies_in_region_view(request):
                 {"error": "Invalid latitude or longitude values."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        anomalies_data = get_anomalies_by_location(longitude, latitude)
-        #  <---------------------------------------------------------------------------------- modify this
-        # Shantanu shall add a function call here
-        # the function will return a dictionary of anomalies (dictionary of dictionaires - check below) in a region around (lattitude, longitude)
-
-        # dictionary of dictionaries for the content (remove hardcoded content and assign it accordingly)
-        # anomalies_data = {
-        #     "anomalies": [
-        #         {
-        #             "latitude": 15.591181864471721,
-        #             "longitude": 73.81062185333096,
-        #             "category": "Speedbreaker"
-        #         },
-        #         {
-        #             "latitude": 15.588822298730122,
-        #             "longitude": 73.81307154458827,
-        #             "category": "Rumbler"
-        #         },
-        #         {
-        #             "latitude": 15.593873211033117,
-        #             "longitude": 73.81406673161777,
-        #             "category": "Obstacle"
-        #         },
-        #         {
-        #             "latitude": 15.594893209859874,
-        #             "longitude": 73.80957563101596,
-        #             "category": "Speedbreaker"
-        #         }
-        #     ]
-        # }
-
-        #  <---------------------------------------------------------------------------------- /modify this
-
-        # Success response
-        print("go sing a song.. it works")
+        anomalies_data = sp.get_anomalies_by_longlat(longitude, latitude)
+        
 
         return Response(
             {"message": "Coordinates received successfully!", "anomalies": anomalies_data},
@@ -159,31 +87,18 @@ def routes_view(request):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
+        node1, node2 = sp.get_nodes_from_longlat(
+             longitudeStart, latitudeStart,
+             longitudeEnd, latitudeEnd,
+        )
+        route = sp.get_path_by_nodeid(node1, node2)
+        
 
-        #  <---------------------------------------------------------------------------------- modify this
-        # Shantanu shall add a function call here
-        # the function will return a dictionary of routes (dictionary of dictionaires - check below) from (lattitudeStart, longitudeStart) to (lattitudeEnd, longitudeEnd)
-
-        # dictionary of dictionaries for the content (remove hardcoded content and assign it accordingly)
-        routes_data = {
-            "routes": [
-                {
-                    "route": 1
-                },
-                {
-                    "route": 2
-                }
-            ]
-        }
-        #  <---------------------------------------------------------------------------------- /modify this
-
-        # Success response
-        print("go sing a song.. it works")
 
         return Response(
             {
                 "message": "Coordinates received successfully!",
-                "routes": routes_data,
+                "routes": [route],
             },
             status=status.HTTP_200_OK,
         )

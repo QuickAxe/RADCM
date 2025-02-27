@@ -337,6 +337,9 @@ class MaterialTheme {
 
   ThemeData theme(ColorScheme colorScheme) => ThemeData(
         useMaterial3: true,
+        progressIndicatorTheme:
+            const ProgressIndicatorThemeData(year2023: false),
+        sliderTheme: const SliderThemeData(year2023: false),
         brightness: colorScheme.brightness,
         colorScheme: colorScheme,
         textTheme: textTheme.apply(
