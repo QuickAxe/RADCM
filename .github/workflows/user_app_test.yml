@@ -26,7 +26,7 @@ jobs:
 
       # To prevent asset build issues
       - name: Create dummy .env file
-        run: touch app/.env
+        run: touch App/.env
 
       - name: Run Flutter tests
         run: flutter test
