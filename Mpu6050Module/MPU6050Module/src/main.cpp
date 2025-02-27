@@ -14,6 +14,7 @@
 #include <ESP8266WiFi.h>
 
 #include "utils.h"
+#include "secrets.h"
 
 // ==================================================================== Params ========================================================================
 
@@ -85,10 +86,6 @@ uint16_t anomalyCounter = 0;
 
 // path to store the detected anomalies in
 const char *filePath = "anomalies.txt";
-
-// wifi credentials, replace with what's appropriate:
-const char *ssid = "Error 404 !";
-const char *password = "whitehouse";
 
 // Server URL:
 const char *url = "http://192.168.1.9:8000";
@@ -233,8 +230,8 @@ void loop()
                     conservativeMode = true;
                 }
 
-                if (addToBuffer(accWindow, gps, LittleFS, anomalyCounter, ANOMALY_BUFFER_SIZE) == -5)
-                    Serial.println("Error adding to bffer");
+                // if (addToBuffer(accWindow, gps, LittleFS, anomalyCounter, ANOMALY_BUFFER_SIZE) == -5)
+                //     Serial.println("Error adding to bffer");
 
                 anomalyCounter++;
                 Serial.print("AnomalyCOunter=");
@@ -244,7 +241,7 @@ void loop()
                 if (anomalyCounter >= ANOMALY_BUFFER_SIZE)
                 {
                     // send all the anomalies now:
-                    uint16_t response = sendData(url, LittleFS, anomalyCounter, ANOMALY_BATCH_SIZE, ANOMALY_BUFFER_SIZE);
+                    int response = sendData(url, LittleFS, anomalyCounter, ANOMALY_BATCH_SIZE, ANOMALY_BUFFER_SIZE);
 
                     if (response != 200)
                     {

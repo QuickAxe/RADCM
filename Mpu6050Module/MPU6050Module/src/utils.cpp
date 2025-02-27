@@ -178,7 +178,7 @@ bool addToBuffer(const std::vector<xyzFloat> &accWindow, TinyGPSPlus &gps, fs::F
 // -3                :  if the buffer file failed to be deleted
 // -5: If the buffer file failed to open
 // -99: Some unexplained error
-uint16_t sendData(const char *url, fs::FS &fs, const uint8_t &anomalyCounter, const uint8_t &batchSize, const uint8_t ANOMALY_BUFFER_SIZE)
+int sendData(const char *url, fs::FS &fs, const uint8_t &anomalyCounter, const uint8_t &batchSize, const uint8_t ANOMALY_BUFFER_SIZE)
 {
     if (WiFi.status() == WL_CONNECTED)
     {
@@ -203,6 +203,7 @@ uint16_t sendData(const char *url, fs::FS &fs, const uint8_t &anomalyCounter, co
                 char path[7];
 
                 // ! note that i is incremented here, so don't worry about it in the main loop
+                // I may or may not have spent a lot of time debugging that :)
                 itoa(i++, path, 10);
                 strcat(path, ".txt");
 
