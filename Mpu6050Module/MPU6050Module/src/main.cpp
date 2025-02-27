@@ -225,6 +225,7 @@ void loop()
                 blink(ledPin, 3);
 
                 // if the buffer is 80% full, increase the threshold
+                // todo change this later, to a probability based thing
                 if (!conservativeMode and anomalyCounter >= (0.8 * ANOMALY_BUFFER_SIZE))
                 {
                     conservativeMode = true;
