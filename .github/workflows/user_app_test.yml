@@ -3,8 +3,12 @@ name: User App Tests
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - "App/**"
   pull_request:
     branches: [ "main" ]
+    paths:
+      - "App/**"
 
 jobs:
   user-app-test:
