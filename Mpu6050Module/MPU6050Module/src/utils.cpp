@@ -109,17 +109,37 @@ bool isAnomaly(const std::vector<xyzFloat> &accWindow, const uint8_t &THRESHOLD)
         return false;
 }
 
-// Adds the current acceleration and gyro windows to the Buffer (A simple text file in the flash filesystem)
+// Adds the current acceleration and gyro windows to the Buffer (A simple text file in the flash filesystem), in a file named anomalyCounter.txt, with it's respective anomaly count as it's name
 // #### Args:
 // pretty self explanatory I think?
-bool addToBuffer(const std::vector<xyzFloat> &accWindow, TinyGPSPlus &gps, fs::FS &fs, const char *path)
+bool addToBuffer(const std::vector<xyzFloat> &accWindow, TinyGPSPlus &gps, fs::FS &fs, const uint8_t &anomalyCounter, const uint8_t &ANOMALY_BUFFER_SIZE)
 {
-    File file = fs.open(path, "a");
+
+    char path[7];
+    int i = anomalyCounter;
+
+    // replace an existing anomaly using reservoir sampling
+    if (anomalyCounter >= ANOMALY_BUFFER_SIZE)
+    {
+        // the index to replace
+        int index = random(anomalyCounter);
+
+        if (index >= ANOMALY_BUFFER_SIZE)
+            return true;
+
+        itoa(index, path, 10);
+    }
+    else
+        itoa(i, path, 10);
+
+    // open the file
+    strcat(path, ".txt");
+    File file = fs.open(path, "w");
 
     if (!file)
     {
         // failed to open file
-        return false;
+        return -5;
     }
 
     for (uint8_t i = 0; i < accWindow.size(); i++)
@@ -143,51 +163,60 @@ bool addToBuffer(const std::vector<xyzFloat> &accWindow, TinyGPSPlus &gps, fs::F
     return true;
 }
 
-// Send *ALL* the anomalies back to the server, batchSize number at a time, so that it fits in RAM. Then delete the buffer file once successfully done
+// Send *ALL* the anomalies back to the server, batchSize number at a time, so that it fits in RAM. Then delete the buffer files once successfully done
 // Make sure a wifi connection has been instantiated before, I think? should I do it here?
+// #### Args:
+// url: url of the server to send the POST request to
+// fs: the fs object
+// anomalycounter: self explanatory
+// batchSize: How many anomalies to sent in one POST request
+// ANOMALY_BUFFER_SIZE: The size of the anomaly buffer (duh)
 // #### Returns:
 // http response code:  if everything goes ok (should be 200)
 // -1                :  if there's no active wifi network connected to
 // -2                :  if there's an error sending any batch of anomalies
 // -3                :  if the buffer file failed to be deleted
-// #### Args:
-// url: url of the server to send the POST request to
-// fs: the fs object
-// path: path to the buffer file
-// anomalycounter: self explanatory
-// batchSize: How many anomalies to sent in one POST request
-int sendData(const char *url, fs::FS &fs, const char *path, const uint8_t &anomalyCounter, const uint8_t &batchSize)
+// -5: If the buffer file failed to open
+// -99: Some unexplained error
+uint16_t sendData(const char *url, fs::FS &fs, const uint8_t &anomalyCounter, const uint8_t &batchSize, const uint8_t ANOMALY_BUFFER_SIZE)
 {
     if (WiFi.status() == WL_CONNECTED)
     {
         WiFiClient client;
         HTTPClient http;
 
-        int httpResponseCode;
+        int httpResponseCode = -99;
 
         http.begin(client, url);
 
-        File file = fs.open(path, "r");
-
-        if (!file)
-        {
-            // failed to open file
-            return false;
-        }
-
         // loop to send all anomalies in the buffer, one batchSize at a time
-        for (uint8_t i = 0; i < anomalyCounter; i++)
+        for (uint8_t i = 0; i < ANOMALY_BUFFER_SIZE;)
         {
             // make the json doc and pack it with anomalies
-            DynamicJsonDocument doc(4900);
+            JsonDocument doc;
             doc["source"] = "jimmy";
 
             // now add batchSize number of anomalies to the json doc:
             for (uint8_t j = 0; j < batchSize; j++)
             {
                 String temp;
+                char path[7];
 
-                // read one anomaly at a time
+                // ! note that i is incremented here, so don't worry about it in the main loop
+                itoa(i++, path, 10);
+                strcat(path, ".txt");
+
+                File file = fs.open(path, "r");
+
+                if (!file)
+                {
+                    // failed to open file, possibly because no more anomalies to send
+                    http.end();
+                    fs.remove(path);
+                    break;
+                }
+
+                // read one anomaly
                 for (uint8_t k = 0; k < 200; k++)
                 {
                     // read each of the axes from the file, separated by a ' '
@@ -213,9 +242,11 @@ int sendData(const char *url, fs::FS &fs, const char *path, const uint8_t &anoma
                 doc["anomaly_data"][j]["Latitude"] = temp.toFloat();
                 temp = file.readStringUntil(' ');
                 doc["anomaly_data"][j]["Longitude"] = temp.toFloat();
+                file.read();
 
-                // increment the anomaly counter as an anomaly hath been read
-                i++;
+                file.close();
+
+                fs.remove(path);
             }
 
             // adding braces here so as to destroy buffer ( the string) as soon as it's done being used, to save memory
@@ -227,32 +258,17 @@ int sendData(const char *url, fs::FS &fs, const char *path, const uint8_t &anoma
                 // send the data to the server now:
                 http.addHeader("Content-Type", "application/json");
                 httpResponseCode = http.POST(buffer);
-
-                // Serial.print("HTTP Response code: ");
-                // Serial.println(httpResponseCode);
             }
-
-            if (httpResponseCode != 200)
-                return -2;
         }
 
         // Free resources
         http.end();
 
-        if (httpResponseCode == 200)
-        {
-            // delete the buffer file
-            if (!fs.remove(path))
-            {
-                return -3;
-            }
-        }
-
         return httpResponseCode;
     }
     else
     {
-        // Serial.println("WiFi Disconnected");
+        // no wifi connection available, oh no... anyway
         return -1;
     }
 }

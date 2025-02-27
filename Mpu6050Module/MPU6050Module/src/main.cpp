@@ -40,16 +40,19 @@
 // value stolen from the frontie's code,
 // using own value because the frontie's one seems rather absurd (delta 18 m/s^2)
 #define THRESHOLD 6
+#define CONSERVATIVE_THRESOLD 12
+
+bool conservativeMode = false;
 
 // The number of ms to wait after detecting an anomaly,
 // before being able to send another
 #define ANOMALY_DETECTION_COOLDOWN 5000
 
 // The number of potential anomalies to store in a buffer before sending all back
-#define ANOMALY_BUFFER_SIZE 1
+#define ANOMALY_BUFFER_SIZE 4
 
 // The number of anomalies to send in one batch, back to the server in a single POST request
-#define ANOMALY_BATCH_SIZE 1
+#define ANOMALY_BATCH_SIZE 2
 
 // ----------------------------------------------------------------- Declarations ----------------------------------------------------------------------
 
@@ -78,7 +81,7 @@ bool notFirst = false;
 bool heartBeat = false;
 
 // counter for storing how many anomalies have been detected
-uint8_t anomalyCounter = 0;
+uint16_t anomalyCounter = 0;
 
 // path to store the detected anomalies in
 const char *filePath = "anomalies.txt";
@@ -87,7 +90,6 @@ const char *filePath = "anomalies.txt";
 const char *ssid = "Error 404 !";
 const char *password = "whitehouse";
 
-// ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // Server URL:
 const char *url = "http://192.168.1.9:8000";
 
@@ -109,6 +111,7 @@ void setup()
 
     // LittleFS.format();
     LittleFS.begin();
+    LittleFS.format();
 
     Wire.begin(i2cSDA, i2cSCL);
     Serial.begin(19200);
@@ -136,7 +139,10 @@ void setup()
     mpu.enableAccDLPF(true);
     mpu.setAccDLPF(MPU9250_DLPF_6); // lowest noise
 
+    // set the module to act as a station (a normal device that can connect to other networks)
+    WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
+    // WiFi.begin();
     Serial.println("Connecting");
 
     uint8_t i = 0;
@@ -156,6 +162,10 @@ void setup()
 
     Serial.println(WiFi.localIP());
 
+    // setup wifi to auto re-connect whenever the network is available again
+    WiFi.setAutoReconnect(true);
+    WiFi.persistent(true);
+
     blink(ledPin, 6);
 }
 
@@ -169,7 +179,7 @@ void loop()
     {
         heartbeatStart = millis();
         heartBeat = true;
-        // ! comment this out later to speed up the loop
+        // !----------------------------- comment this out later to speed up the loop ----------------------------------------------------------
         Serial.println(".........................................................heartbeat...............................................................");
         // blink(ledPin, 1);
         // using above blink would cause a delay of 150ms at least, hence using a hopefully non-blocking blink
@@ -197,7 +207,14 @@ void loop()
         // remove old values from the window
         accWindow.erase(accWindow.begin());
 
-        if (isAnomaly(accWindow, THRESHOLD) and ((millis() - anomalyLastDetected) >= ANOMALY_DETECTION_COOLDOWN))
+        bool detected = false;
+
+        if (!conservativeMode)
+            detected = isAnomaly(accWindow, THRESHOLD);
+        else
+            detected = isAnomaly(accWindow, CONSERVATIVE_THRESOLD);
+
+        if (detected and ((millis() - anomalyLastDetected) >= ANOMALY_DETECTION_COOLDOWN))
         {
             if (notFirst)
             {
@@ -210,14 +227,24 @@ void loop()
                 anomalyLastDetected = millis();
                 blink(ledPin, 3);
 
-                addToBuffer(accWindow, gps, LittleFS, filePath);
+                // if the buffer is 80% full, increase the threshold
+                if (!conservativeMode and anomalyCounter >= (0.8 * ANOMALY_BUFFER_SIZE))
+                {
+                    conservativeMode = true;
+                }
+
+                if (addToBuffer(accWindow, gps, LittleFS, anomalyCounter, ANOMALY_BUFFER_SIZE) == -5)
+                    Serial.println("Error adding to bffer");
+
+                anomalyCounter++;
+                Serial.print("AnomalyCOunter=");
+                Serial.println(anomalyCounter);
 
                 // if the anomaly buffer is full, send all the anomalies:
-                anomalyCounter++;
                 if (anomalyCounter >= ANOMALY_BUFFER_SIZE)
                 {
                     // send all the anomalies now:
-                    int response = sendData(url, LittleFS, filePath, anomalyCounter, ANOMALY_BATCH_SIZE);
+                    uint16_t response = sendData(url, LittleFS, anomalyCounter, ANOMALY_BATCH_SIZE, ANOMALY_BUFFER_SIZE);
 
                     if (response != 200)
                     {
