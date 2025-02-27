@@ -24,6 +24,10 @@ jobs:
         run: flutter pub get
         working-directory: App
 
+      # To prevent asset build issues
+      - name: Create dummy .env file
+        run: touch app/.env
+
       - name: Run Flutter tests
         run: flutter test
         working-directory: App
