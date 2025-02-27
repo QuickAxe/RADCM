@@ -1,0 +1,29 @@
+name: User App Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  user-app-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.29.0"
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: App
+
+      - name: Run Flutter tests
+        run: flutter test
+        working-directory: App
