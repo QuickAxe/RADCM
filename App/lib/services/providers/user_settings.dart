@@ -95,10 +95,9 @@ class UserSettingsProvider extends ChangeNotifier {
   String _profile = "driving";
   String get profile => _profile;
 
-  Future<void> setProfile(String newProfile) async {
+  void setProfile(String newProfile) {
     _profile = newProfile;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("profile", newProfile);
+    _savePreference("profile", newProfile);
     notifyListeners();
   }
 
