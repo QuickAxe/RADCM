@@ -31,6 +31,7 @@
 // Status LED pin
 #define ledPin 2
 
+// Probably don't change this
 #define GPS_BAUD 9600
 
 // the interval in ms between consequitive mpu sensor polls
@@ -41,18 +42,25 @@
 // value stolen from the frontie's code,
 // using own value because the frontie's one seems rather absurd (delta 18 m/s^2)
 #define THRESHOLD 6
-#define CONSERVATIVE_THRESOLD 12
 
-bool conservativeMode = false;
+// The probability with which to discard anomalies once in conservative mode
+// Specify the desired probability in the range [0, 100]
+#define CONSERVATIVE_MODE_PROBABILITY 70
+
+// The percentage of the buffer that should be filled before entering conservative mode
+// Specify the percentage as a decimal here, in the range [0, 1]
+#define CONSERVATIVE_MODE_BUFFER_PERCENTAGE 0.8
 
 // The number of ms to wait after detecting an anomaly,
 // before being able to send another
 #define ANOMALY_DETECTION_COOLDOWN 5000
 
 // The number of potential anomalies to store in a buffer before sending all back
+// Probably leave this value below 100
 #define ANOMALY_BUFFER_SIZE 4
 
 // The number of anomalies to send in one batch, back to the server in a single POST request
+// Maybe make sure this is a divisor of ANOMALY_BUFFER_SIZE... I mean the code should still work
 #define ANOMALY_BATCH_SIZE 2
 
 // ----------------------------------------------------------------- Declarations ----------------------------------------------------------------------
@@ -163,6 +171,8 @@ void setup()
     WiFi.setAutoReconnect(true);
     WiFi.persistent(true);
 
+    notFirst = false;
+
     blink(ledPin, 6);
 }
 
@@ -182,6 +192,7 @@ void loop()
         // using above blink would cause a delay of 150ms at least, hence using a hopefully non-blocking blink
     }
 
+    // a smart blink that doesn't cause any delay
     if (heartBeat)
     {
         if ((millis() - heartbeatStart) <= 100)
@@ -204,14 +215,7 @@ void loop()
         // remove old values from the window
         accWindow.erase(accWindow.begin());
 
-        bool detected = false;
-
-        if (!conservativeMode)
-            detected = isAnomaly(accWindow, THRESHOLD);
-        else
-            detected = isAnomaly(accWindow, CONSERVATIVE_THRESOLD);
-
-        if (detected and ((millis() - anomalyLastDetected) >= ANOMALY_DETECTION_COOLDOWN))
+        if (isAnomaly(accWindow, THRESHOLD) and ((millis() - anomalyLastDetected) >= ANOMALY_DETECTION_COOLDOWN))
         {
             if (notFirst)
             {
@@ -221,21 +225,31 @@ void loop()
                 Serial.println("========================================================================================================================");
                 Serial.println("===========================================   anomaly detected   =======================================================");
                 Serial.println("========================================================================================================================");
+
                 anomalyLastDetected = millis();
+                anomalyCounter++;
+
                 blink(ledPin, 3);
 
-                // if the buffer is 80% full, increase the threshold
-                // todo change this later, to a probability based thing
-                if (!conservativeMode and anomalyCounter >= (0.8 * ANOMALY_BUFFER_SIZE))
+                // if the buffer is filled up to CONSERVATIVE_MODE_BUFFER_PERCENTAGE, trigger conservative mode
+                if (anomalyCounter >= (CONSERVATIVE_MODE_BUFFER_PERCENTAGE * ANOMALY_BUFFER_SIZE))
                 {
-                    conservativeMode = true;
+                    int probability = random(0, 100);
+
+                    // Discard the anomaly with a probability of CONSERVATIVE_MODE_PROBABILITY
+                    if (probability > CONSERVATIVE_MODE_PROBABILITY)
+                    {
+                        anomalyCounter--;
+
+                        // simulate a continue statement
+                        return;
+                    }
                 }
 
                 addToBuffer(accWindow, gps, LittleFS, anomalyCounter, ANOMALY_BUFFER_SIZE);
                 // if (addToBuffer(accWindow, gps, LittleFS, anomalyCounter, ANOMALY_BUFFER_SIZE) == -5)
                 //     Serial.println("Error adding to bffer");
 
-                anomalyCounter++;
                 Serial.print("AnomalyCOunter=");
                 Serial.println(anomalyCounter);
 
@@ -251,9 +265,6 @@ void loop()
                     }
 
                     anomalyCounter = 0;
-
-                    // unset conservative mode
-                    conservativeMode = false;
                 }
             }
             notFirst = true;
