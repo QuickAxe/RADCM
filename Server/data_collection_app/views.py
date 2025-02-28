@@ -2,6 +2,8 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.response import Response
 
+from SensorModel.inference import predictAnomalyClass
+
 # Response data format:
 # {
 #     "source": "mobile",
@@ -100,15 +102,25 @@ def anomaly_data_collection_view(request):
             # handle data from jimmy
         else:
             print("recieved data from mobile")
-            # handle data from mobile
-
-        # Someone will call a function that exposes the ML. model here..
-        # it will take the anomalies.. classify them.. update the db.. and whatever
+            # handle data from mobile      
 
         # send anomalyList to the model here.. 
         # the shape of anomaly list will be (no of anomalies, 200, 3)
+        # the reason I'm sending them as batches and not one at a time is to possibly speed up inference
+        anomalyOutputs = predictAnomalyClass(anomalyList)
 
+        # anomalyOutputs should be of the form:
+        # [ (anomaly_1_CLass, confidence), (anomaly_2_Class, confidence), ...... ]
+        # ugh look at me using snake case 
+        # NOTE: the class here is an index of the class, use below reference to decode it, but in reverse:
+        # classNames = {"Pothole": 0, "Breaker": 1, "Flat": 2}
+        # NOTE: as of now, only the first two classes have been used
 
+        # ! now add these to database, take care of the source (for the weights)
+        # ! OUUU, what if... we scale the weights based on the confidence value??
+
+        # ! ALSOO .. we should probably send the response before running inference for obvious reasons
+        # running inference could take a long time, and would leave the client waiting for a response 
         # Success response
         return Response(
             {
