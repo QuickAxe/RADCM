@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.response import Response
-
+from django.core.cache import cache
 from django.db import connection
 
 from path import spatial_database_queries as sp
@@ -38,8 +38,8 @@ def anomalies_in_region_view(request):
                 {"error": "Invalid latitude or longitude values."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+            
         anomalies_data = sp.get_anomalies_by_longlat(longitude, latitude)
-        
 
         return Response(
             {"message": "Coordinates received successfully!", "anomalies": anomalies_data},
@@ -87,13 +87,23 @@ def routes_view(request):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
+        # get nodes for corresponding (lon, lat) pairs
         node1, node2 = sp.get_nodes_from_longlat(
              longitudeStart, latitudeStart,
              longitudeEnd, latitudeEnd,
         )
-        route = sp.get_path_by_nodeid(node1, node2)
         
-
+        # check cache
+        key = str(node1) + '_' + str(node2)
+        value = cache.get(key)
+        
+        route = value
+        if not route:
+            route = sp.get_path_by_nodeid(node1, node2)
+            cache.set(key, route, timeout=60 * 10)
+            print('stored route in cache - got value from db query')
+        else:
+            print('retrived route from redis cache')
 
         return Response(
             {
