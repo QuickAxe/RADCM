@@ -38,6 +38,11 @@
 // set to 20ms for a 50hz polling rate for now
 #define POLL_INTERVAL 20
 
+// The interval in ms between consequitive WIFI network polls
+// Basically, how often to check if a wifi network is available, to send whatever data is present in the buffer
+// Currently set to 30 min (30 * 60 * 1000)
+#define NETWROK_POLL_INTERVAL 1800000
+
 // the threshold for the Z-Diff anomaly detection function
 // value stolen from the frontie's code,
 // using own value because the frontie's one seems rather absurd (delta 18 m/s^2)
@@ -84,6 +89,7 @@ SoftwareSerial GpsSerial(RX, TX);
 unsigned long heartbeatStart = 0;
 unsigned long mpuStart = 0;
 unsigned long anomalyLastDetected = 0;
+unsigned long lastWifiPoll = 0;
 
 // some flags to store some states for using non-blocking stuff in the main loop
 bool notFirst = false;
@@ -250,9 +256,6 @@ void loop()
                 // if (addToBuffer(accWindow, gps, LittleFS, anomalyCounter, ANOMALY_BUFFER_SIZE) == -5)
                 //     Serial.println("Error adding to bffer");
 
-                Serial.print("AnomalyCOunter=");
-                Serial.println(anomalyCounter);
-
                 // if the anomaly buffer is full, send all the anomalies:
                 if (anomalyCounter >= ANOMALY_BUFFER_SIZE)
                 {
@@ -270,5 +273,25 @@ void loop()
             notFirst = true;
         }
         mpuStart = millis();
+    }
+
+    // send the buffer every NETWROK_POLL_INTERVAL ms, if there is a wifi connection available
+    if ((millis() - lastWifiPoll) >= NETWROK_POLL_INTERVAL)
+    {
+        lastWifiPoll = millis();
+
+        // if there is an active wifi connection and there are enough anomalies to send
+        if ((WiFi.status() == WL_CONNECTED) and (anomalyCounter > ANOMALY_BATCH_SIZE))
+        {
+
+            int response = sendData(url, LittleFS, anomalyCounter, ANOMALY_BATCH_SIZE, ANOMALY_BUFFER_SIZE);
+
+            if (response != 200)
+            {
+                Serial.println("ERROR SENDING DATA with error code: " + response);
+            }
+
+            anomalyCounter = 0;
+        }
     }
 }
