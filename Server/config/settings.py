@@ -54,13 +54,13 @@ REST_FRAMEWORK = {
     ),
 }
 
-# for redis caching
+# for valkey caching
 CACHES = {
     'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',  # Redis server URL
+        'BACKEND': 'django_valkey.cache.ValkeyCache',
+        'LOCATION': 'valkey://127.0.0.1:6379/1',  # Valkey server URL
         'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'CLIENT_CLASS': 'django_valkey.client.DefaultClient',
         }
     }
 }

@@ -8,7 +8,7 @@ comm==0.2.2
 debugpy==1.8.6
 decorator==5.1.1
 Django==5.1.4
-django-redis==5.4.0
+django-valkey
 djangorestframework==3.15.2
 djangorestframework_simplejwt==5.4.0
 EasyProcess==1.1
@@ -39,9 +39,8 @@ PyJWT==2.10.1
 PySocks==1.7.1
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
-pywin32==308
 pyzmq==26.2.0
-redis==5.2.1
+valkey
 requests==2.32.3
 six==1.16.0
 soupsieve==2.6
