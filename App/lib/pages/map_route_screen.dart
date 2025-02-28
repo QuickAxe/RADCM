@@ -48,7 +48,7 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
               },
             ),
             actions: [
-              if (mapProvider.selectedRouteIndex != -1 &&
+              if (mapProvider.selectedMatchingIndex != -1 &&
                   !mapProvider.startNavigation)
                 Padding(
                   padding: const EdgeInsets.all(10.0),

@@ -5,7 +5,6 @@ import 'package:app/services/providers/search.dart';
 import 'package:app/services/providers/user_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
@@ -16,20 +15,17 @@ import '../../data/repository/osrm_repository.dart';
 class MapRouteProvider with ChangeNotifier {
   final OSRMRepository repository = OSRMRepository();
 
-  // Coordinates for start and destination.
   double startLat = 15.49613530624519,
       startLng = 73.82646130357969,
       endLat = 15.60000652430488,
       endLng = 73.82570085490943;
 
-  // Data from the API
-  List<List<LatLng>> alternativeRoutes = [];
-  List<RouteModel> routes = [];
-  // RouteModel contains: legs, distance, duration, summary
+  List<List<LatLng>> alternativeMatchings = [];
+  List<MatchingModel> alternativeMatchingModels = [];
 
   // UI state
   bool isLoading = true;
-  int selectedRouteIndex = -1;
+  int selectedMatchingIndex = -1;
   bool startNavigation = false;
 
   // Store calculated bounds for the route
@@ -65,47 +61,32 @@ class MapRouteProvider with ChangeNotifier {
     try {
       final userSettings =
           Provider.of<UserSettingsProvider>(context, listen: false);
-      // This is the JSON response
-      RouteResponse routeResponse = await repository.fetchRoute(
+      // TODO: Handle passing profiles n all later
+      RouteResponse routeResponse = await repository.fetchMatchedRoute(
         startLat: startLat,
         startLng: startLng,
         endLat: endLat,
         endLng: endLng,
-        profile: userSettings.profile,
       );
 
-      // these are all the alternative routes
-      List<List<LatLng>> routesList = [];
-      // list of routes fetched in terms of RouteResponse
-      List<RouteModel> routeModels = [];
+      List<List<LatLng>> matchingList = [];
+      List<MatchingModel> matchingModels = [];
 
-      // Get an instance of PolylinePoints to decode Polyline -> List<LatLng>
-      PolylinePoints polylinePoints = PolylinePoints();
-
-      // the response is an already constructed RouteResponse data model
-      for (RouteModel route in routeResponse.routes) {
-        routeModels.add(route);
-        if (route.legs.isNotEmpty) {
-          final leg = route.legs.first;
-          List<LatLng> decodedPoints = [];
-          for (var step in leg.steps) {
-            // converts the encoded Polyline of the geometry to a list of LatLng
-            final points = polylinePoints.decodePolyline(step.geometry);
-            decodedPoints
-                .addAll(points.map((p) => LatLng(p.latitude, p.longitude)));
-          }
-          // after decoding all steps in a leg, we add it to routeslist (alternate routes basically)
-          routesList.add(decodedPoints);
+      for (MatchingModel matching in routeResponse.matchings) {
+        matchingModels.add(matching);
+        if (matching.geometry.coordinates.isNotEmpty) {
+          matchingList.add(matching.geometry.coordinates);
         }
       }
 
       // Update state
-      alternativeRoutes = routesList;
-      routes = routeModels;
+      alternativeMatchings = matchingList;
+      alternativeMatchingModels = matchingModels;
       isLoading = false;
-      if (routes.isNotEmpty) {
-        selectedRouteIndex = 0;
-        _calculateBounds(alternativeRoutes[0]);
+
+      if (alternativeMatchingModels.isNotEmpty) {
+        selectedMatchingIndex = 0;
+        _calculateBounds(alternativeMatchings[0]);
       }
     } catch (e) {
       dev.log("Error loading routes: $e");
@@ -132,10 +113,10 @@ class MapRouteProvider with ChangeNotifier {
 
   /// Update selected route index and recalculate bounds.
   void updateSelectedRoute(int index) {
-    selectedRouteIndex = index;
-    if (index < alternativeRoutes.length) {
+    selectedMatchingIndex = index;
+    if (index < alternativeMatchings.length) {
       // When a route is selected it is fit in the screen
-      _calculateBounds(alternativeRoutes[index]);
+      _calculateBounds(alternativeMatchings[index]);
     }
     notifyListeners();
   }
@@ -156,15 +137,22 @@ class MapRouteProvider with ChangeNotifier {
     isLoading = true;
   }
 
-  /// Get the current RouteModel
-  RouteModel get currentRoute =>
-      (selectedRouteIndex >= 0 && selectedRouteIndex < routes.length)
-          ? routes[selectedRouteIndex]
-          : RouteModel(legs: [], distance: 0, duration: 0, summary: '');
+  /// Get the current MatchingModel
+  MatchingModel get currentMatching => (selectedMatchingIndex >= 0 &&
+          selectedMatchingIndex < alternativeMatchingModels.length)
+      ? alternativeMatchingModels[selectedMatchingIndex]
+      : MatchingModel(
+          confidence: 0,
+          geometry: Geometry(coordinates: [], type: ""),
+          weightName: "",
+          weight: 0,
+          legs: [],
+          distance: 0,
+          duration: 0);
 
-  /// Get current route points List<LatLng>
-  List<LatLng> get currentRoutePoints =>
-      (selectedRouteIndex >= 0 && selectedRouteIndex < alternativeRoutes.length)
-          ? alternativeRoutes[selectedRouteIndex]
-          : [];
+  /// Get current matching points List<LatLng>
+  List<LatLng> get currentMatchingPoints => (selectedMatchingIndex >= 0 &&
+          selectedMatchingIndex < alternativeMatchings.length)
+      ? alternativeMatchings[selectedMatchingIndex]
+      : [];
 }
