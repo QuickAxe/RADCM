@@ -33,9 +33,10 @@ class SensorData(Dataset):
         # read the anomaly data and convert it to a numpy array:
         anomaly = pd.read_csv(anomalyPath, header=None)
         anomaly = anomaly.to_numpy(dtype=np.float32, copy=True)
+        
 
         anomaly = anomaly.transpose()
-                
+               
         # perfrom transforms, if any passed during init
         if self.transform:
             anomaly = self.transform(anomaly)

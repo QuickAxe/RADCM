@@ -9,12 +9,12 @@ from rest_framework.response import Response
 #         {
 #             "latitude": 15.600218,
 #             "longitude": 73.826060,
-#             "window": [[1.2, 2.3, 4.2], [5.6, 7.8, 9.0]],
+#             "window": [[1.2, 2.3, 4.2], .....,  [5.6, 7.8, 9.0]],
 #         },
 #         {
 #             "latitude": 15.600219,
 #             "longitude": 73.826061,
-#             "window": [[2.3, 3.4, 5.6], [6.7, 8.9, 1.2]],
+#             "window": [[2.3, 3.4, 5.6], ......,  [6.7, 8.9, 1.2]],
 #         },
 #     ]
 # }
@@ -41,6 +41,10 @@ def anomaly_data_collection_view(request):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        # a list to store all anomalies, and only anomaly data, to send to the model
+        # the first dim should be the number of anomalies in the list
+        anomalyList = []
+        
         # Process each anomaly
         for anomaly in anomaly_data:
             if not isinstance(anomaly, dict):
@@ -87,6 +91,8 @@ def anomaly_data_collection_view(request):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
+            anomalyList.append(window)
+
         
         #todo  <---------------------------------------------------------------------------------- modify this
         if source == "jimmy":
@@ -99,7 +105,9 @@ def anomaly_data_collection_view(request):
         # Someone will call a function that exposes the ML. model here..
         # it will take the anomalies.. classify them.. update the db.. and whatever
 
-        #todo  <---------------------------------------------------------------------------------- /modify this
+        # send anomalyList to the model here.. 
+        # the shape of anomaly list will be (no of anomalies, 200, 3)
+
 
         # Success response
         return Response(

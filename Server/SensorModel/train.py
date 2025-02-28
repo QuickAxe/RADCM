@@ -7,7 +7,7 @@ from tqdm import tqdm
 import matplotlib.pyplot as plt
 import pandas as pd
 
-import numpy as np
+# import numpy as np
 from models import *
 
 from dataSetLoader import SensorData
@@ -35,7 +35,7 @@ interpolationFactor = 5
 numWorkers = 0
 
 # run number to save to its corresponding folder (yes yes, I know, but I'm too lazy to do this in code automatically)
-runNo = "Cnn5-Carlos75"
+runNo = "Cnn5-Carlos75TEST"
 
 
 # ================================================== initialising =========================================================
@@ -124,7 +124,7 @@ def train_one_epoch(epoch_index):
 
         # Make predictions for this batch
         outputs = model(inputs)
-        # print(outputs)
+        print(outputs)
 
         # Compute the loss and its gradients
         loss = lossFunction(outputs, labels)
