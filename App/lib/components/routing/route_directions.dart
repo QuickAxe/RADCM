@@ -7,7 +7,7 @@ import '../../util/route_utils.dart';
 
 /// A widget that displays detailed turn-by-turn directions for a chosen route
 class RouteDirections extends StatelessWidget {
-  final RouteModel route;
+  final MatchingModel route;
   const RouteDirections({super.key, required this.route});
 
   @override

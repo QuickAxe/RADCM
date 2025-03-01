@@ -14,7 +14,7 @@ import '../../services/tts_service.dart';
 
 /// A widget that displays the next valid turn-by-turn direction dynamically.
 class DynamicRouteDirections extends StatefulWidget {
-  final RouteModel route;
+  final MatchingModel route;
 
   const DynamicRouteDirections({super.key, required this.route});
 
@@ -60,10 +60,10 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
         final step1 = widget.route.legs.first.steps[_currentStepIndex];
         final step2 = widget.route.legs.first.steps[_currentStepIndex + 1];
 
-        double step1Lat = step1.maneuver.location[1];
-        double step1Lng = step1.maneuver.location[0];
-        double step2Lat = step2.maneuver.location[1];
-        double step2Lng = step2.maneuver.location[0];
+        double step1Lat = step1.maneuver.location.latitude;
+        double step1Lng = step1.maneuver.location.longitude;
+        double step2Lat = step2.maneuver.location.latitude;
+        double step2Lng = step2.maneuver.location.longitude;
 
         if (_hasPassedCheckpoint(
             step1Lat, step1Lng, step2Lat, step2Lng, userLat, userLng)) {

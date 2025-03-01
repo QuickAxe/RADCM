@@ -61,9 +61,9 @@ class RouteSelectionMode extends StatelessWidget {
               padding: EdgeInsets.zero,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: mapProvider.routes.length,
+              itemCount: mapProvider.alternativeMatchingModels.length,
               itemBuilder: (context, index) {
-                final route = mapProvider.routes[index];
+                final route = mapProvider.alternativeMatchingModels[index];
                 return ListTile(
                   leading: CircleAvatar(
                     backgroundColor: getColorForRoute(index),
@@ -81,7 +81,7 @@ class RouteSelectionMode extends StatelessWidget {
                   subtitle: Text(
                     "Distance: ${formatDistance(route.distance)} | Duration: ${formatDuration(route.duration)}",
                   ),
-                  selected: mapProvider.selectedRouteIndex == index,
+                  selected: mapProvider.selectedMatchingIndex == index,
                   onTap: () {
                     mapProvider.updateSelectedRoute(index);
                     mapController.fitCamera(
@@ -96,8 +96,9 @@ class RouteSelectionMode extends StatelessWidget {
             ),
             const Divider(),
             const SizedBox(height: 10),
-            if (mapProvider.selectedRouteIndex >= 0 &&
-                mapProvider.selectedRouteIndex < mapProvider.routes.length)
+            if (mapProvider.selectedMatchingIndex >= 0 &&
+                mapProvider.selectedMatchingIndex <
+                    mapProvider.alternativeMatchingModels.length)
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
@@ -107,7 +108,7 @@ class RouteSelectionMode extends StatelessWidget {
                         style: theme.textTheme.headlineSmall
                             ?.copyWith(fontWeight: FontWeight.bold),
                       ),
-                      RouteDirections(route: mapProvider.currentRoute),
+                      RouteDirections(route: mapProvider.currentMatching),
                     ],
                   ),
                 ),
@@ -136,11 +137,12 @@ class RouteSelectionMode extends StatelessWidget {
           // Draw all alternative routes.
           PolylineLayer(
             polylines: [
-              for (int i = 0; i < mapProvider.alternativeRoutes.length; i++)
+              for (int i = 0; i < mapProvider.alternativeMatchings.length; i++)
                 Polyline(
-                  points: mapProvider.alternativeRoutes[i],
-                  strokeWidth: mapProvider.selectedRouteIndex == i ? 6.0 : 4.0,
-                  color: mapProvider.selectedRouteIndex == i
+                  points: mapProvider.alternativeMatchings[i],
+                  strokeWidth:
+                      mapProvider.selectedMatchingIndex == i ? 6.0 : 4.0,
+                  color: mapProvider.selectedMatchingIndex == i
                       ? getColorForRoute(i).withOpacity(0.8)
                       : getColorForRoute(i).withOpacity(0.5),
                 ),

@@ -53,7 +53,7 @@ class NavigationMode extends StatelessWidget {
                     style: theme.textTheme.headlineSmall
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
-                  DynamicRouteDirections(route: mapProvider.currentRoute),
+                  DynamicRouteDirections(route: mapProvider.currentMatching),
                 ],
               ),
               // ),
@@ -85,9 +85,9 @@ class NavigationMode extends StatelessWidget {
           PolylineLayer(
             polylines: [
               Polyline(
-                points: mapProvider.currentRoutePoints,
+                points: mapProvider.currentMatchingPoints,
                 strokeWidth: 6.0,
-                color: getColorForRoute(mapProvider.selectedRouteIndex)
+                color: getColorForRoute(mapProvider.selectedMatchingIndex)
                     .withOpacity(0.8),
               ),
             ],
