@@ -16,7 +16,7 @@ _test_data = [
 ]
 class APISpeedTest():
     def perf_helper(self,long1,lat1,long2,lat2):
-        url = f"http://localhost:8000/path/{long1},{lat1};{long2},{lat2}"
+        url = f"http://127.0.0.1:8000/path/{long1},{lat1};{long2},{lat2}"
         start_time = time.time()
         requests.get(url)
         end_time = time.time()

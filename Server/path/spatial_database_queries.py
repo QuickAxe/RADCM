@@ -101,10 +101,14 @@ def get_path_by_longlat(long1:float, lat1:float, long2:float, lat2:float):
                 limit 1),
                 dr as (
                 select * FROM pgr_dijkstra(
-                    'SELECT id_new as id, source, target, length::double precision as cost,length::double precision as reverse_cost FROM public.edges as e, 
-	                (SELECT ST_Expand(ST_Extent(geom_way), 0.1) as box from edges as b
-	                WHERE b.source = '||(select id from source_id)|| '
-	                OR b.target= '||(select id from target_id)||'  )as box WHERE e.geom_way && box.box
+                    'WITH box as (SELECT ST_Expand(ST_Extent(geom_way), 0.1) as box from edges as b
+	                WHERE b.source = '||(select id from source_id)|| ' OR b.source= '||(select id from target_id)||'  
+                        OR b.target = '||(select id from source_id)|| ' OR b.target= '||(select id from target_id)||'
+                        )
+                    SELECT id_new as id, source, target, 
+                    length::double precision as cost,length::double precision as reverse_cost 
+                    FROM public.edges as e, box
+	                 WHERE e.geom_way && box.box
                     ',
                 	(select id from source_id),
                 	(select id from target_id))
@@ -125,10 +129,14 @@ def get_path_by_nodeid(source_id:int,target_id:int):
             """WITH input as (SELECT %s AS source_id, %s AS target_id),
                 dr as (
                 select * FROM pgr_dijkstra(
-                	'SELECT id_new as id, source, target, length::double precision as cost, length::double precision as reverse_cost  FROM public.edges as e, 
-                	(SELECT ST_Expand(ST_Extent(geom_way), 0.1) as box from edges as b
-                	WHERE b.source = '||(select source_id from input)|| '
-                	OR b.target= '||(select target_id from input)||'  )as box WHERE e.geom_way && box.box
+                	'WITH box as (SELECT ST_Expand(ST_Extent(geom_way), 0.1) as box from edges as b
+                	WHERE b.source = '||(select source_id from input)|| ' OR b.source = '||(select target_id from input)||'
+                    OR b.target = '||(select source_id from input)|| ' OR b.target= '||(select target_id from input)||'    
+                 )
+                 SELECT id_new as id, source, target, length::double precision as cost, 
+                 length::double precision as reverse_cost  
+                 FROM public.edges as e, box
+                 WHERE e.geom_way && box.box
                 	',
                 	(select source_id from input),
                 	(select target_id from input))
