@@ -1,6 +1,6 @@
-from models import *
+from .models import *
 import torch 
-from transforms import Interpolate
+from .transforms import Interpolate
 from copy import deepcopy
 
 def predictAnomalyClass(anomalyData):
