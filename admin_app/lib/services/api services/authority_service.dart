@@ -31,7 +31,7 @@ class AuthorityService {
   Future<bool> fixAnomaly(double latitude, double longitude) async {
     try {
       Response response = await dioClient.dio.delete(
-        "anomaly/",
+        "anomaly/fixed/",
         data: {
           "latitude": latitude,
           "longitude": longitude

@@ -3,11 +3,15 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
+import 'package:restart_app/restart_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/api services/authority_service.dart';
 import '../services/api services/dio_client_auth_service.dart';
 import '../services/providers/permissions.dart';
+import '../services/providers/route_provider.dart';
+import '../services/providers/search.dart';
+import '../services/providers/user_settings.dart';
 
 // util to show the dialog box and fix anomaly
 Future<void> showAnomalyDialog(
@@ -112,9 +116,29 @@ Future<void> showAnomalyDialog(
                                   } else {
                                     Fluttertoast.showToast(
                                       msg:
-                                          "Internal issue, please try again later",
+                                          "Your Session has expired, please login again",
                                       toastLength: Toast.LENGTH_LONG,
                                     );
+
+                                    // LOG OUT AUTHORITY
+
+                                    // clear storage
+                                    await DioClientAuth().logout();
+
+                                    final prefs = await SharedPreferences.getInstance();
+                                    await prefs.remove("isDev");
+                                    await prefs.remove("isUser");
+
+                                    if (!context.mounted) return;
+
+                                    // reset providers
+                                    Provider.of<Permissions>(context, listen: false).logout();
+                                    Provider.of<MapRouteProvider>(context, listen: false).logout();
+                                    Provider.of<Search>(context, listen: false).logout();
+                                    Provider.of<UserSettingsProvider>(context, listen: false)
+                                        .logout();
+
+                                    await Restart.restartApp();
                                   }
                                 }
                               }
