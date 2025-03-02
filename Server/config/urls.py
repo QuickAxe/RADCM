@@ -19,9 +19,17 @@ from django.urls import path, include
 # from path.views import my_view
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/auth/', include('auth_app.urls')),
-    path('api/navigation/', include('navigation_app.urls')),
-    path('api/data/', include('data_collection_app.urls')),
+    path('admin/', admin.site.urls), # admin can add users who can then log in to the authority app 
+    path('api/', include('auth_app.urls')),
+    path('api/', include('navigation_app.urls')),
+    path('api/', include('data_collection_app.urls')),
     path('path/', include('path.urls')),
 ]
+
+# --------------------------------------- Active API end-points ---------------------------------------
+# api/token/ - for user Login [POST]
+# api/token/refresh/ - to refresh user Login [POST]
+# api/anomaly/fixed/ - to fix an anomaly [DELETE]
+# api/anomalies/ - to retrieve a list of anomalies around a (latitude, longitude) [GET]
+# api/anomalies/reports/ - to report anomlies (data collector) [POST]
+# api/routes/ - to get routes from (latitudeStart, longitudeStart) to (latitudeEnd, longitudeEnd) [GET]
