@@ -1,6 +1,10 @@
 from rest_framework.decorators import api_view
 from rest_framework import status
 from rest_framework.response import Response
+import os, uuid
+from django.conf import settings
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 from SensorModel.inference import predictAnomalyClass
 
@@ -22,7 +26,7 @@ from SensorModel.inference import predictAnomalyClass
 # }
 #
 # Note: it is enforced that windwo should contain 200 sublists.. bcoz thats what it should
-# source - "mobile" / "jimmy" 
+# source - "mobile" / "jimmy"
 
 # jimmy => Jiggle Intensity Mpu Module Yes
 
@@ -46,14 +50,12 @@ def anomaly_sensor_data_collection_view(request):
         # a list to store all anomalies, and only anomaly data, to send to the model
         # the first dim should be the number of anomalies in the list
         anomalyList = []
-        
+
         # Process each anomaly
         for anomaly in anomaly_data:
             if not isinstance(anomaly, dict):
                 return Response(
-                    {
-                        "error": "Each anomaly entry must be a dictionary."
-                    },
+                    {"error": "Each anomaly entry must be a dictionary."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
@@ -95,23 +97,22 @@ def anomaly_sensor_data_collection_view(request):
 
             anomalyList.append(window)
 
-        
-        #todo  <---------------------------------------------------------------------------------- modify this
+        # todo  <---------------------------------------------------------------------------------- modify this
         if source == "jimmy":
             print("recieved data from jimmy")
             # handle data from jimmy
         else:
             print("recieved data from mobile")
-            # handle data from mobile      
+            # handle data from mobile
 
-        # send anomalyList to the model here.. 
+        # send anomalyList to the model here..
         # the shape of anomaly list will be (no of anomalies, 200, 3)
         # the reason I'm sending them as batches and not one at a time is to possibly speed up inference
         # anomalyOutputs = predictAnomalyClass(anomalyList)
 
         # anomalyOutputs should be of the form:
         # [ (anomaly_1_CLass, confidence), (anomaly_2_Class, confidence), ...... ]
-        # ugh look at me using snake case 
+        # ugh look at me using snake case
         # NOTE: the class here is an index of the class, use below reference to decode it, but in reverse:
         # classNames = {"Pothole": 0, "Breaker": 1, "Flat": 2}
         # NOTE: as of now, only the first two classes have been used
@@ -120,7 +121,7 @@ def anomaly_sensor_data_collection_view(request):
         # ! OUUU, what if... we scale the weights based on the confidence value??
 
         # ! ALSOO .. we should probably send the response before running inference for obvious reasons
-        # running inference could take a long time, and would leave the client waiting for a response 
+        # running inference could take a long time, and would leave the client waiting for a response
         # Success response
         return Response(
             {
@@ -132,9 +133,37 @@ def anomaly_sensor_data_collection_view(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
 @api_view(["POST"])
 def anomaly_image_data_collection_view(request):
     try:
+        print("Files: ", request.FILES)
+
+        if "image" not in request.FILES:
+            return Response(
+                {"error": "Image file not found in requestttt."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        image = request.FILES["image"]
+
+        source = request.data.get("source")
+        if not source or not isinstance(source, str):
+            return Response(
+                {"error": "Invalid source. It must be a non-empty string."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        file_extension = image.name.split(".")[-1]
+        new_filename = f"{source}_{uuid.uuid4().hex}.{file_extension}" #this is to make sure the file names are uniform (source_uuid.extension)
+
+        save_path = os.path.join(settings.MEDIA_ROOT, "anomaly_images", source)
+        os.makedirs(save_path, exist_ok=True)
+        file_path = os.path.join(save_path, new_filename)
+
+        default_storage.save(file_path, ContentFile(image.read()))
+
+        # TODO: sen pic to model
+
         return Response(
             {
                 "message": "Anomaly image data received successfully!",
