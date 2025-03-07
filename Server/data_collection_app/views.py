@@ -28,7 +28,7 @@ from SensorModel.inference import predictAnomalyClass
 
 
 @api_view(["POST"])
-def anomaly_data_collection_view(request):
+def anomaly_sensor_data_collection_view(request):
     try:
         # Extract anomaly data from request body
         anomaly_data = request.data.get("anomaly_data")
@@ -124,7 +124,20 @@ def anomaly_data_collection_view(request):
         # Success response
         return Response(
             {
-                "message": "Anomaly data received successfully!",
+                "message": "Anomaly sensor data received successfully!",
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(["POST"])
+def anomaly_image_data_collection_view(request):
+    try:
+        return Response(
+            {
+                "message": "Anomaly image data received successfully!",
             },
             status=status.HTTP_200_OK,
         )

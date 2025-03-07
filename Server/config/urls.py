@@ -31,5 +31,6 @@ urlpatterns = [
 # api/token/refresh/ - to refresh user Login [POST]
 # api/anomaly/fixed/ - to fix an anomaly [DELETE]
 # api/anomalies/ - to retrieve a list of anomalies around a (latitude, longitude) [GET]
-# api/anomalies/reports/ - to report anomlies (data collector) [POST]
+# api/anomalies/sensors/ - to report anomlies (sensor data collector) [POST]
+# api/anomalies/images/ - to report anomlies (image data collector) [POST]
 # api/routes/ - to get routes from (latitudeStart, longitudeStart) to (latitudeEnd, longitudeEnd) [GET]
