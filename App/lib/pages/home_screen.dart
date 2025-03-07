@@ -8,6 +8,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../components/OSM_Attribution.dart';
@@ -55,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: Padding(
           padding: const EdgeInsets.all(10.0),
           child: FloatingActionButton(
+            backgroundColor: colorScheme.secondaryContainer,
             heroTag: "hamburger",
             onPressed: () {
               _scaffoldKey.currentState?.openDrawer();
@@ -83,6 +85,8 @@ class _HomeScreenState extends State<HomeScreen> {
               return Padding(
                 padding: const EdgeInsets.all(10.0),
                 child: FloatingActionButton(
+                  heroTag: "my_location",
+                  backgroundColor: colorScheme.secondaryContainer,
                   onPressed: () {
                     // refresh user location
                     Provider.of<Permissions>(context, listen: false)
@@ -155,6 +159,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     left: 200,
                     bottom: 200,
                     child: Attribution(),
+                  ),
+                  Positioned(
+                    left: 16,
+                    bottom: 210,
+                    child: FloatingActionButton(
+                      heroTag: "capture_anomaly",
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/capture');
+                      },
+                      backgroundColor: colorScheme.primaryContainer,
+                      tooltip: "See an anomaly? Capture it!",
+                      elevation: 6,
+                      child: const Icon(LucideIcons.camera),
+                    ),
                   ),
                 ],
               );

@@ -14,16 +14,22 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
+from django.http import HttpResponse
+
 # from path.views import my_view
 
 urlpatterns = [
-    path('admin/', admin.site.urls), # admin can add users who can then log in to the authority app 
-    path('api/', include('auth_app.urls')),
-    path('api/', include('navigation_app.urls')),
-    path('api/', include('data_collection_app.urls')),
-    path('path/', include('path.urls')),
+    path("", lambda request: HttpResponse("RADCM Backend")),
+    path(
+        "admin/", admin.site.urls
+    ),  # admin can add users who can then log in to the authority app
+    path("api/", include("auth_app.urls")),
+    path("api/", include("navigation_app.urls")),
+    path("api/", include("data_collection_app.urls")),
+    path("path/", include("path.urls")),
 ]
 
 # --------------------------------------- Active API end-points ---------------------------------------

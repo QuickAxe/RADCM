@@ -10,7 +10,7 @@ import '../models/osrm_models.dart';
 
 class OSRMRepository {
   final String localServerUrl =
-      'http://${dotenv.env['IP_ADDRESS']}:8000/api/navigation/routes/';
+      'http://${dotenv.env['IP_ADDRESS']}:8000/api/routes/';
   final String osrmBaseUrl = "http://router.project-osrm.org/match/v1/driving/";
 
   /// Fetches raw route polylines from local API, decodes them, and sends them to OSRM Matching API.
@@ -32,36 +32,55 @@ class OSRMRepository {
     }
 
     final localData = json.decode(localResponse.body);
-    // log("LocalData: $localData");
 
     // This basically stores the coordinates of all the routes
     final List<List<LatLng>> allRouteCoordinates =
         _extractCoordinates(localData);
 
     if (allRouteCoordinates.isEmpty) {
-      throw Exception("No valid coordinates found in response");
-    }
-
-    // Format the coordinates for OSRM Matching API
-    // TODO: Takes only the first route for now, change later to incorporate multiple routes
-    String coordinateStr = _formatCoordinates(
-        allRouteCoordinates.isNotEmpty ? allRouteCoordinates.first : []);
-    log("Length Coordinates String: ${coordinateStr.length}");
-
-    // Call OSRM Matching API
-    final osrmUrl =
-        "$osrmBaseUrl$coordinateStr?steps=true&geometries=geojson&overview=full&annotations=false";
-    final osrmResponse = await http.get(Uri.parse(osrmUrl));
-
-    if (osrmResponse.statusCode != 200) {
       throw Exception(
-          "Failed to fetch matched route from OSRM: ${osrmResponse.reasonPhrase}");
+          "No valid coordinates found in response"); // TODO: Gracefully handle this
     }
 
-    final osrmData = json.decode(osrmResponse.body);
-    log("OSRM Data length: ${osrmData.length}");
+    final List<LatLng> fullRoute = allRouteCoordinates.first;
+    const int chunkSize = 5;
+    List<RouteResponse> routeResponses = [];
 
-    return RouteResponse.fromJson(osrmData);
+    for (int i = 0; i < fullRoute.length; i += chunkSize) {
+      final List<LatLng> chunk =
+          fullRoute.sublist(i, (i + chunkSize).clamp(0, fullRoute.length));
+      String coordinateStr = _formatCoordinates(chunk);
+      log("Processing chunk ${i ~/ chunkSize + 1}: ${coordinateStr.length} chars");
+      final osrmUrl =
+          "$osrmBaseUrl$coordinateStr?steps=true&geometries=geojson&overview=full&annotations=false";
+      final osrmResponse = await http.get(Uri.parse(osrmUrl));
+
+      if (osrmResponse.statusCode != 200) {
+        throw Exception(
+            "Failed to fetch matched route from OSRM: ${osrmResponse.reasonPhrase}");
+      }
+
+      final osrmData = json.decode(osrmResponse.body);
+      routeResponses.add(RouteResponse.fromJson(
+          osrmData)); // These are multiple OSRM responses
+    }
+
+    return _mergeRouteResponses(routeResponses);
+  }
+
+  RouteResponse _mergeRouteResponses(List<RouteResponse> responses) {
+    if (responses.isEmpty) {
+      throw Exception("No RouteResponse objects inside responses to merge,");
+    }
+
+    // basically matching is the common thing in every route response from OSRM, so just merge it for all the responses
+    List<MatchingModel> mergedMatchings =
+        responses.expand((r) => r.matchings).toList();
+
+    return RouteResponse(
+      code: responses.first.code,
+      matchings: mergedMatchings,
+    );
   }
 
   /// Extracts coordinates by decoding polylines using flutter_polyline_points.
@@ -82,11 +101,9 @@ class OSRMRepository {
           routeCoordinates.addAll(latLngList);
         }
       }
-      routeCoordinates = _downsampleCoordinates(routeCoordinates, 5);
-      log("Downsampled coordinates length: ${routeCoordinates.length.toString()}");
       extractedRoutes.add(routeCoordinates);
     }
-
+    // extractedRoutes is local to this function, its a [[LatLng]]
     return extractedRoutes;
   }
 

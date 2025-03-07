@@ -1,5 +1,6 @@
 import 'dart:developer' as dev;
 
+import 'package:app/components/anomaly_image_uploader.dart';
 import 'package:app/pages/home_screen.dart';
 import 'package:app/pages/map_route_screen.dart';
 import 'package:app/pages/settings_screen.dart';
@@ -99,6 +100,7 @@ class _MyAppState extends State<MyApp> {
         '/additional_settings': (context) => const AdditionalSettings(),
         '/map_route': (context) => const MapRouteScreen(),
         '/navigation_preferences': (context) => const NavigationPreferences(),
+        '/capture': (context) => AnomalyImageUploader(),
       },
     );
   }

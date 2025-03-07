@@ -29,6 +29,17 @@ class AppDrawer extends StatelessWidget {
               Navigator.pushNamed(context, '/settings');
             },
           ),
+          const SizedBox(
+            height: 10,
+          ),
+          ListTile(
+            leading: const Icon(LucideIcons.camera),
+            title: const Text('Capture'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(context, '/capture');
+            },
+          ),
         ],
       ),
     );
