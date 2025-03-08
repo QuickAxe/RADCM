@@ -108,11 +108,12 @@ def anomaly_sensor_data_collection_view(request):
         # send anomalyList to the model here..
         # the shape of anomaly list will be (no of anomalies, 200, 3)
         # the reason I'm sending them as batches and not one at a time is to possibly speed up inference
-        # anomalyOutputs = predictAnomalyClass(anomalyList)
+        anomalyOutputs = predictAnomalyClass(anomalyList)
 
         # anomalyOutputs should be of the form:
         # [ (anomaly_1_CLass, confidence), (anomaly_2_Class, confidence), ...... ]
         # ugh look at me using snake case
+        
         # NOTE: the class here is an index of the class, use below reference to decode it, but in reverse:
         # classNames = {"Pothole": 0, "Breaker": 1, "Flat": 2}
         # NOTE: as of now, only the first two classes have been used
@@ -122,6 +123,7 @@ def anomaly_sensor_data_collection_view(request):
 
         # ! ALSOO .. we should probably send the response before running inference for obvious reasons
         # running inference could take a long time, and would leave the client waiting for a response
+
         # Success response
         return Response(
             {
