@@ -1,0 +1,6 @@
+1. pip install -r requirements.txt
+2. we need valkey running (check setup_valkey)
+3. we need the celery worker running 
+    - open a new terminal
+    - for linux/mac/wsl run: celery -A config worker -E -l info 
+    - for windows run: celery -A config worker -P solo -E -l info
