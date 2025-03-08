@@ -15,11 +15,14 @@ def predictAnomalyClass(anomalyData):
     #### Returns: A list of tuples of predicted classes of each anomaly in the list, along with it's confidence value
     '''    
     device = torch.device("cuda" if torch.cuda.is_available() else ("mps" if torch.mps.is_available() else "cpu"))
+    # device = torch.device("cpu")
+
+    # print("device = ", device)
     
     # use the cnn5 model for now
     model = Cnn5(2)
 
-    model.load_state_dict(torch.load("SensorModel/cnn5_Carlos75_70.pt", weights_only=True))
+    model.load_state_dict(torch.load("SensorModel/cnn5_Carlos75_70.pt", weights_only=True, map_location ='cpu'))
     model.eval()
     model = model.to(device)
 
