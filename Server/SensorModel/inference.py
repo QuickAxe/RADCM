@@ -6,7 +6,7 @@ import time
 from celery import shared_task
 import numpy as np
 
-
+@shared_task
 def predictAnomalyClass(anomalyData):
     '''
     Predict the class of an anomaly
@@ -63,13 +63,6 @@ def predictAnomalyClass(anomalyData):
         classProbs.append((index.item(), temp[index].item()))
     
     return classProbs
-
-# TODO: delete this later
-@shared_task
-def dummyTaskForCelery(anomalies_data):
-    time.sleep(10)
-    return True
-    
 
 
 

@@ -108,7 +108,7 @@ def anomaly_sensor_data_collection_view(request):
         # send anomalyList to the model here..
         # the shape of anomaly list will be (no of anomalies, 200, 3)
         # the reason I'm sending them as batches and not one at a time is to possibly speed up inference
-        anomalyOutputs = predictAnomalyClass(anomalyList)
+        anomalyOutputs = predictAnomalyClass.delay(anomalyList)
 
         # anomalyOutputs should be of the form:
         # [ (anomaly_1_CLass, confidence), (anomaly_2_Class, confidence), ...... ]
