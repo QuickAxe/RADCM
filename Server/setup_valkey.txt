@@ -1,10 +1,10 @@
-1.  get redis on yo system.. 
+1.  get valkey on yo system.. 
     linux, mac -> ez
     windows -> wsl -> ez
 
-2.  start the redis server on port 6379 (default)
+2.  start the valkey server on port 6379 (default)
 
-3.  install requirements.txt (just django-redis and redis tbh)
+3.  install requirements.txt (just django-valkey and valkey tbh)
 
 4.  done
 

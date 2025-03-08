@@ -2,6 +2,8 @@ from .models import *
 import torch 
 from .transforms import Interpolate
 from copy import deepcopy
+import time
+from celery import shared_task
 
 def predictAnomalyClass(anomalyData):
     '''
@@ -56,8 +58,12 @@ def predictAnomalyClass(anomalyData):
     
     return outputs
 
-
-
+# TODO: delete this later
+@shared_task
+def dummyTaskForCelery(anomalies_data):
+    time.sleep(10)
+    return True
+    
 
 
 
