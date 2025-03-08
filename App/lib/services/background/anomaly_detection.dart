@@ -171,7 +171,7 @@ Future<void> flushBuffer(List<Anomaly> probableAnomalyBuffer) async {
 Future<bool> formatAndPost(probableAnomalyBuffer) async {
   Map<String, dynamic> data = formatAnomalyData(probableAnomalyBuffer);
   DioResponse response =
-      await DioClientUser().postRequest('data/anomalies/', data);
+      await DioClientUser().postRequest('anomalies/sensors/', data);
   return response.success == true;
 }
 
