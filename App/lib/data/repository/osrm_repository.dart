@@ -25,7 +25,7 @@ class OSRMRepository {
         "$localServerUrl?format=json&latitudeEnd=$endLat&latitudeStart=$startLat&longitudeEnd=$endLng&longitudeStart=$startLng";
 
     final localResponse = await http.get(Uri.parse(localUrl));
-    log("Called the local API");
+    log("Called the local API: $localUrl");
 
     if (localResponse.statusCode != 200) {
       throw Exception("Failed to fetch data from local API");
@@ -38,21 +38,24 @@ class OSRMRepository {
         _extractCoordinates(localData);
 
     if (allRouteCoordinates.isEmpty) {
-      throw Exception(
-          "No valid coordinates found in response"); // TODO: Gracefully handle this
+      throw Exception("No routes received");
     }
 
+    // fetching the first route FOR NOW
     final List<LatLng> fullRoute = allRouteCoordinates.first;
     const int chunkSize = 5;
-    List<RouteResponse> routeResponses = [];
+    List<Map<String, dynamic>> rawOsrmResponses = [];
 
     for (int i = 0; i < fullRoute.length; i += chunkSize) {
       final List<LatLng> chunk =
           fullRoute.sublist(i, (i + chunkSize).clamp(0, fullRoute.length));
       String coordinateStr = _formatCoordinates(chunk);
+
       log("Processing chunk ${i ~/ chunkSize + 1}: ${coordinateStr.length} chars");
+
       final osrmUrl =
-          "$osrmBaseUrl$coordinateStr?steps=true&geometries=geojson&overview=full&annotations=false";
+          "$osrmBaseUrl$coordinateStr?steps=true&geometries=geojson&overview=full&annotations=false&tidy=true";
+      log("Called $osrmUrl");
       final osrmResponse = await http.get(Uri.parse(osrmUrl));
 
       if (osrmResponse.statusCode != 200) {
@@ -60,27 +63,74 @@ class OSRMRepository {
             "Failed to fetch matched route from OSRM: ${osrmResponse.reasonPhrase}");
       }
 
-      final osrmData = json.decode(osrmResponse.body);
-      routeResponses.add(RouteResponse.fromJson(
-          osrmData)); // These are multiple OSRM responses
+      final Map<String, dynamic> osrmData = json.decode(osrmResponse.body);
+      rawOsrmResponses.add(osrmData);
     }
 
-    return _mergeRouteResponses(routeResponses);
+    return _mergeOsrmResponses(rawOsrmResponses);
   }
 
-  RouteResponse _mergeRouteResponses(List<RouteResponse> responses) {
+  RouteResponse _mergeOsrmResponses(List<Map<String, dynamic>> responses) {
     if (responses.isEmpty) {
-      throw Exception("No RouteResponse objects inside responses to merge,");
+      throw Exception("No OSRM responses to merge.");
     }
 
-    // basically matching is the common thing in every route response from OSRM, so just merge it for all the responses
-    List<MatchingModel> mergedMatchings =
-        responses.expand((r) => r.matchings).toList();
+    // Extract matchings from all responses
+    List<dynamic> allMatchings =
+        responses.expand((r) => r["matchings"] as List).toList();
 
-    return RouteResponse(
-      code: responses.first.code,
-      matchings: mergedMatchings,
-    );
+    if (allMatchings.isEmpty) {
+      throw Exception("No valid matchings found.");
+    }
+
+    // Merge matchings into one single matching object
+    final mergedMatching = _mergeMatchings(allMatchings);
+
+    // Construct the final merged JSON
+    final mergedJson = {
+      "code": responses.first["code"], // Keeping the same response code
+      "matchings": [mergedMatching], // Wrap in a list since OSRM expects a list
+    };
+
+    return RouteResponse.fromJson(mergedJson);
+  }
+
+  Map<String, dynamic> _mergeMatchings(List<dynamic> matchings) {
+    List<List<double>> mergedCoordinates = [];
+    List<dynamic> mergedLegs = [];
+    double totalWeight = 0;
+    double totalDuration = 0;
+    double totalDistance = 0;
+    double maxConfidence = 0;
+
+    for (var matching in matchings) {
+      // Merge geometry coordinates
+      mergedCoordinates.addAll((matching["geometry"]["coordinates"] as List)
+          .map((e) => List<double>.from(e)));
+
+      // Merge legs
+      mergedLegs.addAll(matching["legs"] as List);
+
+      // Sum up weight, duration, distance
+      totalWeight += (matching["weight"] as num).toDouble();
+      totalDuration += (matching["duration"] as num).toDouble();
+      totalDistance += (matching["distance"] as num).toDouble();
+
+      // Get max confidence
+      maxConfidence = maxConfidence > (matching["confidence"] as num).toDouble()
+          ? maxConfidence
+          : (matching["confidence"] as num).toDouble();
+    }
+
+    return {
+      "confidence": maxConfidence,
+      "geometry": {"coordinates": mergedCoordinates, "type": "LineString"},
+      "legs": mergedLegs,
+      "weight_name": "routability",
+      "weight": totalWeight,
+      "duration": totalDuration,
+      "distance": totalDistance
+    };
   }
 
   /// Extracts coordinates by decoding polylines using flutter_polyline_points.

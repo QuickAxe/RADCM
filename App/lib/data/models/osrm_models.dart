@@ -13,8 +13,9 @@ class RouteResponse {
   factory RouteResponse.fromJson(Map<String, dynamic> json) {
     return RouteResponse(
       code: json['code'],
+      // these are no longer alternate routes these are now parts of the same route, like legs // TODO: TO BE CHANGED LATER (probably... i hope not~)
       matchings: (json['matchings'] as List)
-          .map((route) => MatchingModel.fromJson(route))
+          .map((match) => MatchingModel.fromJson(match))
           .toList(),
     );
   }
