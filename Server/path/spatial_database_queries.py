@@ -106,7 +106,14 @@ def get_path_by_longlat(long1:float, lat1:float, long2:float, lat2:float):
                         OR b.target = '||(select id from source_id)|| ' OR b.target= '||(select id from target_id)||'
                         )
                     SELECT id_new as id, source, target, 
-                    length::double precision as cost,length::double precision as reverse_cost 
+                    CASE 
+                        WHEN e.car_forward <> ''Forbidden'' then length::double precision 
+                        ELSE -1 
+                    END as cost, 
+                    CASE 
+                        WHEN e.car_backward <> ''Forbidden'' then length::double precision 
+                        ELSE -1 
+                    END as reverse_cost 
                     FROM public.edges as e, box
 	                 WHERE e.geom_way && box.box
                     ',
@@ -133,8 +140,15 @@ def get_path_by_nodeid(source_id:int,target_id:int):
                 	WHERE b.source = '||(select source_id from input)|| ' OR b.source = '||(select target_id from input)||'
                     OR b.target = '||(select source_id from input)|| ' OR b.target= '||(select target_id from input)||'    
                  )
-                 SELECT id_new as id, source, target, length::double precision as cost, 
-                 length::double precision as reverse_cost  
+                 SELECT id_new as id, source, target, 
+                 CASE 
+                    WHEN e.car_forward <> ''Forbidden'' then length::double precision 
+                    ELSE -1 
+                END as cost, 
+                CASE 
+                    WHEN e.car_backward <> ''Forbidden'' then length::double precision 
+                    ELSE -1 
+                END as reverse_cost  
                  FROM public.edges as e, box
                  WHERE e.geom_way && box.box
                 	',
