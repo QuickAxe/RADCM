@@ -27,14 +27,15 @@ class _BottomPanelState extends State<BottomPanelNav> {
     final colorScheme = theme.colorScheme;
 
     return SlidingUpPanel(
+      isDraggable: false,
       color: colorScheme.surfaceContainer, // Use themed surface color
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       borderRadius: const BorderRadius.only(
         topLeft: Radius.circular(25.0),
         topRight: Radius.circular(25.0),
       ),
-      minHeight: 250,
-      maxHeight: 400,
+      minHeight: 266, // this number is weirdly exact for a reason, dont change
+      maxHeight: 420,
       panel: Column(
         children: [
           const SizedBox(

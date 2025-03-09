@@ -93,6 +93,7 @@ class RouteSelectionMode extends StatelessWidget {
                               padding: const EdgeInsets.all(50.0),
                             ),
                           );
+                          mapController.rotate(0);
                         },
                       );
                     },
