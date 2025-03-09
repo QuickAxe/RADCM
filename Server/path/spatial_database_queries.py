@@ -162,13 +162,15 @@ def get_path_by_nodeid(source_id:int,target_id:int):
                 json_build_object(
                 	'path_seq', dr.path_seq,
                 	'polyline',
-                	ST_AsEncodedPolyline(e.geom_way, 5),
+                	ST_AsEncodedPolyline(
+		                CASE WHEN dr.node = e.source THEN e.geom_way ELSE ST_Reverse(e.geom_way) END
+		                , 5),
                 	'cost', 
                 	dr.cost,
                 	'agg_cost', 
                 	dr.agg_cost,
                 	'WKT', 
-                	e.wkt, 
+                	CASE WHEN dr.node = e.source THEN e.wkt ELSE ST_AsText(ST_Reverse(e.geom_way)) END, 
                 	'maneuver', json_build_object(
                 	'bearing1',ST_Azimuth(ST_PointN(e.geom_way, 1),  ST_PointN(e.geom_way, 2)),
                 	'bearing2',ST_Azimuth(ST_PointN(e.geom_way, -1), ST_PointN(e.geom_way, -2))
