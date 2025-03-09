@@ -8,27 +8,25 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
-import '../../data/models/osrm_models.dart';
-import '../../data/repository/osrm_repository.dart';
+import '../../data/models/route_models.dart';
+import '../../data/repository/route_repository.dart';
 
-/// Provider class that handles fetching the route, and other routing related processes
-class MapRouteProvider with ChangeNotifier {
-  final OSRMRepository repository = OSRMRepository();
+/// Provider class that handles fetching the route and other routing-related processes.
+class RouteProvider with ChangeNotifier {
+  final RouteRepository repository = RouteRepository();
 
   double startLat = 15.49613530624519,
       startLng = 73.82646130357969,
       endLat = 15.60000652430488,
       endLng = 73.82570085490943;
 
-  List<List<LatLng>> alternativeMatchings = [];
-  List<MatchingModel> alternativeMatchingModels = [];
-
-  // UI state
+  List<RouteModel> alternativeRoutes = []; // Stores multiple routes
   bool isLoading = true;
-  int selectedMatchingIndex = -1;
+  bool routeAvailable = true;
+  int selectedRouteIndex = -1;
   bool startNavigation = false;
 
-  // Store calculated bounds for the route
+  // Stores calculated bounds for the selected route
   late LatLngBounds bounds;
 
   /// Initialize the provider by fetching routes.
@@ -37,7 +35,7 @@ class MapRouteProvider with ChangeNotifier {
     final permissionsProvider =
         Provider.of<Permissions>(context, listen: false);
 
-    // sets destination to the currently selected place
+    // Set destination to the currently selected place
     if (searchProvider.isCurrentSelected &&
         searchProvider.currentSelected != null) {
       double? parsedLat =
@@ -49,7 +47,8 @@ class MapRouteProvider with ChangeNotifier {
         endLng = parsedLng;
       }
     }
-    // users current pos as starting point
+
+    // Use user's current position as the starting point
     if (permissionsProvider.position != null) {
       startLat = permissionsProvider.position!.latitude;
       startLng = permissionsProvider.position!.longitude;
@@ -61,42 +60,42 @@ class MapRouteProvider with ChangeNotifier {
     try {
       final userSettings =
           Provider.of<UserSettingsProvider>(context, listen: false);
-      // TODO: Handle passing profiles n all later
-      RouteResponse routeResponse = await repository.fetchMatchedRoute(
+
+      // Fetch routes from the repository
+      dev.log("Before calling the fetchRoute repo function.");
+      RouteResponse routeResponse = await repository.fetchRoute(
         startLat: startLat,
         startLng: startLng,
         endLat: endLat,
         endLng: endLng,
       );
 
-      List<List<LatLng>> matchingList = [];
-      List<MatchingModel> matchingModels = [];
+      dev.log(routeResponse.toString());
 
-      for (MatchingModel matching in routeResponse.matchings) {
-        matchingModels.add(matching);
-        if (matching.geometry.coordinates.isNotEmpty) {
-          matchingList.add(matching.geometry.coordinates);
-        }
-      }
-
-      // Update state
-      alternativeMatchings = matchingList;
-      alternativeMatchingModels = matchingModels;
+      alternativeRoutes = routeResponse.routes;
       isLoading = false;
 
-      if (alternativeMatchingModels.isNotEmpty) {
-        selectedMatchingIndex = 0;
-        _calculateBounds(alternativeMatchings[0]);
+      if (alternativeRoutes.isNotEmpty) {
+        selectedRouteIndex = 0;
+        _calculateBounds(alternativeRoutes.first);
       }
     } catch (e) {
-      dev.log("Error loading routes: $e");
+      dev.log("Inside routeProvider, Error loading routes: $e");
       isLoading = false;
+      routeAvailable = false;
     }
     notifyListeners();
   }
 
-  /// Calculate the bounds for a set of route points.
-  void _calculateBounds(List<LatLng> routePoints) {
+  void setLoading() {
+    isLoading = true;
+    notifyListeners();
+  }
+
+  /// Calculate the bounds for a given route.
+  void _calculateBounds(RouteModel route) {
+    List<LatLng> routePoints =
+        route.segments.expand((s) => s.geometry.coordinates).toList();
     if (routePoints.isEmpty) return;
 
     double minLat =
@@ -113,12 +112,11 @@ class MapRouteProvider with ChangeNotifier {
 
   /// Update selected route index and recalculate bounds.
   void updateSelectedRoute(int index) {
-    selectedMatchingIndex = index;
-    if (index < alternativeMatchings.length) {
-      // When a route is selected it is fit in the screen
-      _calculateBounds(alternativeMatchings[index]);
+    if (index >= 0 && index < alternativeRoutes.length) {
+      selectedRouteIndex = index;
+      _calculateBounds(alternativeRoutes[index]);
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   /// Mark that the navigation has started.
@@ -127,7 +125,7 @@ class MapRouteProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Mark that the navigation has stopped
+  /// Mark that the navigation has stopped.
   void stopRouteNavigation() {
     startNavigation = false;
     notifyListeners();
@@ -137,22 +135,16 @@ class MapRouteProvider with ChangeNotifier {
     isLoading = true;
   }
 
-  /// Get the current MatchingModel
-  MatchingModel get currentMatching => (selectedMatchingIndex >= 0 &&
-          selectedMatchingIndex < alternativeMatchingModels.length)
-      ? alternativeMatchingModels[selectedMatchingIndex]
-      : MatchingModel(
-          confidence: 0,
-          geometry: Geometry(coordinates: [], type: ""),
-          weightName: "",
-          weight: 0,
-          legs: [],
-          distance: 0,
-          duration: 0);
+  /// Get the currently selected route.
+  RouteModel get currentRoute =>
+      (selectedRouteIndex >= 0 && selectedRouteIndex < alternativeRoutes.length)
+          ? alternativeRoutes[selectedRouteIndex]
+          : RouteModel(segments: [], legs: []);
 
-  /// Get current matching points List<LatLng>
-  List<LatLng> get currentMatchingPoints => (selectedMatchingIndex >= 0 &&
-          selectedMatchingIndex < alternativeMatchings.length)
-      ? alternativeMatchings[selectedMatchingIndex]
-      : [];
+  /// Get the segments of the currently selected route.
+  List<RouteSegment> get currentRouteSegments => currentRoute?.segments ?? [];
+
+  /// Get the coordinates of the currently selected route.
+  List<LatLng> get currentRoutePoints =>
+      currentRouteSegments.expand((s) => s.geometry.coordinates).toList();
 }

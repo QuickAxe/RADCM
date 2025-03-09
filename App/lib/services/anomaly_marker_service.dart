@@ -1,6 +1,6 @@
 import 'package:latlong2/latlong.dart';
 
-import '../data/models/anomaly_marker.dart';
+import '../data/models/anomaly_marker_model.dart';
 
 // normally this service will interact with the backend to fetch thee anomalies
 // TODO: req markers based on current view
@@ -55,6 +55,4 @@ class AnomalyService {
         location: const LatLng(15.424183719267909, 73.97882496054558),
         category: "Pothole"),
   ];
-
-
 }

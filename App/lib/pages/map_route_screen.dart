@@ -19,12 +19,13 @@ class MapRouteScreen extends StatefulWidget {
 
 class _MapRouteScreenState extends State<MapRouteScreen> {
   final MapController _mapController = MapController();
-
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final mapProvider = Provider.of<MapRouteProvider>(context, listen: false);
+      final mapProvider = Provider.of<RouteProvider>(context, listen: false);
+      mapProvider.setLoading();
       mapProvider.initialize(context);
     });
   }
@@ -33,7 +34,7 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    return Consumer<MapRouteProvider>(
+    return Consumer<RouteProvider>(
       builder: (context, mapProvider, child) {
         return Scaffold(
           extendBodyBehindAppBar: true,
@@ -48,7 +49,7 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
               },
             ),
             actions: [
-              if (mapProvider.selectedMatchingIndex != -1 &&
+              if (mapProvider.selectedRouteIndex != -1 &&
                   !mapProvider.startNavigation)
                 Padding(
                   padding: const EdgeInsets.all(10.0),
@@ -92,10 +93,11 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
               Positioned.fill(
                 child: mapProvider.startNavigation
                     ? prefix.NavigationMode(
-                        mapProvider: mapProvider, mapController: _mapController)
+                        routeProvider: mapProvider,
+                        mapController: _mapController)
                     : RouteSelectionMode(
                         mapController: _mapController,
-                        mapProvider: mapProvider),
+                        routeProvider: mapProvider),
               ),
               if (mapProvider.isLoading) const BlurWithLoading(),
             ],

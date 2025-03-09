@@ -14,11 +14,11 @@ import '../../util/route_utils.dart';
 import 'route_directions.dart';
 
 class RouteSelectionMode extends StatelessWidget {
-  final MapRouteProvider mapProvider;
+  final RouteProvider routeProvider;
   final MapController mapController;
 
   const RouteSelectionMode(
-      {super.key, required this.mapController, required this.mapProvider});
+      {super.key, required this.mapController, required this.routeProvider});
 
   @override
   Widget build(BuildContext context) {
@@ -36,90 +36,102 @@ class RouteSelectionMode extends StatelessWidget {
       maxHeight: 700,
       panel: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Drag Indicator
-            Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Container(
-                width: 60,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: colorScheme.secondary,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
-            Text(
-              "Select a Route",
-              style: theme.textTheme.headlineSmall
-                  ?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            // List of routes
-            ListView.builder(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: mapProvider.alternativeMatchingModels.length,
-              itemBuilder: (context, index) {
-                final route = mapProvider.alternativeMatchingModels[index];
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: getColorForRoute(index),
-                    child: Text(
-                      '${index + 1}',
-                      style: const TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
+        child: routeProvider.routeAvailable
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Drag Indicator
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Container(
+                      width: 60,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: colorScheme.secondary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
-                  title: Text(
-                    "Route ${index + 1}",
-                    style: theme.textTheme.titleLarge
+                  Text(
+                    "Select a Route",
+                    style: theme.textTheme.headlineSmall
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
-                  subtitle: Text(
-                    "Distance: ${formatDistance(route.distance)} | Duration: ${formatDuration(route.duration)}",
+                  // List of routes
+                  ListView.builder(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: routeProvider.alternativeRoutes.length,
+                    itemBuilder: (context, index) {
+                      final route = routeProvider.alternativeRoutes[index];
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: getColorForRoute(index),
+                          child: Text(
+                            '${index + 1}',
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        title: Text(
+                          "Route ${index + 1}",
+                          style: theme.textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          "Distance: ${route.distance != null ? formatDistance(route.distance!) : "N/A"} | "
+                          "Duration: ${route.duration != null ? formatDuration(route.duration!) : "N/A"}",
+                        ),
+                        selected: routeProvider.selectedRouteIndex == index,
+                        onTap: () {
+                          routeProvider.updateSelectedRoute(index);
+                          mapController.fitCamera(
+                            CameraFit.bounds(
+                              bounds: routeProvider.bounds,
+                              padding: const EdgeInsets.all(50.0),
+                            ),
+                          );
+                        },
+                      );
+                    },
                   ),
-                  selected: mapProvider.selectedMatchingIndex == index,
-                  onTap: () {
-                    mapProvider.updateSelectedRoute(index);
-                    mapController.fitCamera(
-                      CameraFit.bounds(
-                        bounds: mapProvider.bounds,
-                        padding: const EdgeInsets.all(50.0),
+                  const Divider(),
+                  const SizedBox(height: 10),
+                  if (routeProvider.selectedRouteIndex >= 0 &&
+                      routeProvider.selectedRouteIndex <
+                          routeProvider.currentRouteSegments.length)
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            Text(
+                              "Directions",
+                              style: theme.textTheme.headlineSmall
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            RouteDirections(route: routeProvider.currentRoute),
+                          ],
+                        ),
                       ),
-                    );
-                  },
-                );
-              },
-            ),
-            const Divider(),
-            const SizedBox(height: 10),
-            if (mapProvider.selectedMatchingIndex >= 0 &&
-                mapProvider.selectedMatchingIndex <
-                    mapProvider.alternativeMatchingModels.length)
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Text(
-                        "Directions",
-                        style: theme.textTheme.headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                      RouteDirections(route: mapProvider.currentMatching),
-                    ],
-                  ),
+                    ),
+                ],
+              )
+            : Padding(
+                padding: const EdgeInsets.all(30.0),
+                child: Text(
+                  "No Routes",
+                  style: theme.textTheme.titleLarge
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
                 ),
               ),
-          ],
-        ),
       ),
       body: FlutterMap(
         mapController: mapController,
         options: MapOptions(
-          initialCenter: LatLng(mapProvider.startLat, mapProvider.startLng),
+          initialCenter: LatLng(routeProvider.startLat, routeProvider.startLng),
           initialZoom: 14.0,
         ),
         children: [
@@ -137,12 +149,14 @@ class RouteSelectionMode extends StatelessWidget {
           // Draw all alternative routes.
           PolylineLayer(
             polylines: [
-              for (int i = 0; i < mapProvider.alternativeMatchings.length; i++)
+              for (int i = 0; i < routeProvider.alternativeRoutes.length; i++)
                 Polyline(
-                  points: mapProvider.alternativeMatchings[i],
+                  points: routeProvider.alternativeRoutes[i].segments
+                      .expand((segment) => segment.geometry.coordinates)
+                      .toList(),
                   strokeWidth:
-                      mapProvider.selectedMatchingIndex == i ? 6.0 : 4.0,
-                  color: mapProvider.selectedMatchingIndex == i
+                      routeProvider.selectedRouteIndex == i ? 6.0 : 4.0,
+                  color: routeProvider.selectedRouteIndex == i
                       ? getColorForRoute(i).withOpacity(0.8)
                       : getColorForRoute(i).withOpacity(0.5),
                 ),

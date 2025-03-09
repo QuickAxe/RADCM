@@ -8,7 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sensors_plus/sensors_plus.dart';
 
-import '../../data/models/bg_anomaly.dart';
+import '../../data/models/bg_anomaly_model.dart';
 
 // to make sure no other processing happens while buffer is getting flushed
 bool isBufferFlushing = false;

@@ -17,12 +17,12 @@ import '../../util/map_utils.dart';
 import '../../util/route_utils.dart';
 
 class NavigationMode extends StatelessWidget {
-  final MapRouteProvider mapProvider;
+  final RouteProvider routeProvider;
   final MapController mapController;
   const NavigationMode({
     super.key,
     required this.mapController,
-    required this.mapProvider,
+    required this.routeProvider,
   });
 
   @override
@@ -53,7 +53,7 @@ class NavigationMode extends StatelessWidget {
                     style: theme.textTheme.headlineSmall
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
-                  DynamicRouteDirections(route: mapProvider.currentMatching),
+                  DynamicRouteDirections(route: routeProvider.currentRoute),
                 ],
               ),
               // ),
@@ -64,7 +64,7 @@ class NavigationMode extends StatelessWidget {
       body: FlutterMap(
         mapController: mapController,
         options: MapOptions(
-          initialCenter: LatLng(mapProvider.startLat, mapProvider.startLng),
+          initialCenter: LatLng(routeProvider.startLat, routeProvider.startLng),
           initialZoom: 18.0,
           minZoom: 3.0,
         ),
@@ -85,9 +85,9 @@ class NavigationMode extends StatelessWidget {
           PolylineLayer(
             polylines: [
               Polyline(
-                points: mapProvider.currentMatchingPoints,
+                points: routeProvider.currentRoutePoints,
                 strokeWidth: 6.0,
-                color: getColorForRoute(mapProvider.selectedMatchingIndex)
+                color: getColorForRoute(routeProvider.selectedRouteIndex)
                     .withOpacity(0.8),
               ),
             ],

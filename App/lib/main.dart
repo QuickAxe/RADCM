@@ -40,7 +40,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => Permissions()),
         ChangeNotifierProvider(create: (context) => Search()),
         ChangeNotifierProvider(create: (context) => UserSettingsProvider()),
-        ChangeNotifierProvider(create: (context) => MapRouteProvider()),
+        ChangeNotifierProvider(create: (context) => RouteProvider()),
       ],
       child: const MyApp(),
     ),

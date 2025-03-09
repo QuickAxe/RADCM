@@ -7,7 +7,7 @@ import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:provider/provider.dart';
 
-import '../../data/models/anomaly_marker.dart';
+import '../../data/models/anomaly_marker_model.dart';
 
 // This is the layer that displays the anomalies
 class AnomalyMarkerLayer extends StatelessWidget {
