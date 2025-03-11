@@ -9,7 +9,8 @@ import 'package:app/pages/settings_screens/navigation_preferences.dart';
 import 'package:app/pages/settings_screens/routines.dart';
 import 'package:app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:app/pages/settings_screens/voice_engine.dart';
-import 'package:app/services/background/anomaly_detection.dart';
+import 'package:app/services/background/activity_tracker.dart';
+import 'package:app/services/background/anomaly_detector.dart';
 import 'package:app/services/providers/permissions.dart';
 import 'package:app/services/providers/route_provider.dart';
 import 'package:app/services/providers/search.dart';
@@ -18,7 +19,6 @@ import 'package:app/theme/theme.dart';
 import 'package:app/theme/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_isolate/flutter_isolate.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:provider/provider.dart';
 
@@ -55,8 +55,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late FlutterIsolate dataCollectorIsolate;
-
   @override
   void initState() {
     super.initState();
@@ -68,8 +66,8 @@ class _MyAppState extends State<MyApp> {
       permissions.fetchPosition().then((_) {
         dev.log('YOO IM THIS COOL COMMENT HERE.. IM SIC');
 
-        dev.log('background process started.');
-        theDataCollector();
+        dev.log('Activity tracking has started.');
+        ActivityTracker().startTracker();
       });
     });
   }
