@@ -5,16 +5,21 @@ import 'package:app/services/background/anomaly_detector.dart';
 import 'package:flutter_activity_recognition/flutter_activity_recognition.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
+import '../../data/models/bg_anomaly_model.dart';
+
 class ActivityTracker{
   StreamSubscription<Activity>? _activitySubscription;
   late bool _isAnomalyDetectorActive;
-  late AnomalyDetector anomalyDetector;
-  // TODO - handle wasted buffer
+  late AnomalyDetector _anomalyDetector;
+  late List<Anomaly> _probableAnomalyBuffer;
+  late DateTime _checkpoint;
 
   ActivityTracker() {
     _activitySubscription = null;
     _isAnomalyDetectorActive = false;
-    anomalyDetector = AnomalyDetector();
+    _probableAnomalyBuffer = [];
+    _anomalyDetector = AnomalyDetector(_probableAnomalyBuffer);
+    _checkpoint = DateTime(2023, 12, 25, 0, 0, 0);
   }
 
   Future<void> startTracker() async {
@@ -30,20 +35,29 @@ class ActivityTracker{
     _activitySubscription = null;
   }
 
+  // its enforced that you have to stay in vehicle or idle mode for at least 5 seconds
   void _onActivity(Activity activity) {
     print('activity detected >> ${activity.toJson()}');
-    if((activity.type == ActivityType.IN_VEHICLE || activity.type == ActivityType.ON_BICYCLE) && !_isAnomalyDetectorActive && activity.confidence == ActivityConfidence.HIGH) {
+    if((activity.type == ActivityType.IN_VEHICLE || activity.type == ActivityType.ON_BICYCLE) && !_isAnomalyDetectorActive && activity.confidence != ActivityConfidence.LOW && _checkpoint.difference(DateTime.now()).inSeconds >= 5) {
       _isAnomalyDetectorActive = true;
-      anomalyDetector.startDetector();
+      _checkpoint = DateTime.now();
+      _anomalyDetector.startDetector();
 
       Fluttertoast.showToast(
         msg: "${activity.type} - Anomaly Detector Active!",
         toastLength: Toast.LENGTH_LONG,
       );
     }
-    else if (activity.confidence == ActivityConfidence.HIGH && _isAnomalyDetectorActive){
+    else if (activity.confidence == ActivityConfidence.HIGH && _isAnomalyDetectorActive && _checkpoint.difference(DateTime.now()).inSeconds >= 5){
       _isAnomalyDetectorActive = false;
-      anomalyDetector.stopDetector();
+      _checkpoint = DateTime.now();
+
+      // send data to backend if any
+      if(_probableAnomalyBuffer.isNotEmpty) {
+        _anomalyDetector.flushBuffer();
+      }
+
+      _anomalyDetector.stopDetector();
 
       Fluttertoast.showToast(
         msg: "${activity.type} - Anomaly Detector Inactive!",

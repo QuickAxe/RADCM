@@ -14,16 +14,16 @@ class AnomalyDetector{
   late StreamSubscription? _anomalyDetectorSubscription;
   late bool _isBufferFlushing;
 
-  AnomalyDetector(){
+  // the buffer that contains probable anomalies
+  late final List<Anomaly> _probableAnomalyBuffer;
+
+  AnomalyDetector(this._probableAnomalyBuffer){
     _anomalyDetectorSubscription = null;
     _isBufferFlushing = false;
   }
 
   Future<void> startDetector() async {
     frs.Matrix3 rotationMatrix = frs.Matrix3(0, 0, 0, 0, 0, 0, 0, 0, 0);
-
-    // the buffer that contains probable anomalies
-    List<Anomaly> probableAnomalyBuffer = [];
 
     // the sliding window
     Anomaly currentWindow = Anomaly();
@@ -54,7 +54,7 @@ class AnomalyDetector{
       if (currentWindow.accReadings.length == 200 &&
           now.difference(lastAnomaly).inMilliseconds >= 5000) {
         bool isAnomaly =
-        await _checkWindow(currentWindow, probableAnomalyBuffer, locEvent);
+        await _checkWindow(currentWindow, locEvent);
         if (isAnomaly) {
           lastAnomaly = DateTime.now();
         }
@@ -107,7 +107,7 @@ class AnomalyDetector{
   }
 
   // check if the read block is an anomaly
-  Future<bool> _checkWindow(Anomaly currentWindow, List<Anomaly> probableAnomalyBuffer, Position position) async {
+  Future<bool> _checkWindow(Anomaly currentWindow, Position position) async {
     double accelLeft = currentWindow.accReadings.elementAt(97)[2];
     double accelRight = currentWindow.accReadings.elementAt(103)[2];
     double threshold = 18.0;
@@ -127,30 +127,29 @@ class AnomalyDetector{
       currentWindow.latitude = position.latitude;
       currentWindow.longitude = position.longitude;
 
-      probableAnomalyBuffer.add(currentWindow);
+      _probableAnomalyBuffer.add(currentWindow);
       isAnomaly = true;
     }
 
-    if (probableAnomalyBuffer.length == maxBufferSize) {
-      _isBufferFlushing = true;
-      await _flushBuffer(probableAnomalyBuffer);
-      _isBufferFlushing = false;
+    if (_probableAnomalyBuffer.length == maxBufferSize) {
+      await flushBuffer();
     }
 
-    // currentWindow.accReadings.removeFirst();
     return isAnomaly;
   }
 
   // sends probable anomaly data to backend when it reaches buffer limit
-  Future<void> _flushBuffer(List<Anomaly> probableAnomalyBuffer) async {
+  Future<void> flushBuffer() async {
+    _isBufferFlushing = true;
+
     // send data to backend..
     dev.log("Buffer Flushed.. ");
 
     dev.log('BEFORE ------------------------> ${DateTime.now()}');
-    bool isSuccess = await _formatAndPost(probableAnomalyBuffer);
+    bool isSuccess = await _formatAndPost();
     dev.log('AFTER ------------------------> ${DateTime.now()}');
 
-    probableAnomalyBuffer.clear();
+    _probableAnomalyBuffer.clear();
 
     if (isSuccess) {
       Fluttertoast.showToast(
@@ -164,21 +163,21 @@ class AnomalyDetector{
       );
     }
 
-    return;
+    _isBufferFlushing = false;
   }
 
-  Future<bool> _formatAndPost(probableAnomalyBuffer) async {
-    Map<String, dynamic> data = _formatAnomalyData(probableAnomalyBuffer);
+  Future<bool> _formatAndPost() async {
+    Map<String, dynamic> data = _formatAnomalyData();
     DioResponse response =
     await DioClientUser().postRequest('anomalies/sensors/', data);
     return response.success == true;
   }
 
-  Map<String, dynamic> _formatAnomalyData(List<Anomaly> probableAnomalyBuffer) {
+  Map<String, dynamic> _formatAnomalyData() {
     List<dynamic> anomalyData = [];
 
-    for (int i = 0; i < probableAnomalyBuffer.length; i++) {
-      Anomaly anomaly = probableAnomalyBuffer[i];
+    for (int i = 0; i < _probableAnomalyBuffer.length; i++) {
+      Anomaly anomaly = _probableAnomalyBuffer[i];
 
       anomalyData.add({
         "latitude": anomaly.latitude,
