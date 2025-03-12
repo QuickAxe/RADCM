@@ -38,7 +38,7 @@ class ActivityTracker{
   // its enforced that you have to stay in vehicle or idle mode for at least 5 seconds
   void _onActivity(Activity activity) {
     print('activity detected >> ${activity.toJson()}');
-    if((activity.type == ActivityType.IN_VEHICLE || activity.type == ActivityType.ON_BICYCLE) && !_isAnomalyDetectorActive && activity.confidence != ActivityConfidence.LOW && _checkpoint.difference(DateTime.now()).inSeconds >= 5) {
+    if((activity.type == ActivityType.IN_VEHICLE || activity.type == ActivityType.ON_BICYCLE) && !_isAnomalyDetectorActive && activity.confidence != ActivityConfidence.LOW && DateTime.now().difference(_checkpoint).inSeconds >= 5) {
       _isAnomalyDetectorActive = true;
       _checkpoint = DateTime.now();
       _anomalyDetector.startDetector();
@@ -48,7 +48,7 @@ class ActivityTracker{
         toastLength: Toast.LENGTH_LONG,
       );
     }
-    else if (activity.confidence == ActivityConfidence.HIGH && _isAnomalyDetectorActive && _checkpoint.difference(DateTime.now()).inSeconds >= 5){
+    else if (!(activity.type == ActivityType.IN_VEHICLE || activity.type == ActivityType.ON_BICYCLE) && activity.confidence == ActivityConfidence.HIGH && _isAnomalyDetectorActive && DateTime.now().difference(_checkpoint).inSeconds >= 5){
       _isAnomalyDetectorActive = false;
       _checkpoint = DateTime.now();
 
