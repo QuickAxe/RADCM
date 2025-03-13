@@ -30,7 +30,8 @@ class RouteProvider with ChangeNotifier {
   late LatLngBounds bounds;
 
   /// Initialize the provider by fetching routes.
-  Future<void> initialize(BuildContext context) async {
+  Future<void> initialize(
+      BuildContext context, MapController mapController) async {
     final searchProvider = Provider.of<Search>(context, listen: false);
     final permissionsProvider =
         Provider.of<Permissions>(context, listen: false);
@@ -53,7 +54,17 @@ class RouteProvider with ChangeNotifier {
       startLat = permissionsProvider.position!.latitude;
       startLng = permissionsProvider.position!.longitude;
     }
-    await _loadRoutes(context);
+    await _loadRoutes(context).then((_) {
+      if (alternativeRoutes.isNotEmpty) {
+        // after routes load this fits the first route on the screen
+        mapController.fitCamera(
+          CameraFit.bounds(
+            bounds: bounds,
+            padding: const EdgeInsets.fromLTRB(50.0, 150.0, 50.0, 300.0),
+          ),
+        );
+      }
+    });
   }
 
   Future<void> _loadRoutes(BuildContext context) async {
@@ -142,7 +153,7 @@ class RouteProvider with ChangeNotifier {
           : RouteModel(segments: [], legs: []);
 
   /// Get the segments of the currently selected route.
-  List<RouteSegment> get currentRouteSegments => currentRoute?.segments ?? [];
+  List<RouteSegment> get currentRouteSegments => currentRoute.segments ?? [];
 
   /// Get the coordinates of the currently selected route.
   List<LatLng> get currentRoutePoints =>

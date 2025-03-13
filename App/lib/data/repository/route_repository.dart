@@ -10,6 +10,8 @@ import '../models/route_models.dart';
 class RouteRepository {
   final String localServerUrl =
       'http://${dotenv.env['IP_ADDRESS']}:8000/api/routes/';
+  // final String localServerUrl =
+  //     'https://03cc-2a09-bac1-36a0-eb0-00-1c6-8.ngrok-free.app/api/routes/';
 
   /// Fetches route data from the local server.
   Future<RouteResponse> fetchRoute({
@@ -22,6 +24,13 @@ class RouteRepository {
     final String url =
         "$localServerUrl?format=json&latitudeEnd=$endLat&latitudeStart=$startLat&longitudeEnd=$endLng&longitudeStart=$startLng";
 
+    // final response = await http.get(
+    //   Uri.parse(url),
+    //   headers: {
+    //     'ngrok-skip-browser-warning': 'true',
+    //     'Connection': 'keep-alive',
+    //   },
+    // );
     final response = await http.get(Uri.parse(url));
     log("Called Local API: $url");
 

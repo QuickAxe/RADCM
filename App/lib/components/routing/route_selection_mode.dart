@@ -90,7 +90,8 @@ class RouteSelectionMode extends StatelessWidget {
                           mapController.fitCamera(
                             CameraFit.bounds(
                               bounds: routeProvider.bounds,
-                              padding: const EdgeInsets.all(50.0),
+                              padding: const EdgeInsets.fromLTRB(
+                                  50.0, 150.0, 50.0, 300.0),
                             ),
                           );
                           mapController.rotate(0);
@@ -103,6 +104,7 @@ class RouteSelectionMode extends StatelessWidget {
                   if (routeProvider.selectedRouteIndex >= 0 &&
                       routeProvider.selectedRouteIndex <
                           routeProvider.currentRouteSegments.length)
+                    // ================================ DIRECTIONS
                     Expanded(
                       child: SingleChildScrollView(
                         child: Column(
@@ -119,6 +121,7 @@ class RouteSelectionMode extends StatelessWidget {
                     ),
                 ],
               )
+            // ==================== FALLBACK - NO ROUTES
             : Padding(
                 padding: const EdgeInsets.all(30.0),
                 child: Text(

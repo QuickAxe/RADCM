@@ -26,7 +26,7 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final mapProvider = Provider.of<RouteProvider>(context, listen: false);
       mapProvider.setLoading();
-      mapProvider.initialize(context);
+      mapProvider.initialize(context, _mapController);
     });
   }
 
