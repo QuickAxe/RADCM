@@ -10,14 +10,15 @@ import 'package:sensors_plus/sensors_plus.dart';
 
 import '../../data/models/bg_anomaly_model.dart';
 
-class AnomalyDetector{
+class AnomalyDetector {
   late StreamSubscription? _anomalyDetectorSubscription;
   late bool _isBufferFlushing;
+  final DioClientUser _dioClient = DioClientUser();
 
   // the buffer that contains probable anomalies
   late final List<Anomaly> _probableAnomalyBuffer;
 
-  AnomalyDetector(this._probableAnomalyBuffer){
+  AnomalyDetector(this._probableAnomalyBuffer) {
     _anomalyDetectorSubscription = null;
     _isBufferFlushing = false;
   }
@@ -53,8 +54,7 @@ class AnomalyDetector{
       // if size is 200 then check the window for anomaly
       if (currentWindow.accReadings.length == 200 &&
           now.difference(lastAnomaly).inMilliseconds >= 5000) {
-        bool isAnomaly =
-        await _checkWindow(currentWindow, locEvent);
+        bool isAnomaly = await _checkWindow(currentWindow, locEvent);
         if (isAnomaly) {
           lastAnomaly = DateTime.now();
         }
@@ -91,7 +91,8 @@ class AnomalyDetector{
   }
 
   // reorients accelerometer data using the rotation matrix
-  List<double> _reorientAccelerometer(List<double> accLocal, frs.Matrix3 rotationMatrix) {
+  List<double> _reorientAccelerometer(
+      List<double> accLocal, frs.Matrix3 rotationMatrix) {
     // Multiply the rotation matrix by the accelerometer vector
     double xGlobal = rotationMatrix.a * accLocal[0] +
         rotationMatrix.b * accLocal[1] +
@@ -169,7 +170,7 @@ class AnomalyDetector{
   Future<bool> _formatAndPost() async {
     Map<String, dynamic> data = _formatAnomalyData();
     DioResponse response =
-    await DioClientUser().postRequest('anomalies/sensors/', data);
+        await _dioClient.postRequest('anomalies/sensors/', data);
     return response.success == true;
   }
 
@@ -188,5 +189,4 @@ class AnomalyDetector{
 
     return {"source": "mobile", "anomaly_data": anomalyData};
   }
-
 }
