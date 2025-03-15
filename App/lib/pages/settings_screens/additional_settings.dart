@@ -54,10 +54,10 @@ class AdditionalSettings extends StatelessWidget {
                 }
               },
               items: const [
-                DropdownMenuItem(
-                  value: ThemeMode.system,
-                  child: Text("System"),
-                ),
+                // DropdownMenuItem(
+                //   value: ThemeMode.system,
+                //   child: Text("System"),
+                // ),
                 DropdownMenuItem(
                   value: ThemeMode.light,
                   child: Text("Light"),

@@ -66,16 +66,16 @@ class _SearchPlaceState extends State<SearchPlace> {
     // hello darkness
     return Consumer<Search>(builder: (context, search, child) {
       return SearchAnchor(
-              builder: (BuildContext context, SearchController controller) {
-                _searchController = controller;
-                return search.loadingResults
-                    ? Center(
+        builder: (BuildContext context, SearchController controller) {
+          _searchController = controller;
+          return search.loadingResults
+              ? Center(
                   child: LoadingAnimationWidget.waveDots(
                     color: Theme.of(context).hintColor,
                     size: 65,
                   ),
                 )
-                    : SearchBar(
+              : SearchBar(
                   controller: controller,
                   onSubmitted: (_) async {
                     await search.getSuggestions(controller.text.toString());
@@ -85,31 +85,34 @@ class _SearchPlaceState extends State<SearchPlace> {
                     IconButton(
                         onPressed: () async {
                           await search
-                              .getSuggestions(controller.text.toString());
-                          controller.openView();
+                              .getSuggestions(controller.text.toString())
+                              .then((_) {
+                            controller.openView();
+                          });
+                          // controller.openView();
                         },
                         icon: const Icon(Icons.search)),
                   ],
                   hintText: "Search Map",
                   elevation: WidgetStateProperty.all(0), // Remove shadow
                 );
-              },
-              suggestionsBuilder:
-                  (BuildContext context, SearchController controller) {
-                List<ListTile> suggestions = search.searchSuggestions
-                    .map((place) => buildPlaceItem(place, controller))
-                    .toList();
+        },
+        suggestionsBuilder:
+            (BuildContext context, SearchController controller) {
+          List<ListTile> suggestions = search.searchSuggestions
+              .map((place) => buildPlaceItem(place, controller))
+              .toList();
 
-                dev.log('Total search results: ${suggestions.length}');
+          dev.log('Total search results: ${suggestions.length}');
 
-                return suggestions;
-              },
-              viewOnSubmitted: (_) async {
-                await search.getSuggestions(_searchController.text.toString());
-                _searchController.closeView(_searchController.text.toString());
-                _searchController.openView();
-              },
-            );
+          return suggestions;
+        },
+        viewOnSubmitted: (_) async {
+          await search.getSuggestions(_searchController.text.toString());
+          _searchController.closeView(_searchController.text.toString());
+          _searchController.openView();
+        },
+      );
     });
   }
 }

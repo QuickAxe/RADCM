@@ -91,6 +91,9 @@ class AnomalyMarkerLayer extends StatelessWidget {
           options: MarkerClusterLayerOptions(
             maxClusterRadius: 45, // Adjust clustering sensitivity
             size: const Size(40, 40), // Cluster icon size
+            zoomToBoundsOnClick: true,
+            padding: const EdgeInsets.fromLTRB(50.0, 150.0, 50.0, 300.0),
+            rotate: true,
             markers: markers,
             builder: (context, markers) {
               Color clusterColor = _getClusterColor(markers.length);

@@ -62,29 +62,31 @@ class RouteModel {
 
   factory RouteModel.fromJson(dynamic json) {
     log("Inside routemodel factory function");
+    List<RouteSegment> segments = [];
+    double? computedDistance;
+
     if (json is List) {
-      return RouteModel(
-        segments:
-            json.map((segment) => RouteSegment.fromJson(segment)).toList(),
-        legs: null,
-      );
+      segments = json.map((segment) => RouteSegment.fromJson(segment)).toList();
     } else if (json is Map<String, dynamic>) {
       // In case the API later returns route-wide details along with segments.
-      return RouteModel(
-        distance: json.containsKey('distance')
-            ? (json['distance'] as num).toDouble()
-            : null,
-        duration: json.containsKey('duration')
-            ? (json['duration'] as num).toDouble()
-            : null,
-        segments: (json['segments'] as List)
-            .map((segment) => RouteSegment.fromJson(segment))
-            .toList(),
-        legs: null,
-      );
+      segments = (json['segments'] as List)
+          .map((segment) => RouteSegment.fromJson(segment))
+          .toList();
     } else {
       throw Exception("Unexpected route data type: ${json.runtimeType}");
     }
+
+    if (segments.isNotEmpty) {
+      computedDistance = segments.last.aggCost;
+    }
+
+    return RouteModel(
+        distance: computedDistance,
+        duration: json is Map<String, dynamic> && json.containsKey("duration")
+            ? (json['duration'] as num).toDouble()
+            : null,
+        segments: segments,
+        legs: null);
   }
 }
 
