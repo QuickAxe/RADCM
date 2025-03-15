@@ -182,7 +182,12 @@ def get_path_by_nodeid(source_id:int,target_id:int):
                         THEN ST_Azimuth(ST_PointN(e.wkt, -1), ST_PointN(e.wkt, -2))
                         ELSE ST_Azimuth(ST_PointN(e.wkt, 1), ST_PointN(e.wkt, 2))
                     END
-                	)
+                	),
+                    'anomalies',
+                    ( SELECT json_agg(json_build_object('longitude',ST_X(p_geom),'latitude', ST_Y(p_geom),'category', a_type)  )
+                        FROM mv_clustered_anomalies AS ca
+                        WHERE ST_DWithin(e.geom_way, ca.p_geom , 0.001) AND ca.edge_id = e.id_new
+                    ) 
                 ) as step
                 from 
                 dr, edges 
