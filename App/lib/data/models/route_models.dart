@@ -96,6 +96,7 @@ class RouteSegment {
   final double cost;
   final double aggCost;
   final Maneuver maneuver;
+  final List<Anomaly> anomalies;
 
   RouteSegment({
     required this.pathSeq,
@@ -103,17 +104,22 @@ class RouteSegment {
     required this.cost,
     required this.aggCost,
     required this.maneuver,
+    required this.anomalies,
   });
 
   factory RouteSegment.fromJson(Map<String, dynamic> json) {
     log("Inside routesegment factory function");
     return RouteSegment(
-      pathSeq: json['path_seq'],
-      geometry: Geometry.fromPolyline(json['polyline']),
-      cost: (json['cost'] as num).toDouble(),
-      aggCost: (json['agg_cost'] as num).toDouble(),
-      maneuver: Maneuver.fromJson(json['maneuver']),
-    );
+        pathSeq: json['path_seq'],
+        geometry: Geometry.fromPolyline(json['polyline']),
+        cost: (json['cost'] as num).toDouble(),
+        aggCost: (json['agg_cost'] as num).toDouble(),
+        maneuver: Maneuver.fromJson(json['maneuver']),
+        anomalies: json['anomalies'] != null
+            ? (json['anomalies'] as List)
+                .map((anomaly) => Anomaly.fromJson(anomaly))
+                .toList()
+            : []);
   }
 }
 
@@ -153,6 +159,26 @@ class Maneuver {
       bearing2: (json['bearing2'] as num).toDouble(),
       type: null,
       modifier: null,
+    );
+  }
+}
+
+class Anomaly {
+  final double longitude;
+  final double latitude;
+  final String category;
+
+  Anomaly({
+    required this.longitude,
+    required this.latitude,
+    required this.category,
+  });
+
+  factory Anomaly.fromJson(Map<String, dynamic> anomaly) {
+    return Anomaly(
+      longitude: (anomaly['longitude'] as num).toDouble(),
+      latitude: (anomaly['latitude'] as num).toDouble(),
+      category: anomaly['category'],
     );
   }
 }

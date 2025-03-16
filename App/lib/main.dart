@@ -10,7 +10,6 @@ import 'package:app/pages/settings_screens/routines.dart';
 import 'package:app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:app/pages/settings_screens/voice_engine.dart';
 import 'package:app/services/background/activity_tracker.dart';
-import 'package:app/services/background/anomaly_detector.dart';
 import 'package:app/services/providers/permissions.dart';
 import 'package:app/services/providers/route_provider.dart';
 import 'package:app/services/providers/search.dart';
@@ -20,6 +19,7 @@ import 'package:app/theme/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart';
 
 Future<void> main() async {
@@ -42,7 +42,9 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => UserSettingsProvider()),
         ChangeNotifierProvider(create: (context) => RouteProvider()),
       ],
-      child: const MyApp(),
+      child: const OverlaySupport.global(
+        child: MyApp(),
+      ),
     ),
   );
 }

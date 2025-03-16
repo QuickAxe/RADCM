@@ -85,11 +85,8 @@ class _SearchPlaceState extends State<SearchPlace> {
                     IconButton(
                         onPressed: () async {
                           await search
-                              .getSuggestions(controller.text.toString())
-                              .then((_) {
-                            controller.openView();
-                          });
-                          // controller.openView();
+                              .getSuggestions(controller.text.toString());
+                          controller.openView();
                         },
                         icon: const Icon(Icons.search)),
                   ],
