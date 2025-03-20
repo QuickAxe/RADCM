@@ -97,10 +97,10 @@ def routes_view(request):
         key = str(node1) + '_' + str(node2)
         value = cache.get(key)
         
-        route = value
-        if not route:
-            route = sp.get_path_by_nodeid(node1, node2)
-            cache.set(key, route, timeout=60 * 10)
+        routes = value
+        if not routes:
+            routes = sp.get_path_by_nodeid(node1, node2)
+            cache.set(key, routes, timeout=60 * 10)
             print('stored route in cache - got value from db query')
         else:
             print('retrived route from redis cache')
@@ -108,7 +108,7 @@ def routes_view(request):
         return Response(
             {
                 "message": "Coordinates received successfully!",
-                "routes": [route],
+                "routes": routes,
             },
             status=status.HTTP_200_OK,
         )

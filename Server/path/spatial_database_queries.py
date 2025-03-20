@@ -134,14 +134,14 @@ def get_path_by_nodeid(source_id:int,target_id:int):
         # If you get an error her about geom in nodes or geom_way in edges check ./migrations.sql
         cursor.execute(
             """WITH input as (SELECT %s AS source_id, %s AS target_id),
-                dr as (
+                box AS (SELECT ST_Expand(ST_Extent(geom_way), 0.1) as box from edges as b, input
+                    WHERE b.source = input.source_id OR b.source = input.target_id
+                    OR b.target = input.source_id OR b.target= input.target_id
+                ),
+                normal_dr as (
                 select * FROM pgr_dijkstra(
-                	'WITH box as (SELECT ST_Expand(ST_Extent(geom_way), 0.1) as box from edges as b
-                	WHERE b.source = '||(select source_id from input)|| ' OR b.source = '||(select target_id from input)||'
-                    OR b.target = '||(select source_id from input)|| ' OR b.target= '||(select target_id from input)||'    
-                 )
-                 SELECT id_new as id, source, target, 
-                 CASE 
+                    'SELECT id_new as id, source, target, 
+                CASE 
                     WHEN e.car_forward <> ''Forbidden'' then length::double precision 
                     ELSE -1 
                 END as cost, 
@@ -149,32 +149,59 @@ def get_path_by_nodeid(source_id:int,target_id:int):
                     WHEN e.car_backward <> ''Forbidden'' then length::double precision 
                     ELSE -1 
                 END as reverse_cost  
-                 FROM public.edges as e, box
-                 WHERE e.geom_way && box.box
-                	',
-                	(select source_id from input),
-                	(select target_id from input))
-                	)
+                FROM public.edges as e
+                WHERE e.geom_way && ST_GeomFromText(''' ||(select ST_AsText(box) from box)|| ''', 4326)
+                    ',
+                    (select source_id from input),
+                    (select target_id from input))
+                    ),
+                plusfive_dr as (
+                select * FROM pgr_dijkstra(
+                    'SELECT id_new as id, source, target, 
+                CASE 
+                            WHEN e.car_forward <> ''Forbidden'' THEN length::double precision + 5*(
+                                SELECT COUNT(*) FROM mv_clustered_anomalies AS ca 
+                                WHERE ST_DWithin(e.geom_way, ca.p_geom, 0.001) 
+                                AND ca.edge_id = e.id_new
+                            )
+                            ELSE -1 
+                        END AS cost, 
+                        CASE 
+                            WHEN e.car_backward <> ''Forbidden'' THEN length::double precision + 5*(
+                                SELECT COUNT(*) FROM mv_clustered_anomalies AS ca 
+                                WHERE ST_DWithin(e.geom_way, ca.p_geom, 0.001) 
+                                AND ca.edge_id = e.id_new
+                            )
+                            ELSE -1 
+                        END AS reverse_cost  
+                FROM public.edges as e
+                WHERE e.geom_way && ST_GeomFromText(''' ||(select ST_AsText(box) from box)|| ''', 4326)
+                    ',
+                    (select source_id from input),
+                    (select target_id from input))
+                    )
+
                 SELECT
                 json_agg(step) 
                 FROM
-                (SELECT 
+                (
+                SELECT 
                 json_build_object(
-                	'path_seq', dr.path_seq,
-                	'polyline',
-                	ST_AsEncodedPolyline(
-		                CASE WHEN dr.node = e.source THEN e.geom_way ELSE ST_Reverse(e.geom_way) END
-		                , 5),
-                	'cost', 
-                	dr.cost,
-                	'agg_cost', 
-                	dr.agg_cost,
-                	'WKT', 
-                	CASE WHEN dr.node = e.source THEN e.wkt ELSE ST_AsText(ST_Reverse(e.geom_way)) END, 
-                	'maneuver', json_build_object(
-                	'bearing1',
+                    'path_seq', dr.path_seq,
+                    'polyline',
+                    ST_AsEncodedPolyline(
+                        CASE WHEN dr.node = e.source THEN e.geom_way ELSE ST_Reverse(e.geom_way) END
+                        , 5),
+                    'cost', 
+                    e.length::double precision ,
+                    'agg_cost', 
+                    SUM(e.length::double precision ) OVER (ORDER BY dr.path_seq),
+                    'WKT', 
+                    CASE WHEN dr.node = e.source THEN e.wkt ELSE ST_AsText(ST_Reverse(e.geom_way)) END, 
+                    'maneuver', json_build_object(
+                    'bearing1',
                     CASE WHEN dr.node = e.source 
-			            THEN ST_Azimuth(ST_PointN(e.wkt, 1), ST_PointN(e.wkt, 2))
+                        THEN ST_Azimuth(ST_PointN(e.wkt, 1), ST_PointN(e.wkt, 2))
                         ELSE ST_Azimuth(ST_PointN(e.wkt, -1), ST_PointN(e.wkt, -2))
                     END,
                     'bearing2',
@@ -182,24 +209,77 @@ def get_path_by_nodeid(source_id:int,target_id:int):
                         THEN ST_Azimuth(ST_PointN(e.wkt, -1), ST_PointN(e.wkt, -2))
                         ELSE ST_Azimuth(ST_PointN(e.wkt, 1), ST_PointN(e.wkt, 2))
                     END
-                	),
+                    ),
                     'anomalies',
-                    ( SELECT json_agg(json_build_object('longitude',ST_X(p_geom),'latitude', ST_Y(p_geom),'category', a_type)  )
-                        FROM mv_clustered_anomalies AS ca
-                        WHERE ST_DWithin(e.geom_way, ca.p_geom , 0.001) AND ca.edge_id = e.id_new
-                    ) 
+                    ( SELECT json_agg(json_build_object('longitude',ST_X(p_geom),'latitude', ST_Y(p_geom),'category', a_type))
+                    FROM mv_clustered_anomalies AS ca
+                    WHERE 
+                    ST_DWithin(
+                    e.geom_way, ca.p_geom 
+                    , 0.001) 
+                    AND 
+                    ca.edge_id = e.id_new
+                    ) 	
                 ) as step
                 from 
-                dr, edges 
-                AS e where e.id_new = dr.edge 
+                normal_dr AS dr, edges  AS e where e.id_new = dr.edge 
                 order by path_seq asc
                 )
+
+                UNION ALL
+                SELECT
+                json_agg(step) 
+                FROM
+                (
+                SELECT 
+                json_build_object(
+                    'path_seq', dr.path_seq,
+                    'polyline',
+                    ST_AsEncodedPolyline(
+                        CASE WHEN dr.node = e.source THEN e.geom_way ELSE ST_Reverse(e.geom_way) END
+                        , 5),
+                    'cost', 
+                    e.length::double precision ,
+                    'agg_cost', 
+                    SUM(e.length::double precision ) OVER (ORDER BY dr.path_seq),
+                    'WKT', 
+                    CASE WHEN dr.node = e.source THEN e.wkt ELSE ST_AsText(ST_Reverse(e.geom_way)) END, 
+                    'maneuver', json_build_object(
+                    'bearing1',
+                    CASE WHEN dr.node = e.source 
+                        THEN ST_Azimuth(ST_PointN(e.wkt, 1), ST_PointN(e.wkt, 2))
+                        ELSE ST_Azimuth(ST_PointN(e.wkt, -1), ST_PointN(e.wkt, -2))
+                    END,
+                    'bearing2',
+                    CASE WHEN dr.node = e.source 
+                        THEN ST_Azimuth(ST_PointN(e.wkt, -1), ST_PointN(e.wkt, -2))
+                        ELSE ST_Azimuth(ST_PointN(e.wkt, 1), ST_PointN(e.wkt, 2))
+                    END
+                    ),
+                    'anomalies',
+                    ( SELECT json_agg(json_build_object('longitude',ST_X(p_geom),'latitude', ST_Y(p_geom),'category', a_type))
+                    FROM mv_clustered_anomalies AS ca
+                    WHERE 
+                    ST_DWithin(
+                    e.geom_way, ca.p_geom 
+                    , 0.001) 
+                    AND 
+                    ca.edge_id = e.id_new
+                    ) 	
+                ) as step
+                from 
+                plusfive_dr AS dr, edges  AS e where e.id_new = dr.edge 
+                order by path_seq asc
+                )
+
                 ;
-            """,
+                    """,
             [source_id, target_id],
         )
-
+        # print("HERE")
         # Fetch the results
-        results = cursor.fetchone()
-        print(type(results))
-        return results[0]
+        results = cursor.fetchall()
+        
+        
+            
+        return [results[0][0], results[1][0]]
