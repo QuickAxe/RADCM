@@ -92,8 +92,8 @@ class _AnomalyAlertsState extends State<AnomalyAlerts> {
 
     LatLng start = segment.geometry.coordinates.first;
     LatLng end = segment.geometry.coordinates.last;
-    double userToStart = Geolocator.distanceBetween(
-        user.latitude, user.longitude, start.latitude, start.longitude);
+    // double userToStart = Geolocator.distanceBetween(
+    //     user.latitude, user.longitude, start.latitude, start.longitude);
     double userToEnd = Geolocator.distanceBetween(
         user.latitude, user.longitude, end.latitude, end.longitude);
     double anomalyToEnd = Geolocator.distanceBetween(
