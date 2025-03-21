@@ -44,7 +44,8 @@ def get_anomalies_by_longlat(
                         json_agg(json_build_object(
 	                'longitude',ST_X(p_geom),
 	                'latitude', ST_Y(p_geom),
-	                'category', a_type
+	                'category', a_type,
+                    'anomaly_id', unique_id
 	                )  )
                 FROM mv_clustered_anomalies
                 WHERE 
@@ -211,7 +212,7 @@ def get_path_by_nodeid(source_id:int,target_id:int):
                     END
                     ),
                     'anomalies',
-                    ( SELECT json_agg(json_build_object('longitude',ST_X(p_geom),'latitude', ST_Y(p_geom),'category', a_type))
+                    ( SELECT json_agg(json_build_object('longitude',ST_X(p_geom),'latitude', ST_Y(p_geom),'category', a_type,'anomaly_id', unique_id))
                     FROM mv_clustered_anomalies AS ca
                     WHERE 
                     ST_DWithin(
