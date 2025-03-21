@@ -16,6 +16,7 @@ import '../components/OSM_Attribution.dart';
 import '../components/bottom_panel.dart';
 import '../services/grid_movement_handler.dart';
 import '../services/providers/anomaly_marker_layer.dart';
+import '../services/providers/anomaly_provider.dart';
 import '../services/providers/permissions.dart';
 import '../services/providers/search.dart';
 import '../util/map_utils.dart';
@@ -46,6 +47,9 @@ class _HomeScreenState extends State<HomeScreen> {
     _mapController = MapController();
     _gridHandler =
         GridMovementHandler(mapController: _mapController, context: context);
+
+    // this init call fetches anomalies from the hive cache into the provider
+    Provider.of<AnomalyProvider>(context, listen: false).init();
   }
 
   @override

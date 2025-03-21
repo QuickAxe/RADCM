@@ -1,9 +1,24 @@
+import 'package:hive/hive.dart';
 import 'package:latlong2/latlong.dart';
 
-// model for the anomaly marker (NOT to be confused with the Anomaly class from bg process)
+part 'anomaly_marker_model.g.dart';
+
+@HiveType(typeId: 0)
 class AnomalyMarker {
-  final LatLng location;
+  @HiveField(0)
+  final double latitude;
+
+  @HiveField(1)
+  final double longitude;
+
+  @HiveField(2)
   final String category;
 
-  AnomalyMarker({required this.location, required this.category});
+  AnomalyMarker({
+    required this.latitude,
+    required this.longitude,
+    required this.category,
+  });
+
+  LatLng get location => LatLng(latitude, longitude);
 }

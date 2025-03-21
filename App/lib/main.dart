@@ -20,8 +20,11 @@ import 'package:app/theme/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart';
+
+import 'data/models/anomaly_marker_model.dart';
 
 Future<void> main() async {
   // This allows flutter_map caching
@@ -33,6 +36,11 @@ Future<void> main() async {
   await FMTCObjectBoxBackend().initialise();
   // mapStore is a specialized container that is used to store Tiles (caching)
   await const FMTCStore('mapStore').manage.create();
+
+  // init hive and registering a custom anomaly marker adapter (for local storage)
+  await Hive.initFlutter();
+  Hive.registerAdapter(AnomalyMarkerAdapter());
+
   runApp(
     // registering providers here
     MultiProvider(

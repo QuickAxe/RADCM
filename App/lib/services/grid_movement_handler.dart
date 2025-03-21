@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:app/services/providers/anomaly_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:hive/hive.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
@@ -16,15 +17,41 @@ class GridMovementHandler {
   final Set<LatLng> visitedGrids = {};
   final Map<LatLng, List<AnomalyMarker>> anomalyCache = {};
   final BuildContext context;
+  late Box<List<String>> _hiveBox; // to load visitedGrids from cache
 
   GridMovementHandler({required this.mapController, required this.context}) {
-    mapController.mapEventStream.listen((event) {
+    _initHive().then((_) {
+      mapController.mapEventStream.listen((event) {
+        _onMapMoved();
+      });
       _onMapMoved();
     });
-    _onMapMoved();
   }
 
   final DioClientUser _dioClient = DioClientUser();
+
+  Future<void> _initHive() async {
+    _hiveBox = await Hive.openBox<List<String>>('visitedGrids');
+    _loadVisitedGrids();
+  }
+
+  void _loadVisitedGrids() {
+    List<String> storedGrids = _hiveBox.get('visitedGrids', defaultValue: [])!;
+    for (var key in storedGrids) {
+      visitedGrids.add(_parseLatLng(key));
+    }
+    print(
+        "Loaded visited grids from hive, size of visitedGrids: ${visitedGrids.length}");
+  }
+
+  String _latLngToKey(LatLng latLng) =>
+      "${latLng.latitude},${latLng.longitude}";
+
+  /// Convert string back to LatLng
+  LatLng _parseLatLng(String key) {
+    var parts = key.split(',');
+    return LatLng(double.parse(parts[0]), double.parse(parts[1]));
+  }
 
   void _onMapMoved() {
     _debounceTimer?.cancel();
@@ -45,8 +72,16 @@ class GridMovementHandler {
     print("Moved to a new grid! Fetching anomalies for: $newGridCenter");
 
     visitedGrids.add(newGridCenter);
+    _saveVisitedGrids();
 
     _fetchAnomalies(newGridCenter);
+  }
+
+  void _saveVisitedGrids() {
+    List<String> storedGrids =
+        visitedGrids.map((grid) => _latLngToKey(grid)).toList();
+    print("Saved the current set of visited grids");
+    _hiveBox.put('visitedGrids', storedGrids);
   }
 
   /// Finds the grid center for a given point
@@ -73,7 +108,8 @@ class GridMovementHandler {
 
         List<AnomalyMarker> anomalyList = anomalies.map((anomaly) {
           return AnomalyMarker(
-            location: LatLng(anomaly['latitude'], anomaly['longitude']),
+            latitude: anomaly['latitude'],
+            longitude: anomaly['longitude'],
             category: anomaly['category'],
           );
         }).toList();
