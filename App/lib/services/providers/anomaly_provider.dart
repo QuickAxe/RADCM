@@ -1,33 +1,24 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../data/models/anomaly_marker_model.dart';
 
 class AnomalyProvider extends ChangeNotifier {
-  final List<AnomalyMarker> _anomalies = [];
-  ValueNotifier<List<AnomalyMarker>> markersNotifier =
-      ValueNotifier<List<AnomalyMarker>>([]);
+  final ValueNotifier<List<AnomalyMarker>> markersNotifier = ValueNotifier([]);
 
-  List<AnomalyMarker> get anomalies => List.unmodifiable(_anomalies);
+  /// Store anomalies per grid
+  final Map<LatLng, List<AnomalyMarker>> _anomalyCache = {};
 
-  void addAnomalies(List<AnomalyMarker> anomalies) {
-    bool updated = false;
+  /// Adds new anomalies from a fetched grid
+  void addAnomalies(LatLng gridCenter, List<AnomalyMarker> anomalies) {
+    if (_anomalyCache.containsKey(gridCenter)) return; // Skip if already cached
 
-    for (var anomaly in anomalies) {
-      if (!_anomalies.contains(anomaly)) {
-        _anomalies.add(anomaly);
-        updated = true;
-      }
-    }
+    _anomalyCache[gridCenter] = anomalies;
 
-    if (updated) {
-      markersNotifier.value = List.from(_anomalies);
-      notifyListeners();
-    }
-  }
+    // Flatten all anomalies across grids for the map
+    markersNotifier.value =
+        _anomalyCache.values.expand((list) => list).toList();
 
-  void clearAnomalies() {
-    _anomalies.clear();
-    markersNotifier.value = [];
     notifyListeners();
   }
 }

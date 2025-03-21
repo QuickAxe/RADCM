@@ -3,8 +3,6 @@ import 'dart:async';
 import 'package:app/components/UI/blur_with_loading.dart';
 import 'package:app/components/app_drawer.dart';
 import 'package:app/components/bottom_panel_nav.dart';
-import 'package:app/services/anomaly_grid_service.dart';
-import 'package:app/services/providers/anomaly_marker_layer.dart';
 import 'package:app/services/providers/user_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -16,7 +14,8 @@ import 'package:provider/provider.dart';
 
 import '../components/OSM_Attribution.dart';
 import '../components/bottom_panel.dart';
-import '../services/providers/anomaly_provider.dart';
+import '../services/grid_movement_handler.dart';
+import '../services/providers/anomaly_marker_layer.dart';
 import '../services/providers/permissions.dart';
 import '../services/providers/search.dart';
 import '../util/map_utils.dart';
@@ -30,7 +29,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final MapController _mapController;
-  late final AnomalyGridService _gridService;
+  late final GridMovementHandler _gridHandler;
   LatLng userLocation = const LatLng(15.49613530624519, 73.82646130357969);
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -45,28 +44,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _mapController = MapController();
-    _gridService = AnomalyGridService(
-      gridSize:
-          0.01, // this can be removed, its alr initialized (keeping for readability)
-      anomalyProvider: Provider.of<AnomalyProvider>(context, listen: false),
-    );
-
-    _mapController.mapEventStream.listen((event) {
-      _onMapMoved();
-    });
-  }
-
-  void _onMapMoved() {
-    _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 400), () {
-      final bounds = _mapController.camera.visibleBounds;
-      final swCorner = bounds.southWest;
-      final neCorner = bounds.northEast;
-
-      print("Map moved! SW: $swCorner, NE: $neCorner");
-      _gridService.onMapViewChanged(
-          swCorner, neCorner, _mapController.camera.zoom);
-    });
+    _gridHandler =
+        GridMovementHandler(mapController: _mapController, context: context);
   }
 
   @override
