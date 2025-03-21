@@ -15,6 +15,15 @@ def anomalies_in_region_view(request):
         latitude = request.query_params.get("latitude")
         longitude = request.query_params.get("longitude")
 
+        try:
+            radius = request.query_params.get("radius")
+            if radius is None:
+                raise ValueError
+            radius = float(radius)
+            if radius <0.001:
+                raise ValueError
+        except ValueError:
+            radius = 0.4
         # Check if lat lon has some content or not
         if latitude is None or longitude is None:
             return Response(
@@ -39,7 +48,7 @@ def anomalies_in_region_view(request):
                 status=status.HTTP_400_BAD_REQUEST,
             )
             
-        anomalies_data = sp.get_anomalies_by_longlat(longitude, latitude)
+        anomalies_data = sp.get_anomalies_by_longlat(longitude, latitude, radius)
 
         return Response(
             {"message": "Coordinates received successfully!", "anomalies": anomalies_data},

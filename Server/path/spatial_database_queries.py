@@ -34,7 +34,7 @@ def get_nodes_from_longlat(lng1: float, lat1: float, lng2: float, lat2: float) -
         return result
         
 def get_anomalies_by_longlat(
-    long_: float, lat_: float, distance_in_degrees: float = 0.01
+    long_: float, lat_: float, distance_in_degrees: float = 0.4
 )->list[dict]:
     # If you can't run this, check Server/anomalies
     #  - migrations.sql       # Update the database schema
