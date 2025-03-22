@@ -166,7 +166,9 @@ class RouteSelectionMode extends StatelessWidget {
                 ),
             ],
           ),
-          const AnomalyMarkerLayer(),
+          AnomalyMarkerLayer(
+            mapController: mapController,
+          ),
           const Positioned(
             left: 200,
             bottom: 200,

@@ -166,7 +166,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Theme.of(context).colorScheme.outlineVariant)),
                       ],
                     ),
-                  const AnomalyMarkerLayer(),
+                  AnomalyMarkerLayer(
+                    mapController: _mapController,
+                  ),
                   const Positioned(
                     left: 200,
                     bottom: 200,

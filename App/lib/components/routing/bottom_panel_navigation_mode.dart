@@ -100,7 +100,9 @@ class NavigationMode extends StatelessWidget {
                   ),
                 ],
               ),
-              const AnomalyMarkerLayer(),
+              AnomalyMarkerLayer(
+                mapController: mapController,
+              ),
               CurrentLocationLayer(
                 alignPositionOnUpdate: AlignOnUpdate.always,
                 alignDirectionOnUpdate: AlignOnUpdate.always,

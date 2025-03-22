@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:app/services/providers/anomaly_provider.dart';
 import 'package:flutter/cupertino.dart';
@@ -40,8 +41,7 @@ class GridMovementHandler {
     for (var key in storedGrids) {
       visitedGrids.add(_parseLatLng(key));
     }
-    print(
-        "Loaded visited grids from hive, size of visitedGrids: ${visitedGrids.length}");
+    log("Loaded visited grids from hive, size of visitedGrids: ${visitedGrids.length}");
   }
 
   String _latLngToKey(LatLng latLng) =>
@@ -65,14 +65,11 @@ class GridMovementHandler {
     LatLng newGridCenter = getGridCenter(newCenter);
 
     if (visitedGrids.contains(newGridCenter)) {
-      print("Already visited grid: $newGridCenter");
+      log("Already visited grid: $newGridCenter");
       return; // Skip API call if already visited
     }
 
-    print("Moved to a new grid! Fetching anomalies for: $newGridCenter");
-
-    visitedGrids.add(newGridCenter);
-    _saveVisitedGrids();
+    log("Moved to a new grid! Fetching anomalies for: $newGridCenter");
 
     _fetchAnomalies(newGridCenter);
   }
@@ -80,7 +77,7 @@ class GridMovementHandler {
   void _saveVisitedGrids() {
     List<String> storedGrids =
         visitedGrids.map((grid) => _latLngToKey(grid)).toList();
-    print("Saved the current set of visited grids");
+    log("Saved the current set of visited grids");
     _hiveBox.put('visitedGrids', storedGrids);
   }
 
@@ -118,12 +115,18 @@ class GridMovementHandler {
         Provider.of<AnomalyProvider>(context, listen: false)
             .addAnomalies(gridCenter, anomalyList);
 
-        print("Fetched ${anomalyList.length} anomalies for $gridCenter");
+        log("Fetched ${anomalyList.length} anomalies for $gridCenter");
+
+        // moved this here, cuz we'd only want to mark a grid center as visited, if the anomalies for it have been fetched
+        visitedGrids.add(gridCenter);
+        _saveVisitedGrids();
+
+        log("Marked grid as visited, and saved it in hive");
       } else {
-        print("Failed to fetch anomalies. Error: ${response.errorMessage}");
+        log("Failed to fetch anomalies. Error: ${response.errorMessage}");
       }
     } catch (e) {
-      print("Error fetching anomalies: $e");
+      log("Error fetching anomalies: $e");
     }
   }
 }
