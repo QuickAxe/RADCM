@@ -24,9 +24,10 @@ Color _getClusterColor(int count) {
 
 String getAnomalyIcon(String cat) {
   return switch (cat) {
-    "Speedbreaker" => "assets/icons/ic_speedbreaker.png",
+    "SpeedBreaker" => "assets/icons/ic_speedbreaker.png",
     "Rumbler" => "assets/icons/ic_rumbler.png",
     "Pothole" => "assets/icons/ic_pothole.png",
+    "Cracks" => "assets/icons/ic_cracks.png",
     _ => "assets/icons/ic_pothole.png",
   };
 }
@@ -107,7 +108,7 @@ class _AnomalyMarkerLayerState extends State<AnomalyMarkerLayer>
 
             return MarkerClusterLayerWidget(
               options: MarkerClusterLayerOptions(
-                maxClusterRadius: 5,
+                maxClusterRadius: 10,
                 size: const Size(40, 40),
                 zoomToBoundsOnClick: true,
                 padding: const EdgeInsets.fromLTRB(50.0, 150.0, 50.0, 300.0),

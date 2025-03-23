@@ -47,17 +47,17 @@ class UserSettingsProvider extends ChangeNotifier {
 
   // Toggle anomalies provider
   final Map<String, bool> _showOnMap = {
-    "Speedbreaker": true,
+    "SpeedBreaker": true,
     "Rumbler": true,
-    "Obstacle": true,
     "Pothole": true,
+    "Cracks": true,
   };
 
   final Map<String, bool> _alertWhileRiding = {
-    "Speedbreaker": true,
+    "SpeedBreaker": true,
     "Rumbler": true,
-    "Obstacle": true,
-    "Pothole": true
+    "Pothole": true,
+    "Cracks": true,
   };
 
   Map<String, bool> get showOnMap => _showOnMap;
