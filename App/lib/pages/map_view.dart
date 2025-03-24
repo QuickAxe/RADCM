@@ -8,6 +8,7 @@ import '../services/grid_movement_handler.dart';
 import '../services/providers/anomaly_marker_layer.dart';
 import '../services/providers/anomaly_provider.dart';
 import '../services/providers/permissions.dart';
+import '../services/providers/user_settings.dart';
 import '../util/map_utils.dart';
 
 class MapView extends StatefulWidget {
@@ -48,13 +49,7 @@ class _MapViewState extends State<MapView> {
             minZoom: 3.0,
           ),
           children: [
-            TileLayer(
-              panBuffer: 0,
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              tileProvider: FMTCTileProvider(stores: const {
-                'mapStore': BrowseStoreStrategy.readUpdateCreate
-              }),
-            ),
+            const MapTileLayer(),
             if (permissions.position != null)
               MarkerLayer(
                 markers: [
@@ -70,6 +65,27 @@ class _MapViewState extends State<MapView> {
           ],
         );
       },
+    );
+  }
+}
+
+// Moved tileLayer to its separate logic, because it depends on themeMode, and if themeMode changes then we only need to rebuild the tileLayer, NOT the entire Map logic
+class MapTileLayer extends StatelessWidget {
+  const MapTileLayer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final themeMode = context.select<UserSettingsProvider, ThemeMode>(
+      (settings) => settings.themeMode,
+    );
+
+    return TileLayer(
+      panBuffer: 0,
+      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      tileBuilder:
+          themeMode == ThemeMode.dark ? customDarkModeTileBuilder : null,
+      tileProvider: FMTCTileProvider(
+          stores: const {'mapStore': BrowseStoreStrategy.readUpdateCreate}),
     );
   }
 }

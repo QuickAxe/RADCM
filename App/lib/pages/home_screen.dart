@@ -1,3 +1,4 @@
+import 'package:app/util/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -11,9 +12,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: These are initialized too many times, need to use some singleton approach or something
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final colorScheme = context.colorScheme;
     return Scaffold(
       extendBodyBehindAppBar: true,
       key: GlobalKey<ScaffoldState>(),
@@ -43,13 +42,16 @@ class HomeScreen extends StatelessWidget {
   AppBar _buildAppBar(BuildContext context, ColorScheme colorScheme) {
     return AppBar(
       backgroundColor: Colors.transparent,
-      leading: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: FloatingActionButton(
-          backgroundColor: colorScheme.secondaryContainer,
-          heroTag: "hamburger",
-          onPressed: () => Scaffold.of(context).openDrawer(),
-          child: const Icon(Icons.menu_rounded),
+      // A builder was used here, because we cant refer to the Scaffold using context, from the same widget that builds the scaffold
+      leading: Builder(
+        builder: (context) => Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: FloatingActionButton(
+            backgroundColor: colorScheme.secondaryContainer,
+            heroTag: "hamburger",
+            onPressed: () => Scaffold.of(context).openDrawer(),
+            child: const Icon(Icons.menu_rounded),
+          ),
         ),
       ),
       actions: const [

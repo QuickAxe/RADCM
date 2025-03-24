@@ -13,20 +13,18 @@ class LoadingOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<Permissions>(
-      builder: (context, permissions, child) {
-        return Consumer<Search>(
-          builder: (context, search, child) {
-            if (permissions.loadingLocation) {
-              return const BlurWithLoading();
-            } else if (search.isCurrentSelected) {
-              return BottomPanelNav(mapController: MapController());
-            } else {
-              return BottomPanel(mapController: MapController());
-            }
-          },
-        );
-      },
+    final permissions = Provider.of<Permissions>(context);
+    final search = Provider.of<Search>(context);
+
+    return Stack(
+      children: [
+        if (search.isCurrentSelected)
+          BottomPanelNav(mapController: MapController())
+        else
+          BottomPanel(mapController: MapController()),
+        if (permissions.loadingLocation)
+          const Positioned.fill(child: BlurWithLoading()),
+      ],
     );
   }
 }
