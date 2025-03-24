@@ -1,7 +1,3 @@
-import 'dart:developer' as dev;
-
-import 'package:app/components/anomaly_image_uploader.dart';
-import 'package:app/pages/home_screen.dart';
 import 'package:app/pages/map_route_screen.dart';
 import 'package:app/pages/settings_screen.dart';
 import 'package:app/pages/settings_screens/additional_settings.dart';
@@ -9,7 +5,7 @@ import 'package:app/pages/settings_screens/navigation_preferences.dart';
 import 'package:app/pages/settings_screens/routines.dart';
 import 'package:app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:app/pages/settings_screens/voice_engine.dart';
-import 'package:app/services/background/activity_tracker.dart';
+import 'package:app/pages/splash_screen.dart';
 import 'package:app/services/providers/anomaly_provider.dart';
 import 'package:app/services/providers/permissions.dart';
 import 'package:app/services/providers/route_provider.dart';
@@ -18,31 +14,15 @@ import 'package:app/services/providers/user_settings.dart';
 import 'package:app/theme/theme.dart';
 import 'package:app/theme/util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-import 'package:hive_flutter/adapters.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart';
 
-import 'data/models/anomaly_marker_model.dart';
+import 'components/anomaly_image_uploader.dart';
 
 Future<void> main() async {
-  // This allows flutter_map caching
   WidgetsFlutterBinding.ensureInitialized();
 
-  // to use .env
-  await dotenv.load(fileName: ".env");
-
-  await FMTCObjectBoxBackend().initialise();
-  // mapStore is a specialized container that is used to store Tiles (caching)
-  await const FMTCStore('mapStore').manage.create();
-
-  // init hive and registering a custom anomaly marker adapter (for local storage)
-  await Hive.initFlutter();
-  Hive.registerAdapter(AnomalyMarkerAdapter());
-
   runApp(
-    // registering providers here
     MultiProvider(
       providers: [
         // permissions provider to handle permissions (location for now)
@@ -59,49 +39,24 @@ Future<void> main() async {
   );
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() async {
-      Permissions permissions =
-          Provider.of<Permissions>(context, listen: false);
-
-      // calls fetch position
-      permissions.fetchPosition().then((_) {
-        dev.log('YOO IM THIS COOL COMMENT HERE.. IM SIC');
-
-        dev.log('Activity tracking has started.');
-        ActivityTracker().startTracker();
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // Theme related logic (NEED TO MOVE THIS)
     final themeMode = context.select<UserSettingsProvider, ThemeMode>(
       (settings) => settings.themeMode,
     );
     TextTheme textTheme = createTextTheme(context, "Albert Sans", "ABeeZee");
     MaterialTheme theme = MaterialTheme(textTheme);
+
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: const SplashScreen(),
       themeMode: themeMode,
       theme: theme.light(),
       darkTheme: theme.dark(),
-      debugShowCheckedModeBanner: false,
-      home: const HomeScreen(),
       routes: {
         '/settings': (context) => const SettingsScreen(),
         '/toggle_anomalies': (context) => const ToggleAnomaliesScreen(),
@@ -115,3 +70,60 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
+
+// class MyApp extends StatefulWidget {
+//   const MyApp({super.key});
+//
+//   @override
+//   State<MyApp> createState() => _MyAppState();
+// }
+//
+// class _MyAppState extends State<MyApp> {
+//   @override
+//   void initState() {
+//     super.initState();
+//     Future.microtask(() async {
+//       Permissions permissions =
+//           Provider.of<Permissions>(context, listen: false);
+//
+//       // calls fetch position
+//       permissions.fetchPosition().then((_) {
+//         dev.log('YOO IM THIS COOL COMMENT HERE.. IM SIC');
+//
+//         dev.log('Activity tracking has started.');
+//         ActivityTracker().startTracker();
+//       });
+//     });
+//   }
+//
+//   @override
+//   void dispose() {
+//     super.dispose();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final themeMode = context.select<UserSettingsProvider, ThemeMode>(
+//       (settings) => settings.themeMode,
+//     );
+//     TextTheme textTheme = createTextTheme(context, "Albert Sans", "ABeeZee");
+//     MaterialTheme theme = MaterialTheme(textTheme);
+//     return MaterialApp(
+//       themeMode: themeMode,
+//       theme: theme.light(),
+//       darkTheme: theme.dark(),
+//       debugShowCheckedModeBanner: false,
+//       home: const HomeScreen(),
+//       routes: {
+//         '/settings': (context) => const SettingsScreen(),
+//         '/toggle_anomalies': (context) => const ToggleAnomaliesScreen(),
+//         '/routines': (context) => const RoutinesScreen(),
+//         '/voice_engine': (context) => const VoiceEngineScreen(),
+//         '/additional_settings': (context) => const AdditionalSettings(),
+//         '/map_route': (context) => const MapRouteScreen(),
+//         '/navigation_preferences': (context) => const NavigationPreferences(),
+//         '/capture': (context) => AnomalyImageUploader(),
+//       },
+//     );
+//   }
+// }
