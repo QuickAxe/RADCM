@@ -1,4 +1,5 @@
 from django.db import connection
+from math import pi
 
 def get_nodes_from_longlat(lng1: float, lat1: float, lng2: float, lat2: float) -> tuple[int, int]:
     with connection.cursor() as cursor:
@@ -130,7 +131,7 @@ def get_path_by_longlat(long1:float, lat1:float, long2:float, lat2:float):
         results = cursor.fetchall()
         return results
 
-def get_path_by_nodeid(source_id:int,target_id:int):
+def get_path_by_nodeid(source_id:int,target_id:int) -> list[list[dict]]:
     with connection.cursor() as cursor:
         # If you get an error her about geom in nodes or geom_way in edges check ./migrations.sql
         cursor.execute(
@@ -280,7 +281,26 @@ def get_path_by_nodeid(source_id:int,target_id:int):
         # print("HERE")
         # Fetch the results
         results = cursor.fetchall()
+
+        def add_turn(array_of_dicts: list[dict]):
+
+            for i in range(1, len(array_of_dicts)):
+                curr_dict = array_of_dicts[i]
+                prev_dict = array_of_dicts[i]
+                turn_angle = (curr_dict["maneuver"]["bearing1"] - prev_dict["maneuver"]["bearing2"]) %( 2 * pi)
+                
+                if turn_angle <= (1 - 1 / 4) * pi:
+                    curr_dict["maneuver"]["turn_direction"] = "LEFT"
+                elif turn_angle <= (1 - 1 / 8) * pi:
+                    curr_dict["maneuver"]["turn_direction"] = "SLIGHTLY LEFT"
+                elif turn_angle <= (1 + 1 / 8) * pi:
+                    curr_dict["maneuver"]["turn_direction"] = "STRIAGHT"
+                elif turn_angle <= (1 + 1 / 4) * pi:
+                    curr_dict["maneuver"]["turn_direction"] = "STRIAGHT"
+                elif turn_angle <= 2 * pi:
+                    curr_dict["maneuver"]["turn_direction"] = "RIGHT"
+
+        add_turn(results[0][0])
+        add_turn(results[1][0])
         
-        
-            
         return [results[0][0], results[1][0]]
