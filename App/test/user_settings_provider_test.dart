@@ -63,8 +63,8 @@ void main() {
     });
 
     test('toggleShowOnMap updates values', () {
-      userSettings.toggleShowOnMap("Speedbreaker");
-      expect(userSettings.showOnMap["Speedbreaker"], false);
+      userSettings.toggleShowOnMap("SpeedBreaker");
+      expect(userSettings.showOnMap["SpeedBreaker"], false);
     });
 
     test('toggleAlertWhileRiding updates values', () {
