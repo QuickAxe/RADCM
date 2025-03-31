@@ -142,14 +142,12 @@ class Geometry {
 class Maneuver {
   final double bearing1;
   final double bearing2;
-  final String? type;
-  final String? modifier;
+  final String? turnDirection;
 
   Maneuver({
     required this.bearing1,
     required this.bearing2,
-    required this.type,
-    required this.modifier,
+    required this.turnDirection,
   });
 
   factory Maneuver.fromJson(Map<String, dynamic> json) {
@@ -157,8 +155,9 @@ class Maneuver {
     return Maneuver(
       bearing1: (json['bearing1'] as num).toDouble(),
       bearing2: (json['bearing2'] as num).toDouble(),
-      type: null,
-      modifier: null,
+      turnDirection: json.containsKey("turn_direction")
+          ? json['turn_direction'] as String?
+          : null,
     );
   }
 }

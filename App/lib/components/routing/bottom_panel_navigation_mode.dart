@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:app/components/OSM_Attribution.dart';
 import 'package:app/components/routing/dynamic_route_directions.dart';
+import 'package:app/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
@@ -70,13 +71,14 @@ class NavigationMode extends StatelessWidget {
             options: MapOptions(
               initialCenter:
                   LatLng(routeProvider.startLat, routeProvider.startLng),
-              initialZoom: 18.0,
-              minZoom: 3.0,
+              initialZoom: defaultZoom,
+              minZoom: minZoom,
+              maxZoom: maxZoom,
             ),
             children: [
               TileLayer(
                 panBuffer: 0,
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate: tileServerUrl,
                 // retinaMode: true,
                 tileBuilder: themeMode == ThemeMode.dark
                     ? customDarkModeTileBuilder

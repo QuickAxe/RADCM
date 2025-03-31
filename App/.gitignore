@@ -44,3 +44,5 @@ app.*.map.json
 
 
 /lib/data/models/anomaly_marker_model.g.dart
+/devtools_options.yaml
+

@@ -32,7 +32,7 @@ class RouteSelectionMode extends StatelessWidget {
       color: Theme.of(context).colorScheme.surfaceContainer,
       borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(25.0), topRight: Radius.circular(25.0)),
-      minHeight: 200,
+      minHeight: 300,
       maxHeight: 700,
       panel: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -76,14 +76,14 @@ class RouteSelectionMode extends StatelessWidget {
                           ),
                         ),
                         title: Text(
-                          "Route ${index + 1}",
+                          "Route ${index + 1} ${index == 1 ? " (Avoiding Anomalies)" : ""}",
                           style: theme.textTheme.titleLarge
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Text(
-                          "Distance: ${route.distance != null ? formatDistance(route.distance!) : "N/A"} | "
-                          "Duration: ${route.duration != null ? formatDuration(route.duration!) : "N/A"}",
-                        ),
+                            "Distance: ${route.distance != null ? formatDistance(route.distance!) : "N/A"}"
+                            // "Duration: ${route.duration != null ? formatDuration(route.duration!) : "N/A"}",
+                            ),
                         selected: routeProvider.selectedRouteIndex == index,
                         onTap: () {
                           routeProvider.updateSelectedRoute(index);

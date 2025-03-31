@@ -1,16 +1,20 @@
 import 'dart:developer' as dev;
 
-import 'package:flutter/cupertino.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
-class Permissions extends ChangeNotifier with WidgetsBindingObserver {
-  Position? position;
-  bool locationAvailable = false;
-  bool waitingForLocationSettings = false;
-  bool loadingLocation = false;
+import '../../util/general_utils.dart';
 
-  // This is used to observe lifecycle changes for the app so when it returns from the settings screen we can detect it
+class Permissions extends ChangeNotifier with WidgetsBindingObserver {
+  Position? _position;
+  bool _locationAvailable = false;
+  bool _loadingLocation = false;
+  bool _waitingForLocationSettings = false;
+
+  Position? get position => _position;
+  bool get locationAvailable => _locationAvailable;
+  bool get loadingLocation => _loadingLocation;
+
   Permissions() {
     WidgetsBinding.instance.addObserver(this);
   }
@@ -23,111 +27,57 @@ class Permissions extends ChangeNotifier with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && waitingForLocationSettings) {
-      waitingForLocationSettings = false;
-      // once u return from the settings screen call fetch position again
+    if (state == AppLifecycleState.resumed && _waitingForLocationSettings) {
+      _waitingForLocationSettings = false;
       fetchPosition();
     }
   }
 
   Future<void> fetchPosition() async {
-    // checks if location is enabled
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    dev.log('I AM IN FETCH POSITION 1');
-
-    if (!serviceEnabled) {
-      dev.log('I AM IN FETCH POSITION 2');
-
-      dev.log('Location Service not enabled.');
-      locationAvailable = false;
-      notifyListeners();
-
-      Fluttertoast.showToast(
-        msg: "Location service is disabled. Please enable it in settings.",
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.CENTER,
-      );
-
-      waitingForLocationSettings = true;
-      // opens location settings
-      await Geolocator.openLocationSettings();
-    }
-
-    dev.log('I AM IN FETCH POSITION 3');
-    await checkAndRequestLocationPermission();
-  }
-
-  Future<void> checkAndRequestLocationPermission() async {
-    loadingLocation = true;
+    _loadingLocation = true;
     notifyListeners();
+
+    showToast("Fetching user location");
+
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      dev.log('Location Service is disabled.');
+      showToast("Enable location services in settings.");
+      _waitingForLocationSettings = true;
+      await Geolocator.openLocationSettings();
+      return;
+    }
 
     LocationPermission permission = await Geolocator.checkPermission();
-    dev.log('I AM IN CHECK & REQUEST 1');
-
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        dev.log('Location permission was denied.');
-
-        Fluttertoast.showToast(
-          msg:
-              "Location permission is denied. Please enable it in app settings.",
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.CENTER,
-        );
-        // opens app settings
-        await Geolocator.openAppSettings();
-      }
     }
 
-    dev.log('I AM IN CHECK & REQUEST 2');
+    if (permission == LocationPermission.deniedForever) {
+      dev.log('Location permission permanently denied.');
+      showToast("Location permission denied. Enable it in settings.");
+      await Geolocator.openAppSettings();
+      return;
+    }
 
-    // fetches the current position
-    position = await Geolocator.getCurrentPosition();
-    locationAvailable = true;
-    loadingLocation = false;
-    notifyListeners();
-
-    // checkBatteryOptimizationStatus();
+    if (permission == LocationPermission.whileInUse ||
+        permission == LocationPermission.always) {
+      _position = await Geolocator.getCurrentPosition();
+      _locationAvailable = true;
+      _loadingLocation = false;
+      notifyListeners();
+    } else {
+      dev.log('Location permission not granted.');
+      _locationAvailable = false;
+      _loadingLocation = false;
+      notifyListeners();
+    }
   }
 
-  // Future<void> checkBatteryOptimizationStatus() async {
-  //   SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   // ?? syntax is basically to return a fallback value, in our case false
-  //   bool batteryPromptShown = prefs.getBool("battery_prompt_shown") ?? false;
-  //
-  //   if (!batteryPromptShown) {
-  //     await batteryOptimizationDisable();
-  //     await prefs.setBool("battery_prompt_shown", true);
-  //   }
-  // }
-  //
-  // Future<void> batteryOptimizationDisable() async {
-  //   if (Platform.isAndroid) {
-  //     Fluttertoast.showToast(
-  //       msg: "Please disable battery optimization.",
-  //       toastLength: Toast.LENGTH_LONG,
-  //       gravity: ToastGravity.BOTTOM,
-  //     );
-  //
-  //     const intent = AndroidIntent(
-  //       action: 'android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS',
-  //       data: 'package:com.example.app',
-  //       flags: [Flag.FLAG_ACTIVITY_NEW_TASK],
-  //     );
-  //
-  //     await intent.launch();
-  //   }
-  // }
-
   void startListening() {
-    Geolocator.getPositionStream().listen(
-      (Position newPosition) {
-        position = newPosition;
-        locationAvailable = true;
-        notifyListeners();
-      },
-    );
+    Geolocator.getPositionStream().listen((Position newPosition) {
+      _position = newPosition;
+      _locationAvailable = true;
+      notifyListeners();
+    });
   }
 }
