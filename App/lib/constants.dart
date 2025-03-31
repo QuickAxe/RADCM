@@ -7,5 +7,4 @@ const double minZoom = 3.0;
 const LatLng defaultCenter = LatLng(15.4961, 73.8264);
 
 // Tiling server
-const String tileServerUrl =
-    'https://tileserver.sorciermahep.tech/tile/{z}/{x}/{y}.png';
+const String tileServerUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
