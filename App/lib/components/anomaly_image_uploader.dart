@@ -1,16 +1,17 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart';
+
+import '../services/api_service/dio_client_user_service.dart';
 
 class AnomalyImageUploader extends StatefulWidget {
   @override
@@ -21,6 +22,7 @@ class _AnomalyImageUploaderState extends State<AnomalyImageUploader> {
   File? _imageFile;
   final ImagePicker _picker = ImagePicker();
   bool _isUploading = false;
+  final DioClientUser _dioClient = DioClientUser();
 
   Future<void> _captureImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.camera);
@@ -42,44 +44,36 @@ class _AnomalyImageUploaderState extends State<AnomalyImageUploader> {
 
     setState(() => _isUploading = true);
 
-    var url = Uri.parse(
-        "http://${dotenv.env['IP_ADDRESS']}:8000/api/anomalies/images/");
-    var request = http.MultipartRequest("POST", url)
-      ..fields["source"] = "mobile"
-      ..files.add(await http.MultipartFile.fromPath(
-        "image",
-        _imageFile!.path,
-        filename: basename(_imageFile!.path),
-        contentType:
-            MediaType.parse(lookupMimeType(_imageFile!.path) ?? "image/jpeg"),
-      ));
-
     try {
-      var response = await request.send();
-      var responseData = await response.stream.bytesToString();
+      String fileName = basename(_imageFile!.path);
+      FormData formData = FormData.fromMap({
+        "source": "mobile",
+        "image": await MultipartFile.fromFile(
+          _imageFile!.path,
+          filename: fileName,
+          contentType:
+              MediaType.parse(lookupMimeType(_imageFile!.path) ?? "image/jpeg"),
+        ),
+      });
+
+      DioResponse response =
+          await _dioClient.postRequest("/anomalies/images/", formData);
+
       setState(() => _isUploading = false);
 
-      if (response.statusCode == 200) {
+      if (response.success) {
         Fluttertoast.showToast(
-          msg: "Anomaly submitted! Your turn PWD",
-          toastLength: Toast.LENGTH_SHORT,
-        );
-        setState(() {
-          _imageFile = null;
-        });
+            msg: "Anomaly submitted!", toastLength: Toast.LENGTH_SHORT);
+        setState(() => _imageFile = null);
       } else {
         Fluttertoast.showToast(
-          msg: "Something went wrong :/",
-          toastLength: Toast.LENGTH_SHORT,
-        );
-        log("Upload failed: $responseData");
+            msg: "Something went wrong :/", toastLength: Toast.LENGTH_SHORT);
+        log("Upload failed: ${response.errorMessage}");
       }
     } catch (e) {
       setState(() => _isUploading = false);
       Fluttertoast.showToast(
-        msg: "An error occurred!",
-        toastLength: Toast.LENGTH_SHORT,
-      );
+          msg: "An error occurred!", toastLength: Toast.LENGTH_SHORT);
       log('Error: $e');
     }
   }

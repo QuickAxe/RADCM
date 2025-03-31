@@ -21,12 +21,12 @@ class DioClientUser {
       : _dio = Dio(
           BaseOptions(
             baseUrl: 'http://${dotenv.env['IP_ADDRESS']}:8000/api/',
-            // baseUrl: 'https://0b81-2a09-bac1-36a0-eb0-00-dd-21.ngrok-free.app/api/',
+            // baseUrl: 'https://3bc4-152-57-247-190.ngrok-free.app/api/',
             connectTimeout: const Duration(seconds: 5),
             headers: {
               'Content-Type': 'application/json',
-              //   'Accept': 'application/json',
-              //   'ngrok-skip-browser-warning': 'true',
+              // 'Accept': 'application/json',
+              // 'ngrok-skip-browser-warning': 'true',
             },
           ),
         ) {
@@ -68,8 +68,7 @@ class DioClientUser {
   }
 
   // POST request
-  Future<DioResponse> postRequest(
-      String endpoint, Map<String, dynamic> data) async {
+  Future<DioResponse> postRequest(String endpoint, dynamic data) async {
     try {
       Response response = await _dio.post(endpoint, data: data);
       return DioResponse(success: true, data: response.data);
