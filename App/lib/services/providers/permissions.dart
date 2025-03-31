@@ -1,8 +1,9 @@
 import 'dart:developer' as dev;
 
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
+
+import '../../util/general_utils.dart';
 
 class Permissions extends ChangeNotifier with WidgetsBindingObserver {
   Position? _position;
@@ -36,9 +37,11 @@ class Permissions extends ChangeNotifier with WidgetsBindingObserver {
     _loadingLocation = true;
     notifyListeners();
 
+    showToast("Fetching user location");
+
     if (!await Geolocator.isLocationServiceEnabled()) {
       dev.log('Location Service is disabled.');
-      _showToast("Enable location services in settings.");
+      showToast("Enable location services in settings.");
       _waitingForLocationSettings = true;
       await Geolocator.openLocationSettings();
       return;
@@ -51,7 +54,7 @@ class Permissions extends ChangeNotifier with WidgetsBindingObserver {
 
     if (permission == LocationPermission.deniedForever) {
       dev.log('Location permission permanently denied.');
-      _showToast("Location permission denied. Enable it in settings.");
+      showToast("Location permission denied. Enable it in settings.");
       await Geolocator.openAppSettings();
       return;
     }
@@ -76,13 +79,5 @@ class Permissions extends ChangeNotifier with WidgetsBindingObserver {
       _locationAvailable = true;
       notifyListeners();
     });
-  }
-
-  void _showToast(String message) {
-    Fluttertoast.showToast(
-      msg: message,
-      toastLength: Toast.LENGTH_LONG,
-      gravity: ToastGravity.CENTER,
-    );
   }
 }

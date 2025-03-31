@@ -31,15 +31,6 @@ class _AnomalyImageUploaderState extends State<AnomalyImageUploader> {
     }
   }
 
-  Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _imageFile = File(pickedFile.path);
-      });
-    }
-  }
-
   Future<void> _uploadImage(BuildContext context) async {
     if (_imageFile == null) {
       Fluttertoast.showToast(
@@ -130,7 +121,7 @@ class _AnomalyImageUploaderState extends State<AnomalyImageUploader> {
                             Icon(LucideIcons.fileQuestion,
                                 size: 50, color: colorScheme.secondary),
                             const SizedBox(height: 30),
-                            Text("Wher anomaly?? lyin'",
+                            Text("Capture a picture of the anomaly",
                                 style: theme.textTheme.bodyMedium),
                           ],
                         ),
@@ -168,14 +159,6 @@ class _AnomalyImageUploaderState extends State<AnomalyImageUploader> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildActionButton(
-                        icon: LucideIcons.galleryHorizontalEnd,
-                        label: "Gallery",
-                        onPressed: _pickImage,
-                        buttonColor: colorScheme.secondaryContainer,
-                        iconColor: colorScheme.onSecondaryContainer,
-                        textColor: colorScheme.onSecondaryContainer,
-                      ),
                       const SizedBox(width: 20),
                       _buildActionButton(
                         icon: LucideIcons.camera,

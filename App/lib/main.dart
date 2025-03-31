@@ -7,6 +7,7 @@ import 'package:app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:app/pages/settings_screens/voice_engine.dart';
 import 'package:app/pages/splash_screen.dart';
 import 'package:app/services/providers/anomaly_provider.dart';
+import 'package:app/services/providers/map_controller_provider.dart';
 import 'package:app/services/providers/permissions.dart';
 import 'package:app/services/providers/route_provider.dart';
 import 'package:app/services/providers/search.dart';
@@ -25,13 +26,15 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
-        // permissions provider to handle permissions (location for now)
+        // permissions provider to handle permissions
         ChangeNotifierProvider(create: (context) => Permissions()),
         ChangeNotifierProvider(create: (context) => Search()),
         ChangeNotifierProvider(create: (context) => UserSettingsProvider()),
         ChangeNotifierProvider(create: (context) => RouteProvider()),
         ChangeNotifierProvider(create: (context) => AnomalyProvider()),
+        ChangeNotifierProvider(create: (context) => MapControllerProvider()),
       ],
+      // overlaySupport is used to show the anomaly notification overlay while navigating
       child: const OverlaySupport.global(
         child: MyApp(),
       ),
@@ -70,60 +73,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-// class MyApp extends StatefulWidget {
-//   const MyApp({super.key});
-//
-//   @override
-//   State<MyApp> createState() => _MyAppState();
-// }
-//
-// class _MyAppState extends State<MyApp> {
-//   @override
-//   void initState() {
-//     super.initState();
-//     Future.microtask(() async {
-//       Permissions permissions =
-//           Provider.of<Permissions>(context, listen: false);
-//
-//       // calls fetch position
-//       permissions.fetchPosition().then((_) {
-//         dev.log('YOO IM THIS COOL COMMENT HERE.. IM SIC');
-//
-//         dev.log('Activity tracking has started.');
-//         ActivityTracker().startTracker();
-//       });
-//     });
-//   }
-//
-//   @override
-//   void dispose() {
-//     super.dispose();
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final themeMode = context.select<UserSettingsProvider, ThemeMode>(
-//       (settings) => settings.themeMode,
-//     );
-//     TextTheme textTheme = createTextTheme(context, "Albert Sans", "ABeeZee");
-//     MaterialTheme theme = MaterialTheme(textTheme);
-//     return MaterialApp(
-//       themeMode: themeMode,
-//       theme: theme.light(),
-//       darkTheme: theme.dark(),
-//       debugShowCheckedModeBanner: false,
-//       home: const HomeScreen(),
-//       routes: {
-//         '/settings': (context) => const SettingsScreen(),
-//         '/toggle_anomalies': (context) => const ToggleAnomaliesScreen(),
-//         '/routines': (context) => const RoutinesScreen(),
-//         '/voice_engine': (context) => const VoiceEngineScreen(),
-//         '/additional_settings': (context) => const AdditionalSettings(),
-//         '/map_route': (context) => const MapRouteScreen(),
-//         '/navigation_preferences': (context) => const NavigationPreferences(),
-//         '/capture': (context) => AnomalyImageUploader(),
-//       },
-//     );
-//   }
-// }

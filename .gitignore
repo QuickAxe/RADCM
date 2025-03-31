@@ -23,3 +23,6 @@ media
 .vscode
 # stupid workaround 
 /Mpu6050Module/MPU6050Module/.gitignore
+Server/dummy.json
+Server/Server.code-workspace
+Server/anomalies/out.csv

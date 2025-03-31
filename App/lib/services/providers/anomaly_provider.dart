@@ -1,3 +1,5 @@
+import 'dart:developer' as dev;
+
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:latlong2/latlong.dart';
@@ -16,6 +18,7 @@ class AnomalyProvider extends ChangeNotifier {
   }
 
   void _loadCachedAnomalies() {
+    dev.log("Loading cached anomalies");
     if (_hiveBox.isNotEmpty) {
       _anomalyCache.clear();
 
