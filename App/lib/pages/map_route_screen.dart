@@ -38,55 +38,34 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
       builder: (context, mapProvider, child) {
         return Scaffold(
           extendBodyBehindAppBar: true,
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                mapProvider.stopRouteNavigation();
-                mapProvider.flushRoutes();
-                Navigator.of(context).pop();
-              },
-            ),
-            actions: [
-              if (mapProvider.selectedRouteIndex != -1 &&
-                  !mapProvider.startNavigation)
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: FloatingActionButton(
-                    heroTag: "start_navigation",
-                    tooltip: "Start Navigation",
-                    onPressed: () {
-                      _mapController.moveAndRotate(
-                        LatLng(mapProvider.startLat, mapProvider.startLng),
-                        18.0,
-                        0.0,
-                      );
-                      mapProvider.startRouteNavigation();
-                    },
-                    child: const Icon(
-                      Icons.navigation_rounded,
-                    ),
-                  ),
-                )
-              else if (mapProvider.startNavigation)
-                Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: FloatingActionButton(
-                    heroTag: "stop_navigation",
-                    tooltip: "Stop Navigation",
-                    onPressed: () {
-                      mapProvider.stopRouteNavigation();
-                    },
-                    backgroundColor: colorScheme.errorContainer,
-                    child: Icon(
-                      Icons.stop_rounded,
-                      color: colorScheme.onErrorContainer,
-                    ),
-                  ),
-                )
-            ],
-          ),
+          appBar: mapProvider.startNavigation
+              ? null
+              : AppBar(
+                  backgroundColor: Colors.transparent,
+                  actions: [
+                    if (mapProvider.selectedRouteIndex != -1 &&
+                        !mapProvider.startNavigation)
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: FloatingActionButton(
+                          heroTag: "start_navigation",
+                          tooltip: "Start Navigation",
+                          onPressed: () {
+                            _mapController.moveAndRotate(
+                              LatLng(
+                                  mapProvider.startLat, mapProvider.startLng),
+                              18.0,
+                              0.0,
+                            );
+                            mapProvider.startRouteNavigation();
+                          },
+                          child: const Icon(
+                            Icons.navigation_rounded,
+                          ),
+                        ),
+                      )
+                  ],
+                ),
           body: Stack(
             children: [
               /// Map or navigation mode

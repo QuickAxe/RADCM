@@ -44,8 +44,8 @@ class NavigationMode extends StatelessWidget {
           color: Theme.of(context).colorScheme.surfaceContainer,
           borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(25.0), topRight: Radius.circular(25.0)),
-          minHeight: 200,
-          maxHeight: 400,
+          minHeight: 150,
+          maxHeight: 150,
           panel: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
@@ -102,9 +102,6 @@ class NavigationMode extends StatelessWidget {
                   ),
                 ],
               ),
-              AnomalyMarkerLayer(
-                mapController: mapController,
-              ),
               CurrentLocationLayer(
                 alignPositionOnUpdate: AlignOnUpdate.always,
                 alignDirectionOnUpdate: AlignOnUpdate.always,
@@ -124,12 +121,15 @@ class NavigationMode extends StatelessWidget {
               ),
               const Positioned(
                 left: 200,
-                bottom: 200,
+                bottom: 145,
                 child: Attribution(),
+              ),
+              AnomalyMarkerLayer(
+                mapController: mapController,
               ),
               Positioned(
                 left: 16,
-                bottom: 210,
+                bottom: 160,
                 child: FloatingActionButton(
                   heroTag: "voice_toggle",
                   onPressed: () {
@@ -155,7 +155,7 @@ class NavigationMode extends StatelessWidget {
               ),
               Positioned(
                 left: 16,
-                bottom: 275,
+                bottom: 225,
                 child: FloatingActionButton(
                   heroTag: "stop_navigation",
                   tooltip: "Stop Navigation",
