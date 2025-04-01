@@ -22,7 +22,7 @@ class AnomalyAlerts extends StatefulWidget {
 class _AnomalyAlertsState extends State<AnomalyAlerts> {
   StreamSubscription<Position>? positionStream;
   final Distance distance = Distance();
-  List<Anomaly> activeAnomalies = [];
+  List<AnomalyWithDistance> activeAnomalies = [];
 
   @override
   void initState() {
@@ -34,11 +34,14 @@ class _AnomalyAlertsState extends State<AnomalyAlerts> {
       List<Anomaly> upcoming = getUpcomingAnomalies(position, widget.segments);
 
       setState(() {
-        activeAnomalies
-            .removeWhere((anomaly) => hasUserPassedAnomaly(position, anomaly));
+        activeAnomalies.removeWhere((anomalyWithDistance) =>
+            hasUserPassedAnomaly(position, anomalyWithDistance.anomaly));
         for (var anomaly in upcoming) {
-          if (!activeAnomalies.contains(anomaly)) {
-            activeAnomalies.add(anomaly); // Insert at the bottom
+          if (!activeAnomalies.any((item) => item.anomaly == anomaly)) {
+            // Calculate the distance and store it with the anomaly
+            double distanceToAnomaly = calculateDistance(position, anomaly);
+            activeAnomalies.add(AnomalyWithDistance(
+                anomaly: anomaly, distance: distanceToAnomaly));
           }
         }
         // this shud only keep the top 3 closest anomalies, why closest since we traversing the segments and detecting anomalies, the new ones are added at the bottom, the new ones are the further ones, so we only keep 3 from top since they oldest, closest
@@ -161,9 +164,11 @@ class _AnomalyAlertsState extends State<AnomalyAlerts> {
                     ),
                   ]
                 : activeAnomalies
-                    .map((anomaly) => AnomalyNotificationWidget(
-                          category: anomaly.category,
-                          message: "${anomaly.category} ahead!",
+                    .map((anomalyWithDistance) => AnomalyNotificationWidget(
+                          category: anomalyWithDistance.anomaly.category,
+                          message:
+                              "${anomalyWithDistance.anomaly.category} ahead!",
+                          distance: anomalyWithDistance.distance,
                         ))
                     .toList(),
           ),
@@ -171,4 +176,14 @@ class _AnomalyAlertsState extends State<AnomalyAlerts> {
       ),
     );
   }
+}
+
+class AnomalyWithDistance {
+  final Anomaly anomaly;
+  final double distance;
+
+  AnomalyWithDistance({
+    required this.anomaly,
+    required this.distance,
+  });
 }

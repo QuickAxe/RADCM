@@ -5,8 +5,12 @@ import '../../services/providers/anomaly_marker_layer.dart';
 class AnomalyNotificationWidget extends StatelessWidget {
   final String message;
   final String category;
+  final double distance;
   const AnomalyNotificationWidget(
-      {super.key, required this.message, required this.category});
+      {super.key,
+      required this.message,
+      required this.category,
+      required this.distance});
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +36,21 @@ class AnomalyNotificationWidget extends StatelessWidget {
                       color: colorScheme.onPrimaryFixed,
                       fontWeight: FontWeight.bold,
                       fontSize: 18)),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: colorScheme.onPrimaryFixed,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                "${distance.toStringAsFixed(0)}m",
+                style: TextStyle(
+                  color: colorScheme.primaryFixed,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
             ),
           ],
         ),
