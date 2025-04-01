@@ -13,12 +13,14 @@ services:
       - OSM2PGSQL_EXTRA_ARGS=-C 4096
     command: run
     restart: unless-stopped
-  
+    
   cloudflared: 
     image: docker.io/cloudflare/cloudflared 
     container_name: cloudflare-tunnel
     restart: unless-stopped 
-    command: tunnel --url http://map:80
+    command: tunnel --no-autoupdate --protocol http2 run
+    environment:
+      - TUNNEL_TOKEN=$TUNNEL_TOKEN
 
 volumes:
   osm-data:
