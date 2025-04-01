@@ -6,6 +6,8 @@ runs*/
 Server/TilingServer/*.osm.pbf
 Server/TilingServer/*.poly
 Server/SensorModel/model_visualization*
+Server/VisionModel/models/**
+!Server/VisionModel/models/GetModels.ipynb
 
 # Django #
 **/.cxx
