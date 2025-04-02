@@ -3,7 +3,7 @@ from io import BytesIO
 from PIL import Image
 from celery import shared_task
 
-model = YOLO("models/yolo11m_cbam.pt")
+model = YOLO("VisionModel/models/yolo11m_cbam.pt")
 
 # Crack -> 3, Pothole -> 1
 remap_dict = {0: 3, 1: 1}
@@ -38,7 +38,8 @@ def vision_predict_anomaly_class(image_list):
             )
 
         probs_list.append(temp_list)
-    print(probs_list)
+
+    return probs_list
 
 
 if __name__ == "__main__":
@@ -48,6 +49,6 @@ if __name__ == "__main__":
     image_dir = "./"
     image_paths = glob.glob(os.path.join(image_dir, "*.png"))
 
-    image_data_list = [open(image_path, "rb").read() for image_path in image_paths]
+    image_data_list = [open(image_path, "rb") for image_path in image_paths]
 
     vision_predict_anomaly_class(image_data_list)

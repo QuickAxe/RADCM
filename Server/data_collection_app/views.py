@@ -7,6 +7,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
 from SensorModel.inference import predictAnomalyClass
+from VisionModel.inference import vision_predict_anomaly_class
 
 # Response data format:
 # {
@@ -113,7 +114,7 @@ def anomaly_sensor_data_collection_view(request):
         # anomalyOutputs should be of the form:
         # [ (anomaly_1_CLass, confidence), (anomaly_2_Class, confidence), ...... ]
         # ugh look at me using snake case
-        
+
         # NOTE: the class here is an index of the class, use below reference to decode it, but in reverse:
         # classNames = {"Pothole": 0, "Breaker": 1, "Flat": 2}
         # NOTE: as of now, only the first two classes have been used
@@ -139,32 +140,32 @@ def anomaly_sensor_data_collection_view(request):
 @api_view(["POST"])
 def anomaly_image_data_collection_view(request):
     try:
-        print("Files: ", request.FILES)
-
-        if "image" not in request.FILES:
+        images = request.FILES.getlist("image")
+        if not images:
             return Response(
-                {"error": "Image file not found in requestttt."},
+                {"error": "No images found in request."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        image = request.FILES["image"]
 
         source = request.data.get("source")
+        lat = request.data.getlist("lat")
+        lng = request.data.getlist("lng")
+
         if not source or not isinstance(source, str):
             return Response(
-                {"error": "Invalid source. It must be a non-empty string."},
+                {"error": "Invalid source."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if len(lat) != len(images) or len(lng) != len(images):
+            return Response(
+                {"error": "Latitudes and longitudes must match number of images."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        file_extension = image.name.split(".")[-1]
-        new_filename = f"{source}_{uuid.uuid4().hex}.{file_extension}" #this is to make sure the file names are uniform (source_uuid.extension)
-
-        save_path = os.path.join(settings.MEDIA_ROOT, "anomaly_images", source)
-        os.makedirs(save_path, exist_ok=True)
-        file_path = os.path.join(save_path, new_filename)
-
-        default_storage.save(file_path, ContentFile(image.read()))
-
-        # TODO: sen pic to model
+        # Vision model processing here
+        image_list = [image.read() for image in images]
+        vision_model_outputs = vision_predict_anomaly_class.delay(image_list)
+        # print(vision_model_outputs.id)
 
         return Response(
             {
