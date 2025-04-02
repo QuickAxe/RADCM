@@ -286,7 +286,7 @@ def get_path_by_nodeid(source_id:int,target_id:int) -> list[list[dict]]:
 
             for i in range(1, len(array_of_dicts)):
                 curr_dict = array_of_dicts[i]
-                prev_dict = array_of_dicts[i]
+                prev_dict = array_of_dicts[i-1]
                 turn_angle = (curr_dict["maneuver"]["bearing1"] - prev_dict["maneuver"]["bearing2"]) %( 2 * pi)
                 
                 if turn_angle <= (1 - 1 / 4) * pi:
