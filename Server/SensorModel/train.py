@@ -40,7 +40,11 @@ runNo = "Cnn5-Carlos75TEST"
 
 # ================================================== initialising =========================================================
 
-device = torch.device("cuda" if torch.cuda.is_available() else ("mps" if torch.mps.is_available() else "cpu"))
+device = torch.device(
+    "cuda"
+    if torch.cuda.is_available()
+    else ("mps" if torch.mps.is_available() else "cpu")
+)
 print("Device: ", device)
 
 # ------------------------------ initilaise the dataloaders ------------------------------

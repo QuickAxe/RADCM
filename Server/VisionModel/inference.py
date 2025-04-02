@@ -3,8 +3,6 @@ from io import BytesIO
 from PIL import Image
 from celery import shared_task
 
-model = YOLO("VisionModel/models/yolo11m_cbam.pt")
-
 # Crack -> 3, Pothole -> 1
 remap_dict = {0: 3, 1: 1}
 
@@ -18,6 +16,8 @@ def vision_predict_anomaly_class(image_list):
     #### Returns:
     list[list[tuple[str, float]]]: A list of tuples of predicted classes for each image in the bytes_list, along with the associated confidence value.
     """
+
+    model = YOLO("VisionModel/models/yolo11m_cbam.pt")
 
     images = [Image.open(BytesIO(image)) for image in image_list]
 
