@@ -15,6 +15,7 @@ class DioResponse {
 class DioClientUser {
   static final DioClientUser _instance = DioClientUser._internal();
   final Dio _dio;
+
   factory DioClientUser() => _instance;
 
   DioClientUser._internal()
@@ -54,10 +55,13 @@ class DioClientUser {
 
   // GET request
   Future<DioResponse> getRequest(String endpoint,
-      {Map<String, dynamic>? queryParams}) async {
+      {String? baseUrl, Map<String, dynamic>? queryParams}) async {
     try {
-      Response response =
-          await _dio.get(endpoint, queryParameters: queryParams);
+      Response response = await _dio.get(
+          Uri.parse(baseUrl ?? _dio.options.baseUrl)
+              .resolve(endpoint)
+              .toString(),
+          queryParameters: queryParams);
       return DioResponse(success: true, data: response.data);
     } on DioException catch (e) {
       return DioResponse(
@@ -68,9 +72,14 @@ class DioClientUser {
   }
 
   // POST request
-  Future<DioResponse> postRequest(String endpoint, dynamic data) async {
+  Future<DioResponse> postRequest(String endpoint, dynamic data,
+      {String? baseUrl}) async {
     try {
-      Response response = await _dio.post(endpoint, data: data);
+      Response response = await _dio.post(
+          Uri.parse(baseUrl ?? _dio.options.baseUrl)
+              .resolve(endpoint)
+              .toString(),
+          data: data);
       return DioResponse(success: true, data: response.data);
     } on DioException catch (e) {
       return DioResponse(
@@ -81,10 +90,14 @@ class DioClientUser {
   }
 
   // PUT request
-  Future<DioResponse> putRequest(
-      String endpoint, Map<String, dynamic> data) async {
+  Future<DioResponse> putRequest(String endpoint, Map<String, dynamic> data,
+      {String? baseUrl}) async {
     try {
-      Response response = await _dio.put(endpoint, data: data);
+      Response response = await _dio.put(
+          Uri.parse(baseUrl ?? _dio.options.baseUrl)
+              .resolve(endpoint)
+              .toString(),
+          data: data);
       return DioResponse(success: true, data: response.data);
     } on DioException catch (e) {
       return DioResponse(
@@ -95,9 +108,11 @@ class DioClientUser {
   }
 
   // DELETE request
-  Future<DioResponse> deleteRequest(String endpoint) async {
+  Future<DioResponse> deleteRequest(String endpoint, {String? baseUrl}) async {
     try {
-      Response response = await _dio.delete(endpoint);
+      Response response = await _dio.delete(
+        Uri.parse(baseUrl ?? _dio.options.baseUrl).resolve(endpoint).toString(),
+      );
       return DioResponse(success: true, data: response.data);
     } on DioException catch (e) {
       return DioResponse(

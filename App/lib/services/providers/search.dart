@@ -5,12 +5,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import '../api_service/dio_client_user_service.dart';
+
 class Search extends ChangeNotifier {
   List<dynamic> searchSuggestions = [];
   bool isCurrentSelected = false;
   bool loadingResults = false;
   dynamic currentSelected;
   String? errorMessage;
+  final DioClientUser _dioClient = DioClientUser();
 
   // Fetch multiple places for a search query
   Future<void> getSuggestions(String query) async {
@@ -21,14 +24,26 @@ class Search extends ChangeNotifier {
     searchSuggestions.clear(); // clear previous search results
 
     try {
-      final url = Uri.parse(
-          'https://nominatim.openstreetmap.org/search?q=$query&format=json&addressdetails=1&limit=50');
-      final response = await http.get(url);
+      const String baseUrl = "https://nominatim.openstreetmap.org/";
+      const String endpoint = "search";
 
-      if (response.statusCode == 200) {
-        searchSuggestions = json.decode(response.body);
+      Map<String, dynamic> queryParams = {
+        "q": query,
+        "format": "json",
+        "addressdetails": "1",
+        "limit": "50",
+      };
+
+      // final url = Uri.parse(
+      //     'https://nominatim.openstreetmap.org/search?q=$query&format=json&addressdetails=1&limit=50');
+      // final response = await http.get(url);
+
+      DioResponse response = await _dioClient.getRequest(endpoint, baseUrl: baseUrl, queryParams: queryParams);
+      if (response.success) {
+        searchSuggestions = response.data;
+      print('search content ---------------------> ${searchSuggestions}');
       } else {
-        errorMessage = "Unexpected error: ${response.statusCode}";
+        errorMessage = "Unexpected error: ${response.errorMessage}";
       }
     } on SocketException {
       errorMessage = "No internet connection. Check your network.";
