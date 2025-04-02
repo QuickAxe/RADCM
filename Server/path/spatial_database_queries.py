@@ -294,9 +294,9 @@ def get_path_by_nodeid(source_id:int,target_id:int) -> list[list[dict]]:
                 elif turn_angle <= (1 - 1 / 8) * pi:
                     curr_dict["maneuver"]["turn_direction"] = "SLIGHTLY LEFT"
                 elif turn_angle <= (1 + 1 / 8) * pi:
-                    curr_dict["maneuver"]["turn_direction"] = "STRIAGHT"
+                    curr_dict["maneuver"]["turn_direction"] = "STRAIGHT"
                 elif turn_angle <= (1 + 1 / 4) * pi:
-                    curr_dict["maneuver"]["turn_direction"] = "STRIAGHT"
+                    curr_dict["maneuver"]["turn_direction"] = "SLIGHTLY RIGHT"
                 elif turn_angle <= 2 * pi:
                     curr_dict["maneuver"]["turn_direction"] = "RIGHT"
 
