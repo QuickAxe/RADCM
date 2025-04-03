@@ -1,5 +1,6 @@
 import 'dart:developer' as dev;
 
+import 'package:app/components/anomaly_zoom_popup.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
@@ -27,6 +28,7 @@ class MapView extends StatefulWidget {
 class _MapViewState extends State<MapView> {
   late final MapController _mapController;
   late final GridMovementHandler _gridHandler;
+  double _currentZoom = defaultZoom;
 
   @override
   void initState() {
@@ -36,10 +38,39 @@ class _MapViewState extends State<MapView> {
     _gridHandler =
         GridMovementHandler(mapController: _mapController, context: context);
     Provider.of<AnomalyProvider>(context, listen: false).init();
+
+    _mapController.mapEventStream.listen((event) {
+      if (event is MapEventMoveEnd ||
+          event is MapEventDoubleTapZoomEnd ||
+          event is MapEventMove) {
+        if (mounted) {
+          // dev.log("Current zoom level: ${_mapController.camera.zoom}");
+          setState(() {
+            _currentZoom = _mapController.camera.zoom;
+          });
+        }
+      }
+    });
+  }
+
+  int get clusteringRadius {
+    // cuz i always forget, more zoom == closer to the map
+    // default zoom is set to 18
+    if (_currentZoom >= 15) return 20;
+    if (_currentZoom >= 14) return 40;
+    if (_currentZoom >= 10) return 80;
+    return 100;
   }
 
   @override
   Widget build(BuildContext context) {
+    double opacity = (_currentZoom >= zoomThreshold)
+        ? 1.0
+        : 0.0; // dis controls the anomaly marker layer visibility
+
+    bool showPopup = _currentZoom <
+        zoomThreshold; // this controls whether to show the popup (anomalies not visible)
+
     return Consumer<Permissions>(
       builder: (context, permissions, child) {
         var userLocation = permissions.position != null
@@ -69,11 +100,29 @@ class _MapViewState extends State<MapView> {
                 ],
               ),
             if (widget.polylineLayer != null) widget.polylineLayer!,
-            AnomalyMarkerLayer(mapController: _mapController),
+            // dis anomaly marker layer ＼（〇_ｏ）／
+            AnimatedOpacity(
+              duration: const Duration(milliseconds: 500),
+              opacity: opacity,
+              child: AnomalyMarkerLayer(
+                mapController: _mapController,
+                clusteringRadius: clusteringRadius,
+              ),
+            ),
             const Positioned(
               left: 200,
               bottom: 200,
               child: Attribution(),
+            ),
+            Positioned(
+              top: 80,
+              left: 10,
+              right: 10,
+              child: AnimatedOpacity(
+                opacity: showPopup ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 500),
+                child: AnomalyZoomPopup(mapController: _mapController),
+              ),
             ),
           ],
         );

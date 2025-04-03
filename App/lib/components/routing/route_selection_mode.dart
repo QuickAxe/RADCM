@@ -6,19 +6,55 @@ import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
+import '../../constants.dart';
 import '../../services/providers/anomaly_marker_layer.dart';
 import '../../services/providers/route_provider.dart';
 import '../../services/providers/user_settings.dart';
 import '../../util/map_utils.dart';
 import '../../util/route_utils.dart';
+import '../anomaly_zoom_popup.dart';
 import 'route_directions.dart';
 
-class RouteSelectionMode extends StatelessWidget {
+class RouteSelectionMode extends StatefulWidget {
   final RouteProvider routeProvider;
   final MapController mapController;
 
   const RouteSelectionMode(
       {super.key, required this.mapController, required this.routeProvider});
+
+  @override
+  State<RouteSelectionMode> createState() => _RouteSelectionModeState();
+}
+
+class _RouteSelectionModeState extends State<RouteSelectionMode> {
+  double _currentZoom = defaultZoom;
+
+  @override
+  void initState() {
+    super.initState();
+
+    widget.mapController.mapEventStream.listen((event) {
+      if (event is MapEventMoveEnd ||
+          event is MapEventDoubleTapZoomEnd ||
+          event is MapEventMove) {
+        if (mounted) {
+          // dev.log("Current zoom level: ${widget.mapController.camera.zoom}");
+          setState(() {
+            _currentZoom = widget.mapController.camera.zoom;
+          });
+        }
+      }
+    });
+  }
+
+  int get clusteringRadius {
+    // cuz i always forget, more zoom == closer to the map
+    // default zoom is set to 18
+    if (_currentZoom >= 15) return 20;
+    if (_currentZoom >= 14) return 40;
+    if (_currentZoom >= 10) return 80;
+    return 100;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +64,13 @@ class RouteSelectionMode extends StatelessWidget {
       (settings) => settings.themeMode,
     );
 
+    double opacity = (_currentZoom >= zoomThreshold)
+        ? 1.0
+        : 0.0; // dis controls the anomaly marker layer visibility
+
+    bool showPopup = _currentZoom <
+        zoomThreshold; // this controls whether to show the popup (anomalies not visible)
+
     return SlidingUpPanel(
       color: Theme.of(context).colorScheme.surfaceContainer,
       borderRadius: const BorderRadius.only(
@@ -36,7 +79,7 @@ class RouteSelectionMode extends StatelessWidget {
       maxHeight: 700,
       panel: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: routeProvider.routeAvailable
+        child: widget.routeProvider.routeAvailable
             ? Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -62,9 +105,10 @@ class RouteSelectionMode extends StatelessWidget {
                     padding: EdgeInsets.zero,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: routeProvider.alternativeRoutes.length,
+                    itemCount: widget.routeProvider.alternativeRoutes.length,
                     itemBuilder: (context, index) {
-                      final route = routeProvider.alternativeRoutes[index];
+                      final route =
+                          widget.routeProvider.alternativeRoutes[index];
                       return ListTile(
                         leading: CircleAvatar(
                           backgroundColor: getColorForRoute(index),
@@ -84,26 +128,27 @@ class RouteSelectionMode extends StatelessWidget {
                             "Distance: ${route.distance != null ? formatDistance(route.distance!) : "N/A"}"
                             // "Duration: ${route.duration != null ? formatDuration(route.duration!) : "N/A"}",
                             ),
-                        selected: routeProvider.selectedRouteIndex == index,
+                        selected:
+                            widget.routeProvider.selectedRouteIndex == index,
                         onTap: () {
-                          routeProvider.updateSelectedRoute(index);
-                          mapController.fitCamera(
+                          widget.routeProvider.updateSelectedRoute(index);
+                          widget.mapController.fitCamera(
                             CameraFit.bounds(
-                              bounds: routeProvider.bounds,
+                              bounds: widget.routeProvider.bounds,
                               padding: const EdgeInsets.fromLTRB(
                                   50.0, 150.0, 50.0, 300.0),
                             ),
                           );
-                          mapController.rotate(0);
+                          widget.mapController.rotate(0);
                         },
                       );
                     },
                   ),
                   const Divider(),
                   const SizedBox(height: 10),
-                  if (routeProvider.selectedRouteIndex >= 0 &&
-                      routeProvider.selectedRouteIndex <
-                          routeProvider.currentRouteSegments.length)
+                  if (widget.routeProvider.selectedRouteIndex >= 0 &&
+                      widget.routeProvider.selectedRouteIndex <
+                          widget.routeProvider.currentRouteSegments.length)
                     // ================================ DIRECTIONS
                     Expanded(
                       child: SingleChildScrollView(
@@ -114,7 +159,8 @@ class RouteSelectionMode extends StatelessWidget {
                               style: theme.textTheme.headlineSmall
                                   ?.copyWith(fontWeight: FontWeight.bold),
                             ),
-                            RouteDirections(route: routeProvider.currentRoute),
+                            RouteDirections(
+                                route: widget.routeProvider.currentRoute),
                           ],
                         ),
                       ),
@@ -133,9 +179,10 @@ class RouteSelectionMode extends StatelessWidget {
               ),
       ),
       body: FlutterMap(
-        mapController: mapController,
+        mapController: widget.mapController,
         options: MapOptions(
-          initialCenter: LatLng(routeProvider.startLat, routeProvider.startLng),
+          initialCenter: LatLng(
+              widget.routeProvider.startLat, widget.routeProvider.startLng),
           initialZoom: 14.0,
         ),
         children: [
@@ -153,26 +200,44 @@ class RouteSelectionMode extends StatelessWidget {
           // Draw all alternative routes.
           PolylineLayer(
             polylines: [
-              for (int i = 0; i < routeProvider.alternativeRoutes.length; i++)
+              for (int i = 0;
+                  i < widget.routeProvider.alternativeRoutes.length;
+                  i++)
                 Polyline(
-                  points: routeProvider.alternativeRoutes[i].segments
+                  points: widget.routeProvider.alternativeRoutes[i].segments
                       .expand((segment) => segment.geometry.coordinates)
                       .toList(),
                   strokeWidth:
-                      routeProvider.selectedRouteIndex == i ? 6.0 : 4.0,
-                  color: routeProvider.selectedRouteIndex == i
+                      widget.routeProvider.selectedRouteIndex == i ? 6.0 : 4.0,
+                  color: widget.routeProvider.selectedRouteIndex == i
                       ? getColorForRoute(i).withOpacity(0.8)
                       : getColorForRoute(i).withOpacity(0.5),
                 ),
             ],
           ),
-          AnomalyMarkerLayer(
-            mapController: mapController,
+          // dis anomaly marker layer ＼（〇_ｏ）／
+          AnimatedOpacity(
+            duration: const Duration(milliseconds: 500),
+            opacity: opacity,
+            child: AnomalyMarkerLayer(
+              mapController: widget.mapController,
+              clusteringRadius: clusteringRadius,
+            ),
           ),
           const Positioned(
             left: 200,
             bottom: 200,
             child: Attribution(),
+          ),
+          Positioned(
+            top: 80,
+            left: 10,
+            right: 10,
+            child: AnimatedOpacity(
+              opacity: showPopup ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 500),
+              child: AnomalyZoomPopup(mapController: widget.mapController),
+            ),
           ),
         ],
       ),

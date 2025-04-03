@@ -54,9 +54,14 @@ class _SplashScreenState extends State<SplashScreen>
 
       // Initialize permission logic and start the activity tracker
       final permissions = Provider.of<Permissions>(context, listen: false);
-      await permissions.fetchPosition().then((_) {
-        ActivityTracker().startTracker();
-        showToast("Activity Tracker started.");
+      await permissions.fetchPosition().then((_) async {
+        await ActivityTracker().startTracker().then((_) {
+          showToast("Activity Tracker started.");
+        }).catchError((error) {
+          dev.log("didnt start activity tracker: $error");
+        });
+      }).catchError((error) {
+        dev.log("failed fetchlocation: $error");
       });
 
       // Log a message indicating initialization is complete.

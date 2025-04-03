@@ -126,6 +126,7 @@ class NavigationMode extends StatelessWidget {
               ),
               AnomalyMarkerLayer(
                 mapController: mapController,
+                clusteringRadius: 10,
               ),
               Positioned(
                 left: 16,

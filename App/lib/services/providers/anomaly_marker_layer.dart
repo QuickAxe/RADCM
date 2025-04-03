@@ -34,7 +34,12 @@ String getAnomalyIcon(String cat) {
 
 class AnomalyMarkerLayer extends StatefulWidget {
   final MapController mapController;
-  const AnomalyMarkerLayer({super.key, required this.mapController});
+  final int clusteringRadius;
+  const AnomalyMarkerLayer({
+    super.key,
+    required this.mapController,
+    required this.clusteringRadius,
+  });
 
   @override
   State<AnomalyMarkerLayer> createState() => _AnomalyMarkerLayerState();
@@ -108,7 +113,7 @@ class _AnomalyMarkerLayerState extends State<AnomalyMarkerLayer>
 
             return MarkerClusterLayerWidget(
               options: MarkerClusterLayerOptions(
-                maxClusterRadius: 10,
+                maxClusterRadius: widget.clusteringRadius,
                 size: const Size(40, 40),
                 zoomToBoundsOnClick: true,
                 padding: const EdgeInsets.fromLTRB(50.0, 150.0, 50.0, 300.0),

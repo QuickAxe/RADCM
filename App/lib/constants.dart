@@ -5,6 +5,7 @@ const double defaultZoom = 18.0;
 const double maxZoom = 20.0;
 const double minZoom = 3.0;
 const LatLng defaultCenter = LatLng(15.4961, 73.8264);
+const double zoomThreshold = 10.0;
 
 // Tiling server
 const String tileServerUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
