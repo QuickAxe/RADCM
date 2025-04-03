@@ -51,18 +51,6 @@ gdown==5.2.0
 # Server/SensorModel/playground.ipynb: 4
 # Server/SensorModel/train.py: 7
 matplotlib==3.10.0
-<<<<<<< Updated upstream
-
-# Server/SensorModel/dataSetLoader.py: 5
-# Server/SensorModel/inference.py: 7
-# Server/SensorModel/playground.ipynb: 3
-# Server/SensorModel/transforms.py: 2
-numpy==2.1.1
-
-# Server/SensorModel/dataSetLoader.py: 4
-# Server/SensorModel/playground.ipynb: 1
-# Server/SensorModel/train.py: 8
-=======
 matplotlib-inline==0.1.7
 mpmath==1.3.0
 nest-asyncio==1.6.0
@@ -83,7 +71,6 @@ nvidia-nvjitlink-cu12==12.4.127
 nvidia-nvtx-cu12==12.4.127
 opencv-python==4.11.0.86
 packaging==24.1
->>>>>>> Stashed changes
 pandas==2.2.3
 
 # Server/VisionModel/inference.py: 3
