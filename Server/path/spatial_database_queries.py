@@ -5,29 +5,42 @@ def get_nodes_from_longlat(lng1: float, lat1: float, lng2: float, lat2: float) -
     with connection.cursor() as cursor:
         
         query = '''WITH source_id as (with s as (select %s as long , %s as lat)
-        select id from nodes,s
+        select id from nodes as n,s
         WHERE ST_DWithin(geom, ST_SetSRID(ST_MAKEPOINT(s.long , s.lat), 4326), 0.05)
+		AND EXISTS (
+		SELECT 1 FROM edges AS e WHERE (e.source = n.id or e.target = n.id)
+		AND ST_DWithin(n.geom, e.geom_way, 0.0001)
+		AND ST_DWithin(e.geom_way, ST_SetSRID(ST_MAKEPOINT(s.long , s.lat), 4326), 0.05)
+		AND e.car_forward <> 'Forbidden'
+		)
             order by (
             select ST_DISTANCE(
             geom,
             ST_SetSRID(ST_MAKEPOINT(s.long , s.lat), 4326)
             )
         )
+		
         limit 1),				
         target_id as (with s as (select %s as long , %s as lat)
-        select id from nodes,s
+        select id from nodes AS n,s
         WHERE ST_DWithin(geom, ST_SetSRID(ST_MAKEPOINT(s.long , s.lat), 4326), 0.05)
+		AND EXISTS (
+		SELECT 1 FROM edges AS e WHERE (e.source = n.id or e.target = n.id) 
+		AND ST_DWithin(n.geom, e.geom_way, 0.0001)
+		AND ST_DWithin(e.geom_way, ST_SetSRID(ST_MAKEPOINT(s.long , s.lat), 4326), 0.05)
+		AND e.car_forward <> 'Forbidden'
+		)
             order by (
             select ST_DISTANCE(
             geom,
             ST_SetSRID(ST_MAKEPOINT(s.long , s.lat), 4326)
             )
-        )
+        ) 		
         limit 1)
         SELECT
         source_id.id, target_id.id
         FROM source_id, target_id'''
-        
+    
         cursor.execute(query, [lng1, lat1, lng2, lat2, ])
         result = cursor.fetchone()
         if not result or not result[0] or not result[1]:
