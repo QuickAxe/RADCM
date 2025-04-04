@@ -46,18 +46,34 @@ class _AnomalyImageUploaderState extends State<AnomalyImageUploader> {
 
     try {
       String fileName = basename(_imageFile!.path);
-      FormData formData = FormData.fromMap({
-        "source": "mobile",
-        "image": await MultipartFile.fromFile(
-          _imageFile!.path,
-          filename: fileName,
-          contentType:
-              MediaType.parse(lookupMimeType(_imageFile!.path) ?? "image/jpeg"),
+
+      // Example coordinates (replace with real GPS values)
+      String latitude = "12.3456";
+      String longitude = "77.6543";
+
+      FormData formData = FormData();
+
+      // Add fields (source, lat, lng)
+      formData.fields.addAll([
+        const MapEntry("source", "mobile"),
+        MapEntry("lat", latitude),
+        MapEntry("lng", longitude),
+      ]);
+
+      // Add image as a list-compatible entry
+      formData.files.add(
+        MapEntry(
+          "image",
+          await MultipartFile.fromFile(
+            _imageFile!.path,
+            filename: fileName,
+            contentType: MediaType.parse(lookupMimeType(_imageFile!.path) ?? "image/jpeg"),
+          ),
         ),
-      });
+      );
 
       DioResponse response =
-          await _dioClient.postRequest("/anomalies/images/", formData);
+          await _dioClient.postRequest("anomalies/images/", formData);
 
       setState(() => _isUploading = false);
 

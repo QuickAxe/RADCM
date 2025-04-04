@@ -88,3 +88,5 @@ ultralytics==8.3.74
 # Manually added
 redis==5.2.1
 valkey==6.1.0
+django_valkey
+psycopg2
