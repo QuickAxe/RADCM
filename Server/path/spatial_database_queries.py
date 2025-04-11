@@ -1,5 +1,7 @@
 from django.db import connection
 from math import pi
+from itertools import starmap
+
 
 def get_nodes_from_longlat(lng1: float, lat1: float, lng2: float, lat2: float) -> tuple[int, int]:
     with connection.cursor() as cursor:
@@ -203,6 +205,7 @@ def get_path_by_nodeid(source_id:int,target_id:int) -> list[list[dict]]:
                 SELECT 
                 json_build_object(
                     'path_seq', dr.path_seq,
+                    'node_id', dr.node,
                     'polyline',
                     ST_AsEncodedPolyline(
                         CASE WHEN dr.node = e.source THEN e.geom_way ELSE ST_Reverse(e.geom_way) END
@@ -249,6 +252,7 @@ def get_path_by_nodeid(source_id:int,target_id:int) -> list[list[dict]]:
                 SELECT 
                 json_build_object(
                     'path_seq', dr.path_seq,
+                    'node_id', dr.node,
                     'polyline',
                     ST_AsEncodedPolyline(
                         CASE WHEN dr.node = e.source THEN e.geom_way ELSE ST_Reverse(e.geom_way) END
@@ -294,7 +298,15 @@ def get_path_by_nodeid(source_id:int,target_id:int) -> list[list[dict]]:
         # print("HERE")
         # Fetch the results
         results = cursor.fetchall()
-
+        if (
+            not results
+            or not results[0]
+            or not results[1]
+            or not results[0][0]  # Don't know if these are necessary
+            or not results[1][0]
+        ):
+            raise ValueError("No entry found in the database")
+        
         def add_turn(array_of_dicts: list[dict]):
 
             for i in range(1, len(array_of_dicts)):
@@ -313,7 +325,51 @@ def get_path_by_nodeid(source_id:int,target_id:int) -> list[list[dict]]:
                 elif turn_angle <= 2 * pi:
                     curr_dict["maneuver"]["turn_direction"] = "RIGHT"
 
-        add_turn(results[0][0])
-        add_turn(results[1][0])
-        
-        return [results[0][0], results[1][0]]
+        results = [results[0][0], results[1][0]]
+        if not routes_are_different(results[0], results[1]):
+            print("Same route")
+            results = [results[0]]
+        for arr in results:
+            add_turn(arr)
+
+        return results
+
+
+def routes_are_different(route1: list, route2: list) -> bool:
+    if len(route1) != len(route2):
+        return True
+    return any(starmap(lambda x, y: x["node_id"] != y["node_id"], zip(route1, route2)))
+
+
+# r1 = [
+#     {"node_id": 1},
+#     {"node_id": 2},
+# ]
+# r2 = [
+#     {"node_id": 1},
+#     {"node_id": 2},
+# ]
+# r3 = [
+#     {"node_id": 1},
+#     {"node_id": 2},
+#     {"node_id": 3},
+# ]
+# r4 = [
+#     {"node_id": 1},
+#     {"node_id": 2},
+#     {"node_id": 4},
+# ]
+
+# if not routes_are_different(r1, r2):
+#     print("Pass")
+# else:
+#     print("Fail")
+
+# if routes_are_different(r1, r3):
+#     print("Pass")
+# else:
+#     print("Fail")
+# if routes_are_different(r3, r4):
+#     print("Pass")
+# else:
+#     print("Fail")
