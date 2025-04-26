@@ -11,7 +11,6 @@ import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
-import '../../services/overlayNotificationService.dart';
 import '../../services/providers/anomaly_marker_layer.dart';
 import '../../services/providers/route_provider.dart';
 import '../../services/providers/user_settings.dart';
@@ -162,7 +161,6 @@ class NavigationMode extends StatelessWidget {
                   tooltip: "Stop Navigation",
                   onPressed: () {
                     routeProvider.stopRouteNavigation();
-                    OverlayNotificationService().dismissNotification();
                   },
                   backgroundColor: colorScheme.errorContainer,
                   child: Icon(

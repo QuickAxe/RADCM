@@ -4,3 +4,5 @@
     - open a new terminal
     - for linux/mac/wsl run: celery -A config worker -E -l info 
     - for windows run: celery -A config worker -P solo -E -l info
+
+NOTE: if it shows you 'celery' not recognized or something, then try running, python -m celery -A config worker -P solo -E -l info

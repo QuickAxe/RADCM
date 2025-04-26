@@ -33,7 +33,7 @@ class GridMovementHandler {
 
   Future<void> _initHive() async {
     _hiveBox = await Hive.openBox<List<String>>('visitedGrids');
-    _loadVisitedGrids();
+    // _loadVisitedGrids();
   }
 
   void _loadVisitedGrids() {

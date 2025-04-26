@@ -77,8 +77,34 @@ class _SplashScreenState extends State<SplashScreen>
     } catch (e, stackTrace) {
       dev.log('Error during initialization: $e', stackTrace: stackTrace);
       showToast("An error occurred when initializing.");
-      // TODO: UI error, retry mechanism
+      _showInitializationError();
     }
+  }
+
+  void _showInitializationError() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Initialization Error'),
+        content: const Text('Something went wrong. Please retry'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _initializeApp();
+            },
+            child: const Text('Retry'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

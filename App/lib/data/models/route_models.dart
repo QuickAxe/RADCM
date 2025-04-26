@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -34,7 +32,7 @@ class RouteResponse {
   });
 
   factory RouteResponse.fromJson(Map<String, dynamic> json) {
-    log("Inside routeresponse factory function");
+    // log("Inside routeresponse factory function");
     return RouteResponse(
       message: json['message'],
       routes: (json['routes'] as List).map((routeData) {
@@ -61,7 +59,7 @@ class RouteModel {
   });
 
   factory RouteModel.fromJson(dynamic json) {
-    log("Inside routemodel factory function");
+    // log("Inside routemodel factory function");
     List<RouteSegment> segments = [];
     double? computedDistance;
 
@@ -108,7 +106,7 @@ class RouteSegment {
   });
 
   factory RouteSegment.fromJson(Map<String, dynamic> json) {
-    log("Inside routesegment factory function");
+    // log("Inside routesegment factory function");
     return RouteSegment(
         pathSeq: json['path_seq'],
         geometry: Geometry.fromPolyline(json['polyline']),
@@ -129,7 +127,7 @@ class Geometry {
   Geometry({required this.coordinates});
 
   factory Geometry.fromPolyline(String polyline) {
-    log("Inside geometry factory function");
+    // log("Inside geometry factory function");
     return Geometry(
       coordinates: PolylinePoints()
           .decodePolyline(polyline)
@@ -151,7 +149,7 @@ class Maneuver {
   });
 
   factory Maneuver.fromJson(Map<String, dynamic> json) {
-    log("Inside maneuver factory function");
+    // log("Inside maneuver factory function");
     return Maneuver(
       bearing1: (json['bearing1'] as num).toDouble(),
       bearing2: (json['bearing2'] as num).toDouble(),
@@ -197,7 +195,7 @@ class Leg {
   });
 
   factory Leg.fromJson(Map<String, dynamic> json) {
-    log("Inside leg factory function");
+    // log("Inside leg factory function");
     return Leg(
       steps: null,
       distance: (json['distance'] as num).toDouble(),
@@ -222,7 +220,7 @@ class Step {
   });
 
   factory Step.fromJson(Map<String, dynamic> json) {
-    log("Inside step factory function");
+    // log("Inside step factory function");
     return Step(
       geometry: json['geometry'],
       maneuver: Maneuver.fromJson(json['maneuver']),

@@ -15,7 +15,6 @@ import 'package:app/services/providers/user_settings.dart';
 import 'package:app/theme/theme.dart';
 import 'package:app/theme/util.dart';
 import 'package:flutter/material.dart';
-import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart';
 
 import 'components/anomaly_image_uploader.dart';
@@ -34,10 +33,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => AnomalyProvider()),
         ChangeNotifierProvider(create: (context) => MapControllerProvider()),
       ],
-      // overlaySupport is used to show the anomaly notification overlay while navigating
-      child: const OverlaySupport.global(
-        child: MyApp(),
-      ),
+      child: const MyApp(),
     ),
   );
 }

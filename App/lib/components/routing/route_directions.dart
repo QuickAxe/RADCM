@@ -23,7 +23,8 @@ class RouteDirections extends StatelessWidget {
       itemBuilder: (context, index) {
         String? turnDirection = route.segments[index].maneuver.turnDirection;
 
-        String instruction = turnDirection ?? "n/a";
+        String instruction = _getManeuverInstruction(
+            turnDirection, formatDistance(route.segments[index].cost));
 
         return ListTile(
           leading: Icon(
@@ -58,6 +59,27 @@ class RouteDirections extends StatelessWidget {
         return LucideIcons.cornerUpRight;
       default:
         return LucideIcons.arrowUp;
+    }
+  }
+
+  /// Returns an appropriate icon for the given maneuver type
+  String _getManeuverInstruction(
+      String? turnDirection, String formattedDistance) {
+    switch (turnDirection) {
+      case "START":
+        return "Start your journey & continue ahead";
+      case "STRAIGHT":
+        return "Continue Straight for $formattedDistance";
+      case "LEFT":
+        return "Take the next left";
+      case "SLIGHTLY LEFT":
+        return "At the incoming fork, take a slight left";
+      case "RIGHT":
+        return "Take the next right";
+      case "SLIGHTLY RIGHT":
+        return "At the incoming fork, take a slight right";
+      default:
+        return "Start your journey & continue ahead";
     }
   }
 }
