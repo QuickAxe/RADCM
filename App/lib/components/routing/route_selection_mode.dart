@@ -16,11 +16,9 @@ import '../anomaly_zoom_popup.dart';
 import 'route_directions.dart';
 
 class RouteSelectionMode extends StatefulWidget {
-  final RouteProvider routeProvider;
   final MapController mapController;
 
-  const RouteSelectionMode(
-      {super.key, required this.mapController, required this.routeProvider});
+  const RouteSelectionMode({super.key, required this.mapController});
 
   @override
   State<RouteSelectionMode> createState() => _RouteSelectionModeState();
@@ -66,9 +64,11 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final screenHeight = MediaQuery.of(context).size.height;
     final themeMode = context.select<UserSettingsProvider, ThemeMode>(
       (settings) => settings.themeMode,
     );
+    final routeProvider = context.watch<RouteProvider>();
 
     double opacity = (_currentZoom >= zoomThreshold)
         ? 1.0
@@ -81,11 +81,11 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
       color: Theme.of(context).colorScheme.surfaceContainer,
       borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(25.0), topRight: Radius.circular(25.0)),
-      minHeight: 300,
-      maxHeight: 700,
+      minHeight: screenHeight * 0.4,
+      maxHeight: screenHeight * 0.8,
       panel: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0),
-        child: widget.routeProvider.routeAvailable
+        child: routeProvider.routeAvailable
             ? Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -93,7 +93,7 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
                   Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: Container(
-                      width: 60,
+                      width: MediaQuery.of(context).size.width * 0.15,
                       height: 4,
                       decoration: BoxDecoration(
                         color: colorScheme.secondary,
@@ -111,10 +111,9 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
                     padding: EdgeInsets.zero,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: widget.routeProvider.alternativeRoutes.length,
+                    itemCount: routeProvider.alternativeRoutes.length,
                     itemBuilder: (context, index) {
-                      final route =
-                          widget.routeProvider.alternativeRoutes[index];
+                      final route = routeProvider.alternativeRoutes[index];
                       return ListTile(
                         leading: CircleAvatar(
                           backgroundColor: getColorForRoute(index),
@@ -136,13 +135,12 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
                             "Distance: ${route.distance != null ? formatDistance(route.distance!) : "N/A"}"
                             // "Duration: ${route.duration != null ? formatDuration(route.duration!) : "N/A"}",
                             ),
-                        selected:
-                            widget.routeProvider.selectedRouteIndex == index,
+                        selected: routeProvider.selectedRouteIndex == index,
                         onTap: () {
-                          widget.routeProvider.updateSelectedRoute(index);
+                          routeProvider.updateSelectedRoute(index);
                           widget.mapController.fitCamera(
                             CameraFit.bounds(
-                              bounds: widget.routeProvider.bounds,
+                              bounds: routeProvider.bounds,
                               padding: const EdgeInsets.fromLTRB(
                                   50.0, 150.0, 50.0, 300.0),
                             ),
@@ -154,9 +152,9 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
                   ),
                   const Divider(),
                   const SizedBox(height: 10),
-                  if (widget.routeProvider.selectedRouteIndex >= 0 &&
-                      widget.routeProvider.selectedRouteIndex <
-                          widget.routeProvider.currentRouteSegments.length)
+                  if (routeProvider.selectedRouteIndex >= 0 &&
+                      routeProvider.selectedRouteIndex <
+                          routeProvider.currentRouteSegments.length)
                     // ================================ DIRECTIONS
                     Expanded(
                       child: SingleChildScrollView(
@@ -167,8 +165,7 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
                               style: theme.textTheme.headlineSmall
                                   ?.copyWith(fontWeight: FontWeight.bold),
                             ),
-                            RouteDirections(
-                                route: widget.routeProvider.currentRoute),
+                            RouteDirections(route: routeProvider.currentRoute),
                           ],
                         ),
                       ),
@@ -189,8 +186,7 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
       body: FlutterMap(
         mapController: widget.mapController,
         options: MapOptions(
-          initialCenter: LatLng(
-              widget.routeProvider.startLat, widget.routeProvider.startLng),
+          initialCenter: LatLng(routeProvider.startLat, routeProvider.startLng),
           initialZoom: 14.0,
         ),
         children: [
@@ -208,16 +204,14 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
           // Draw all alternative routes.
           PolylineLayer(
             polylines: [
-              for (int i = 0;
-                  i < widget.routeProvider.alternativeRoutes.length;
-                  i++)
+              for (int i = 0; i < routeProvider.alternativeRoutes.length; i++)
                 Polyline(
-                  points: widget.routeProvider.alternativeRoutes[i].segments
+                  points: routeProvider.alternativeRoutes[i].segments
                       .expand((segment) => segment.geometry.coordinates)
                       .toList(),
                   strokeWidth:
-                      widget.routeProvider.selectedRouteIndex == i ? 6.0 : 4.0,
-                  color: widget.routeProvider.selectedRouteIndex == i
+                      routeProvider.selectedRouteIndex == i ? 6.0 : 4.0,
+                  color: routeProvider.selectedRouteIndex == i
                       ? getColorForRoute(i).withOpacity(0.8)
                       : getColorForRoute(i).withOpacity(0.5),
                 ),
@@ -248,10 +242,12 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
               );
             },
           ),
-          const Positioned(
-            left: 345,
-            bottom: 305,
-            child: Attribution(),
+          const Align(
+            alignment: Alignment.bottomRight,
+            child: Padding(
+              padding: EdgeInsets.only(right: 16.0, bottom: 340.0),
+              child: Attribution(),
+            ),
           ),
           Positioned(
             top: 80,

@@ -36,6 +36,7 @@ class NavigationMode extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final settings = Provider.of<UserSettingsProvider>(context);
+    final screenHeight = MediaQuery.of(context).size.height;
     log("Voice Enabled? ${settings.voiceEnabled}");
     return Stack(
       children: [
@@ -43,8 +44,8 @@ class NavigationMode extends StatelessWidget {
           color: Theme.of(context).colorScheme.surfaceContainer,
           borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(25.0), topRight: Radius.circular(25.0)),
-          minHeight: 150,
-          maxHeight: 150,
+          minHeight: screenHeight * 0.18,
+          maxHeight: screenHeight * 0.18,
           panel: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
@@ -118,10 +119,12 @@ class NavigationMode extends StatelessWidget {
                   markerSize: const Size(40, 40),
                 ),
               ),
-              const Positioned(
-                left: 200,
-                bottom: 145,
-                child: Attribution(),
+              const Align(
+                alignment: Alignment.bottomRight,
+                child: Padding(
+                  padding: EdgeInsets.only(right: 16.0, bottom: 160.0),
+                  child: Attribution(),
+                ),
               ),
               AnomalyMarkerLayer(
                 mapController: mapController,

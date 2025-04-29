@@ -17,29 +17,30 @@ class AnomalyZoomPopup extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(10.0),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 5.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
                 "Anomalies hidden",
                 style: TextStyle(
                   color: context.colorScheme.onSurface,
                   fontWeight: FontWeight.bold,
                 ),
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.left,
+                overflow: TextOverflow.ellipsis,
               ),
-              ElevatedButton(
-                onPressed: () {
-                  mapController.moveAndRotate(
-                      mapController.camera.center, zoomThreshold, 0.0);
-                },
-                child: const Text("Zoom in"),
-              ),
-            ],
-          ),
+            ),
+            const SizedBox(width: 12),
+            ElevatedButton(
+              onPressed: () {
+                mapController.moveAndRotate(
+                    mapController.camera.center, zoomThreshold, 0.0);
+              },
+              child: const Text("Zoom in"),
+            ),
+          ],
         ),
       ),
     );

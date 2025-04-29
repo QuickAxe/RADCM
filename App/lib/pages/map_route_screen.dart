@@ -74,9 +74,7 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
                     ? prefix.NavigationMode(
                         routeProvider: mapProvider,
                         mapController: _mapController)
-                    : RouteSelectionMode(
-                        mapController: _mapController,
-                        routeProvider: mapProvider),
+                    : RouteSelectionMode(mapController: _mapController),
               ),
               if (mapProvider.isLoading) const BlurWithLoading(),
             ],

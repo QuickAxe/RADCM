@@ -109,19 +109,22 @@ class _MapViewState extends State<MapView> {
                 clusteringRadius: clusteringRadius,
               ),
             ),
-            const Positioned(
-              left: 345,
-              bottom: 210,
-              child: Attribution(),
+            const Align(
+              alignment: Alignment.bottomRight,
+              child: Padding(
+                padding: EdgeInsets.only(right: 16.0, bottom: 210.0),
+                child: Attribution(),
+              ),
             ),
-            Positioned(
-              top: 80,
-              left: 10,
-              right: 10,
-              child: AnimatedOpacity(
-                opacity: showPopup ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 500),
-                child: AnomalyZoomPopup(mapController: _mapController),
+            SafeArea(
+              child: Padding(
+                padding:
+                    const EdgeInsets.only(top: 16.0, left: 10.0, right: 10.0),
+                child: AnimatedOpacity(
+                  opacity: showPopup ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 500),
+                  child: AnomalyZoomPopup(mapController: _mapController),
+                ),
               ),
             ),
           ],

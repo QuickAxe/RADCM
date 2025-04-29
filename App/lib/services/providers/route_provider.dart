@@ -87,6 +87,7 @@ class RouteProvider with ChangeNotifier {
       isLoading = false;
 
       if (alternativeRoutes.isNotEmpty) {
+        routeAvailable = true;
         selectedRouteIndex = 0;
         _calculateBounds(alternativeRoutes.first);
       }
