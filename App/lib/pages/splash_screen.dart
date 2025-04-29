@@ -134,7 +134,7 @@ class _SplashScreenState extends State<SplashScreen>
               FadeTransition(
                 opacity: _fadeAnimation,
                 child: const Text(
-                  "RADCM",
+                  "Rosto Radar",
                   style: TextStyle(
                     fontSize: 25,
                     fontWeight: FontWeight.bold,
@@ -144,7 +144,7 @@ class _SplashScreenState extends State<SplashScreen>
               ),
               const SizedBox(height: 20),
               const CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white70)),
               const SizedBox(height: 10),
               const Text(
                 "Initializing...",

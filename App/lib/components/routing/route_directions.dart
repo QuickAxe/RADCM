@@ -1,3 +1,4 @@
+import 'package:app/util/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -11,9 +12,6 @@ class RouteDirections extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -27,15 +25,16 @@ class RouteDirections extends StatelessWidget {
             turnDirection, formatDistance(route.segments[index].cost));
 
         return ListTile(
-          leading: Icon(
-              _getManeuverIcon(turnDirection)), // Icon based on turnDirection
+          leading: Icon(_getManeuverIcon(turnDirection),
+              color:
+                  context.colorScheme.primary), // Icon based on turnDirection
           title: Text(
             instruction,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           subtitle: Text(
             "Distance: ${formatDistance(route.segments[index].cost)}",
-            style: TextStyle(color: Colors.grey[700]),
+            style: TextStyle(color: context.colorScheme.secondary),
           ),
         );
       },

@@ -45,8 +45,6 @@ class _AnomalyMarkerLayerState extends State<AnomalyMarkerLayer>
     with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Consumer<UserSettingsProvider>(
       builder: (context, userSettings, child) {
         return ValueListenableBuilder<List<AnomalyMarker>>(
@@ -81,10 +79,10 @@ class _AnomalyMarkerLayerState extends State<AnomalyMarkerLayer>
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  "${anomaly.category} has been reported in this area.\nStay alert.",
+                                  "${anomaly.category} has been reported in this area.",
                                   textAlign: TextAlign.center,
                                 ),
-                                SizedBox(
+                                const SizedBox(
                                   height: 10,
                                 ),
                               ],

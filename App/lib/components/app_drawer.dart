@@ -1,3 +1,4 @@
+import 'package:app/util/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
@@ -7,16 +8,17 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      backgroundColor: context.colorScheme.surface,
       child: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 25),
         children: [
-          const DrawerHeader(
+          DrawerHeader(
             child: Center(
-              child: Text(
-                'RADCM',
-                style: TextStyle(fontSize: 24),
-              ),
-            ),
+                child: Text(
+              "Rosto Radar",
+              style:
+                  TextStyle(fontSize: 20, color: context.colorScheme.onSurface),
+            )),
           ),
           const SizedBox(
             height: 10,

@@ -33,6 +33,9 @@ class GridMovementHandler {
 
   Future<void> _initHive() async {
     _hiveBox = await Hive.openBox<List<String>>('visitedGrids');
+
+    LatLng mapCenter = mapController.camera.center;
+    _checkIfMovedToNewGrid(mapCenter);
     // _loadVisitedGrids();
   }
 
@@ -74,13 +77,6 @@ class GridMovementHandler {
     _fetchAnomalies(newGridCenter);
   }
 
-  void _saveVisitedGrids() {
-    List<String> storedGrids =
-        visitedGrids.map((grid) => _latLngToKey(grid)).toList();
-    log("Saved the current set of visited grids");
-    _hiveBox.put('visitedGrids', storedGrids);
-  }
-
   /// Finds the grid center for a given point
   LatLng getGridCenter(LatLng point) {
     double lat =
@@ -99,34 +95,45 @@ class GridMovementHandler {
         // NOTE: Radius is an optional parameter
       });
 
-      if (response.success && response.data != null) {
-        final Map<String, dynamic> jsonResponse = response.data;
-        final List<dynamic> anomalies = jsonResponse['anomalies'] ?? [];
-
-        List<AnomalyMarker> anomalyList = anomalies.map((anomaly) {
-          return AnomalyMarker(
-            latitude: anomaly['latitude'],
-            longitude: anomaly['longitude'],
-            category: anomaly['category'],
-          );
-        }).toList();
-
-        anomalyCache[gridCenter] = anomalyList; // Store anomalies in cache
-        Provider.of<AnomalyProvider>(context, listen: false)
-            .addAnomalies(gridCenter, anomalyList);
-
-        log("Fetched ${anomalyList.length} anomalies for $gridCenter");
-
-        // moved this here, cuz we'd only want to mark a grid center as visited, if the anomalies for it have been fetched
-        visitedGrids.add(gridCenter);
-        _saveVisitedGrids();
-
-        log("Marked grid as visited, and saved it in hive");
-      } else {
-        log("Failed to fetch anomalies. Error: ${response.errorMessage}");
+      // error fetching
+      if (!response.success) {
+        throw Exception("API call failed");
+      } else if (response.data == null) {
+        throw Exception("API returned null data");
       }
+
+      // fetch successful
+      final List<dynamic> anomalies = response.data['anomalies'] ?? [];
+
+      List<AnomalyMarker> anomalyList = anomalies.map((anomaly) {
+        return AnomalyMarker(
+          latitude: anomaly['latitude'],
+          longitude: anomaly['longitude'],
+          category: anomaly['category'],
+        );
+      }).toList();
+
+      // store gridCenter -> anomalyList -- in Memory
+      anomalyCache[gridCenter] = anomalyList;
+
+      // add it to the providers list (this overrides)
+      Provider.of<AnomalyProvider>(context, listen: false)
+          .addAnomalies(gridCenter, anomalyList);
+
+      // store the visited grid -- in Memory
+      visitedGrids.add(gridCenter);
+
+      // update the stored anomalies in Hive
+      _saveVisitedGrids();
     } catch (e) {
       log("Error fetching anomalies: $e");
     }
+  }
+
+  void _saveVisitedGrids() {
+    List<String> storedGrids =
+        visitedGrids.map((grid) => _latLngToKey(grid)).toList();
+    log("Saved visited grids in Hive");
+    _hiveBox.put('visitedGrids', storedGrids);
   }
 }

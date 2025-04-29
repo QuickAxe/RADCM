@@ -28,24 +28,30 @@ class RouteSelectionMode extends StatefulWidget {
 
 class _RouteSelectionModeState extends State<RouteSelectionMode> {
   double _currentZoom = defaultZoom;
+  late final ValueNotifier<double> zoomNotifier;
 
   @override
   void initState() {
     super.initState();
+    zoomNotifier = ValueNotifier<double>(defaultZoom);
 
     widget.mapController.mapEventStream.listen((event) {
       if (event is MapEventMoveEnd ||
           event is MapEventDoubleTapZoomEnd ||
           event is MapEventMove) {
-        if (mounted) {
-          // dev.log("Current zoom level: ${widget.mapController.camera.zoom}");
-          setState(() {
-            _currentZoom = widget.mapController.camera.zoom;
-          });
+        final newZoom = widget.mapController.camera.zoom;
+        if (zoomNotifier.value != newZoom) {
+          zoomNotifier.value = newZoom;
         }
       }
     });
   }
+
+  // @override
+  // void dispose() {
+  //   zoomNotifier.dispose();
+  //   super.dispose();
+  // }
 
   int get clusteringRadius {
     // cuz i always forget, more zoom == closer to the map
@@ -120,7 +126,9 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
                           ),
                         ),
                         title: Text(
-                          "Route ${index + 1} ${index == 1 ? " (Avoiding Anomalies)" : ""}",
+                          index == 0
+                              ? "Shortest Route"
+                              : "Route avoiding anomalies",
                           style: theme.textTheme.titleLarge
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
@@ -216,27 +224,48 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
             ],
           ),
           // dis anomaly marker layer ＼（〇_ｏ）／
-          AnimatedOpacity(
-            duration: const Duration(milliseconds: 500),
-            opacity: opacity,
-            child: AnomalyMarkerLayer(
-              mapController: widget.mapController,
-              clusteringRadius: clusteringRadius,
-            ),
+          ValueListenableBuilder<double>(
+            valueListenable: zoomNotifier,
+            builder: (context, zoom, child) {
+              final opacity = (zoom >= zoomThreshold) ? 1.0 : 0.0;
+              int clusteringRadius;
+              if (zoom >= 15)
+                clusteringRadius = 20;
+              else if (zoom >= 14)
+                clusteringRadius = 40;
+              else if (zoom >= 10)
+                clusteringRadius = 80;
+              else
+                clusteringRadius = 100;
+
+              return AnimatedOpacity(
+                duration: const Duration(milliseconds: 500),
+                opacity: opacity,
+                child: AnomalyMarkerLayer(
+                  mapController: widget.mapController,
+                  clusteringRadius: clusteringRadius,
+                ),
+              );
+            },
           ),
           const Positioned(
-            left: 200,
-            bottom: 200,
+            left: 345,
+            bottom: 305,
             child: Attribution(),
           ),
           Positioned(
             top: 80,
             left: 10,
             right: 10,
-            child: AnimatedOpacity(
-              opacity: showPopup ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 500),
-              child: AnomalyZoomPopup(mapController: widget.mapController),
+            child: ValueListenableBuilder<double>(
+              valueListenable: zoomNotifier,
+              builder: (context, zoom, child) {
+                return AnimatedOpacity(
+                  opacity: (zoom < zoomThreshold) ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 500),
+                  child: AnomalyZoomPopup(mapController: widget.mapController),
+                );
+              },
             ),
           ),
         ],

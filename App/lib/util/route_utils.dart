@@ -5,8 +5,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 Color getColorForRoute(int index) {
   List<Color> colors = [
     Colors.blue,
-    Colors.red,
     Colors.green,
+    Colors.red,
     Colors.purple,
     Colors.orange
   ];

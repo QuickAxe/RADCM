@@ -50,21 +50,29 @@ class MyApp extends StatelessWidget {
     TextTheme textTheme = createTextTheme(context, "Albert Sans", "ABeeZee");
     MaterialTheme theme = MaterialTheme(textTheme);
 
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const SplashScreen(),
-      themeMode: themeMode,
-      theme: theme.light(),
-      darkTheme: theme.dark(),
-      routes: {
-        '/settings': (context) => const SettingsScreen(),
-        '/toggle_anomalies': (context) => const ToggleAnomaliesScreen(),
-        '/routines': (context) => const RoutinesScreen(),
-        '/voice_engine': (context) => const VoiceEngineScreen(),
-        '/additional_settings': (context) => const AdditionalSettings(),
-        '/map_route': (context) => const MapRouteScreen(),
-        '/navigation_preferences': (context) => const NavigationPreferences(),
-        '/capture': (context) => AnomalyImageUploader(),
+    return Builder(
+      builder: (context) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(0.8)),
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            home: const SplashScreen(),
+            themeMode: themeMode,
+            theme: theme.light(),
+            darkTheme: theme.dark(),
+            routes: {
+              '/settings': (context) => const SettingsScreen(),
+              '/toggle_anomalies': (context) => const ToggleAnomaliesScreen(),
+              '/routines': (context) => const RoutinesScreen(),
+              '/voice_engine': (context) => const VoiceEngineScreen(),
+              '/additional_settings': (context) => const AdditionalSettings(),
+              '/map_route': (context) => const MapRouteScreen(),
+              '/navigation_preferences': (context) =>
+                  const NavigationPreferences(),
+              '/capture': (context) => AnomalyImageUploader(),
+            },
+          ),
+        );
       },
     );
   }

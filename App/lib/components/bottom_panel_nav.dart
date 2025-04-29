@@ -1,4 +1,3 @@
-import 'package:app/components/transport_profile_selector_row.dart';
 import 'package:app/util/string_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -34,8 +33,8 @@ class _BottomPanelState extends State<BottomPanelNav> {
         topLeft: Radius.circular(25.0),
         topRight: Radius.circular(25.0),
       ),
-      minHeight: 266, // this number is weirdly exact for a reason, dont change
-      maxHeight: 420,
+      minHeight: 200,
+      maxHeight: 700,
       panel: Column(
         children: [
           const SizedBox(
@@ -86,7 +85,7 @@ class _BottomPanelState extends State<BottomPanelNav> {
               ],
             ),
           // Transport options
-          const TransportProfileSelectorRow(),
+          // const TransportProfileSelectorRow(),
           // CTA -> Go to
           Padding(
             padding: const EdgeInsets.fromLTRB(10.0, 8.0, 10.0, 10.0),

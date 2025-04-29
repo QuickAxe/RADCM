@@ -110,8 +110,8 @@ class _MapViewState extends State<MapView> {
               ),
             ),
             const Positioned(
-              left: 200,
-              bottom: 200,
+              left: 345,
+              bottom: 210,
               child: Attribution(),
             ),
             Positioned(

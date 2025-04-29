@@ -8,13 +8,15 @@ import '../../data/models/anomaly_marker_model.dart';
 
 class AnomalyProvider extends ChangeNotifier {
   final ValueNotifier<List<AnomalyMarker>> markersNotifier = ValueNotifier([]);
+
+  /// Stored key value pairs of cached anomalies, key being the grid center and value is a list of anomaly markers
   final Map<LatLng, List<AnomalyMarker>> _anomalyCache = {};
   late Box<List<dynamic>> _hiveBox;
 
   /// Initialize Hive and load stored anomalies
   Future<void> init() async {
     _hiveBox = await Hive.openBox<List<dynamic>>('anomalies');
-    _loadCachedAnomalies();
+    // _loadCachedAnomalies();
   }
 
   void _loadCachedAnomalies() {
@@ -35,19 +37,20 @@ class AnomalyProvider extends ChangeNotifier {
     _updateMarkers();
   }
 
-  void addAnomalies(LatLng gridCenter, List<AnomalyMarker> anomalies) {
-    if (_anomalyCache.containsKey(gridCenter)) return;
-
-    _anomalyCache[gridCenter] = anomalies;
-    _hiveBox.put(_latLngToKey(gridCenter), anomalies);
-
-    _updateMarkers();
-  }
-
   void _updateMarkers() {
     markersNotifier.value =
         _anomalyCache.values.expand((list) => list).toList();
     notifyListeners();
+  }
+
+  void addAnomalies(LatLng gridCenter, List<AnomalyMarker> anomalies) {
+    final isReplace = _anomalyCache.containsKey(gridCenter);
+
+    _anomalyCache[gridCenter] = anomalies;
+    _hiveBox.put(_latLngToKey(gridCenter), anomalies);
+
+    dev.log("${isReplace ? "Replaced" : "Added"} anomalies for $gridCenter");
+    _updateMarkers();
   }
 
   /// Helper: Convert LatLng to a string key for Hive storage
