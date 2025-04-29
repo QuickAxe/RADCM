@@ -23,7 +23,7 @@ class DioClientUser {
           BaseOptions(
             baseUrl: 'http://${dotenv.env['IP_ADDRESS']}:8000/api/',
             // baseUrl: 'https://3bc4-152-57-247-190.ngrok-free.app/api/',
-            connectTimeout: const Duration(seconds: 5),
+            connectTimeout: const Duration(seconds: 10),
             headers: {
               'Content-Type': 'application/json',
               // 'Accept': 'application/json',

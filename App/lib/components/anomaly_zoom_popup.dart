@@ -24,7 +24,7 @@ class AnomalyZoomPopup extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Anomalies are hidden at this zoom level",
+                "Anomalies hidden",
                 style: TextStyle(
                   color: context.colorScheme.onSurface,
                   fontWeight: FontWeight.bold,
