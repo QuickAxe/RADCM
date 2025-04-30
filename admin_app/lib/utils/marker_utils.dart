@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 
 /// gets the appropriate icon (image asset path) TODO: Mapping redundant, also exists in settings create a single src
 String getAnomalyIcon(String cat) {
-  String imageAssetPath = switch (cat) {
-    "Speedbreaker" => "assets/icons/ic_speedbreaker.png",
+  return switch (cat) {
+    "SpeedBreaker" => "assets/icons/ic_speedbreaker.png",
     "Rumbler" => "assets/icons/ic_rumbler.png",
-    "Obstacle" => "assets/icons/ic_obstacle.png",
     "Pothole" => "assets/icons/ic_pothole.png",
-    _ => "assets/icons/ic_obstacle.png",
+    "Cracks" => "assets/icons/ic_cracks.png",
+    _ => "assets/icons/ic_pothole.png",
   };
-  return imageAssetPath;
 }
 
 /// this is for the marker clusters, color increases with more and more anomalies

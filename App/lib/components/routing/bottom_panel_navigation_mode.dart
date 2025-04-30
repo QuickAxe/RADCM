@@ -137,7 +137,7 @@ class NavigationMode extends StatelessWidget {
                   heroTag: "voice_toggle",
                   onPressed: () {
                     settings.toggleVoiceEnabled();
-                    log("Inside onPressed: Voice Enabled? ${settings.voiceEnabled}");
+                    log("Voice Enabled? ${settings.voiceEnabled}");
                   },
                   backgroundColor: settings.voiceEnabled
                       ? colorScheme.primaryContainer
@@ -157,6 +157,7 @@ class NavigationMode extends StatelessWidget {
                 ),
               ),
               Positioned(
+                //o.o
                 left: 16,
                 bottom: 225,
                 child: FloatingActionButton(

@@ -1,3 +1,4 @@
+import 'package:app/util/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +26,7 @@ class _BottomPanelState extends State<BottomPanel> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return SlidingUpPanel(
-      color: Theme.of(context).colorScheme.surfaceContainer,
+      color: context.colorScheme.surfaceContainer,
       padding: const EdgeInsets.symmetric(horizontal: 5.0),
       borderRadius: const BorderRadius.only(
         topLeft: Radius.circular(25.0),

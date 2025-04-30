@@ -54,17 +54,17 @@ class UserSettingsProvider extends ChangeNotifier {
 
   /// Toggle anomalies provider
   final Map<String, bool> _showOnMap = {
-    "Speedbreaker": true,
+    "SpeedBreaker": true,
     "Rumbler": true,
-    "Obstacle": true,
     "Pothole": true,
+    "Cracks": true,
   };
 
   final Map<String, bool> _alertWhileRiding = {
-    "Speedbreaker": true,
+    "SpeedBreaker": true,
     "Rumbler": true,
-    "Obstacle": true,
-    "Pothole": true
+    "Pothole": true,
+    "Cracks": true
   };
 
   Map<String, bool> get showOnMap => _showOnMap;
@@ -109,7 +109,7 @@ class UserSettingsProvider extends ChangeNotifier {
   }
 
   // Theme Mode Setting
-  ThemeMode _themeMode = ThemeMode.dark; // Default is system
+  ThemeMode _themeMode = ThemeMode.light; // Default is system
   ThemeMode get themeMode => _themeMode;
 
   void setThemeMode(ThemeMode mode) {

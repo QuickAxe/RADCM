@@ -133,7 +133,7 @@ Future<void> showAnomalyDialog(
 
                                     // reset providers
                                     Provider.of<Permissions>(context, listen: false).logout();
-                                    Provider.of<MapRouteProvider>(context, listen: false).logout();
+                                    Provider.of<RouteProvider>(context, listen: false).logout();
                                     Provider.of<Search>(context, listen: false).logout();
                                     Provider.of<UserSettingsProvider>(context, listen: false)
                                         .logout();

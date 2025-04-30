@@ -41,34 +41,34 @@ class AdditionalSettings extends StatelessWidget {
                 'Battery Optimization may prevent normal operation of the app. To avoid issues we recommend disabling it.'),
             onTap: () => openBatteryOptimizationSettings(context),
           ),
-          ListTile(
-            title: const Text("Theme"),
-            subtitle: const Text(
-                "Choose between Light mode or Dark mode or select System to default to your system theme."),
-            trailing: DropdownButton<ThemeMode>(
-              borderRadius: BorderRadius.circular(15),
-              value: settings.themeMode,
-              onChanged: (ThemeMode? newMode) {
-                if (newMode != null) {
-                  settings.setThemeMode(newMode);
-                }
-              },
-              items: const [
-                DropdownMenuItem(
-                  value: ThemeMode.system,
-                  child: Text("System"),
-                ),
-                DropdownMenuItem(
-                  value: ThemeMode.light,
-                  child: Text("Light"),
-                ),
-                DropdownMenuItem(
-                  value: ThemeMode.dark,
-                  child: Text("Dark"),
-                ),
-              ],
-            ),
-          ),
+          // ListTile(
+          //   title: const Text("Theme"),
+          //   subtitle: const Text(
+          //       "Choose between Light mode or Dark mode or select System to default to your system theme."),
+          //   trailing: DropdownButton<ThemeMode>(
+          //     borderRadius: BorderRadius.circular(15),
+          //     value: settings.themeMode,
+          //     onChanged: (ThemeMode? newMode) {
+          //       if (newMode != null) {
+          //         settings.setThemeMode(newMode);
+          //       }
+          //     },
+          //     items: const [
+          //       // DropdownMenuItem(
+          //       //   value: ThemeMode.system,
+          //       //   child: Text("System"),
+          //       // ),
+          //       DropdownMenuItem(
+          //         value: ThemeMode.light,
+          //         child: Text("Light"),
+          //       ),
+          //       DropdownMenuItem(
+          //         value: ThemeMode.dark,
+          //         child: Text("Dark"),
+          //       ),
+          //     ],
+          //   ),
+          // ),
         ],
       ),
     );

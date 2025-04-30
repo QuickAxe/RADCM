@@ -1,5 +1,7 @@
 import 'package:admin_app/components/OSM_Attribution.dart';
 import 'package:admin_app/components/routing/dynamic_route_directions.dart';
+import 'package:admin_app/constants.dart';
+import 'package:admin_app/utils/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
@@ -12,11 +14,10 @@ import '../../services/providers/anomaly_marker_layer.dart';
 import '../../services/providers/route_provider.dart';
 import '../../services/providers/user_settings.dart';
 import '../../utils/fix_anomaly_dialog.dart';
-import '../../utils/map_utils.dart';
 import '../../utils/route_utils.dart';
 
 class NavigationMode extends StatefulWidget {
-  final MapRouteProvider mapProvider;
+  final RouteProvider mapProvider;
   final MapController mapController;
   final double endLat;
   final double endLng;
@@ -41,12 +42,14 @@ class _NavigationModeState extends State<NavigationMode> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final settings = Provider.of<UserSettingsProvider>(context, listen: false);
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return SlidingUpPanel(
       color: Theme.of(context).colorScheme.surfaceContainer,
       borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(25.0), topRight: Radius.circular(25.0)),
-      minHeight: 200,
-      maxHeight: 400,
+      minHeight: screenHeight * 0.18,
+      maxHeight: screenHeight * 0.18,
       // NOTE: Change the maxHeight if content overflows (Alternatively, adjust the text style)
       panel: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -73,15 +76,17 @@ class _NavigationModeState extends State<NavigationMode> {
         options: MapOptions(
           initialCenter:
               LatLng(widget.mapProvider.startLat, widget.mapProvider.startLng),
-          initialZoom: 18.0,
-          minZoom: 3.0,
+          initialZoom: defaultZoom,
+          minZoom: minZoom,
+          maxZoom: maxZoom,
         ),
         children: [
           TileLayer(
             panBuffer: 0,
-            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            tileBuilder:
-                themeMode == ThemeMode.dark ? customDarkModeTileBuilder : null,
+            urlTemplate: tileServerUrl,
+            // tileBuilder:
+            //     themeMode == ThemeMode.dark ? customDarkModeTileBuilder : null,
+            // o.o
             userAgentPackageName: 'com.example.app',
             // This part allows caching tiles
             tileProvider: FMTCTileProvider(
@@ -99,7 +104,6 @@ class _NavigationModeState extends State<NavigationMode> {
               ),
             ],
           ),
-          const AnomalyMarkerLayer(),
           CurrentLocationLayer(
             alignPositionOnUpdate: AlignOnUpdate.always,
             alignDirectionOnUpdate: AlignOnUpdate.always,
@@ -117,11 +121,14 @@ class _NavigationModeState extends State<NavigationMode> {
               markerSize: const Size(40, 40),
             ),
           ),
-          const Positioned(
-            left: 200,
-            bottom: 200,
-            child: Attribution(),
+          const Align(
+            alignment: Alignment.bottomRight,
+            child: Padding(
+              padding: EdgeInsets.only(right: 16.0, bottom: 160.0),
+              child: Attribution(),
+            ),
           ),
+          const AnomalyMarkerLayer(),
           Positioned(
             left: 85,
             bottom: 210,
@@ -154,12 +161,15 @@ class _NavigationModeState extends State<NavigationMode> {
                 showAnomalyDialog(context, widget.endLat, widget.endLng);
               },
               tooltip: "Fix Anomaly",
+              backgroundColor: context.colorScheme.primaryContainer,
               elevation: 6,
-              child: const Icon(
+              child: Icon(
                 Icons.construction_rounded,
+                color: context.colorScheme.onPrimaryContainer,
               ),
             ),
           ),
+          // TODO: Anomaly alerts
         ],
       ),
     );

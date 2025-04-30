@@ -1,5 +1,6 @@
 import 'package:admin_app/components/OSM_Attribution.dart';
 import 'package:admin_app/components/UI/blur_with_loading.dart';
+import 'package:admin_app/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
@@ -14,7 +15,6 @@ import '../services/providers/anomaly_marker_layer.dart';
 import '../services/providers/permissions.dart';
 import '../services/providers/search.dart';
 import '../services/providers/user_settings.dart';
-import '../utils/map_utils.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -79,8 +79,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () {
                     search.performDeselection();
                     // move map to user location
-                    _mapController.move(
-                        userLocation, _mapController.camera.zoom);
+                    _mapController.moveAndRotate(
+                        userLocation, defaultZoom, 0.0);
                   },
                   child: const Icon(
                     Icons.arrow_back_rounded,
@@ -120,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   permissions.position!.latitude,
                   permissions.position!.longitude,
                 );
-                _mapController.move(userLocation, _mapController.camera.zoom);
+                _mapController.moveAndRotate(userLocation, defaultZoom, 0.0);
               }
 
               return FlutterMap(
@@ -134,11 +134,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   TileLayer(
                     panBuffer: 0,
-                    urlTemplate:
-                        'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    tileBuilder: themeMode == ThemeMode.dark
-                        ? customDarkModeTileBuilder
-                        : null,
+                    urlTemplate: tileServerUrl,
+                    // tileBuilder: themeMode == ThemeMode.dark
+                    //     ? customDarkModeTileBuilder
+                    //     : null,
                     userAgentPackageName: 'com.example.admin_app',
                     tileProvider: _tileProvider,
                   ),
@@ -157,11 +156,25 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   const AnomalyMarkerLayer(),
-                  const Positioned(
-                    left: 200,
-                    bottom: 200,
-                    child: Attribution(),
+                  const Align(
+                    alignment: Alignment.bottomRight,
+                    child: Padding(
+                      padding: EdgeInsets.only(right: 16.0, bottom: 210.0),
+                      child: Attribution(),
+                    ),
                   ),
+                  // COMPARE
+                  // SafeArea(
+                  //   child: Padding(
+                  //     padding:
+                  //     const EdgeInsets.only(top: 16.0, left: 10.0, right: 10.0),
+                  //     child: AnimatedOpacity(
+                  //       opacity: showPopup ? 1.0 : 0.0,
+                  //       duration: const Duration(milliseconds: 500),
+                  //       child: AnomalyZoomPopup(mapController: _mapController),
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               );
             },

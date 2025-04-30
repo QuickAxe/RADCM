@@ -1,3 +1,4 @@
+import 'package:app/util/context_extensions.dart';
 import 'package:app/util/string_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -22,17 +23,16 @@ class _BottomPanelState extends State<BottomPanelNav> {
   @override
   Widget build(BuildContext context) {
     final searchProvider = Provider.of<Search>(context, listen: true);
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return SlidingUpPanel(
       isDraggable: false,
-      color: colorScheme.surfaceContainer, // Use themed surface color
+      color: context.colorScheme.surfaceContainer, // Use themed surface color
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       borderRadius: const BorderRadius.only(
         topLeft: Radius.circular(25.0),
         topRight: Radius.circular(25.0),
       ),
+      // TODO: MediaQuery dis
       minHeight: 200,
       maxHeight: 700,
       panel: Column(
@@ -46,11 +46,11 @@ class _BottomPanelState extends State<BottomPanelNav> {
               children: [
                 ListTile(
                   leading: Icon(Icons.location_on_rounded,
-                      color: colorScheme.primary),
+                      color: context.colorScheme.primary),
                   title: Text(
                     searchProvider.currentSelected['name'] ??
                         'Unknown Location',
-                    style: theme.textTheme.titleLarge
+                    style: context.theme.textTheme.titleLarge
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Column(
@@ -60,7 +60,8 @@ class _BottomPanelState extends State<BottomPanelNav> {
                         Text(
                           capitalize(searchProvider.currentSelected['type']
                               .toString()),
-                          style: TextStyle(color: colorScheme.onSurfaceVariant),
+                          style: TextStyle(
+                              color: context.colorScheme.onSurfaceVariant),
                         ),
                       if (searchProvider.currentSelected['address'] != null)
                         Text(
@@ -77,7 +78,7 @@ class _BottomPanelState extends State<BottomPanelNav> {
                           ].where((element) => element.isNotEmpty).join(', '),
                           style: TextStyle(
                               fontSize: 12,
-                              color: colorScheme.onSurfaceVariant),
+                              color: context.colorScheme.onSurfaceVariant),
                         ),
                     ],
                   ),
@@ -91,14 +92,15 @@ class _BottomPanelState extends State<BottomPanelNav> {
             padding: const EdgeInsets.fromLTRB(10.0, 8.0, 10.0, 10.0),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
+                backgroundColor: context.colorScheme.primary,
                 minimumSize: const Size.fromHeight(40),
               ),
               onPressed: () => Navigator.pushNamed(context, '/map_route'),
               child: Text(
                 "Get Routes",
-                style: theme.textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.bold, color: colorScheme.onPrimary),
+                style: context.theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: context.colorScheme.onPrimary),
               ),
             ),
           )

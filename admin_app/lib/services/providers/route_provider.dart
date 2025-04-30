@@ -4,16 +4,15 @@ import 'package:admin_app/services/providers/permissions.dart';
 import 'package:admin_app/services/providers/user_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
-import '../../data/models/osrm_models.dart';
-import '../../data/repository/osrm_repository.dart';
+import '../../data/models/route_models.dart';
+import '../../data/repository/route_repository.dart';
 
 /// Provider class that handles fetching the route, and other routing related processes
-class MapRouteProvider with ChangeNotifier {
-  final OSRMRepository repository = OSRMRepository();
+class RouteProvider with ChangeNotifier {
+  final RouteRepository repository = RouteRepository();
 
   // Coordinates for start and destination.
   double startLat = 15.49613530624519,
@@ -21,12 +20,9 @@ class MapRouteProvider with ChangeNotifier {
       endLat = 15.60000652430488,
       endLng = 73.82570085490943;
 
-  // Data from the API
-  List<List<LatLng>> alternativeRoutes = [];
-  List<RouteModel> routes = [];
-
-  // UI state
+  List<RouteModel> alternativeRoutes = []; // Stores multiple routes
   bool isLoading = true;
+  bool routeAvailable = true;
   int selectedRouteIndex = -1;
   bool startNavigation = false;
 
@@ -42,7 +38,7 @@ class MapRouteProvider with ChangeNotifier {
 
     // Data from the API
     alternativeRoutes.clear();
-    routes.clear();
+    // routes.clear();
 
     // UI state
     bool isLoading = true;
@@ -52,67 +48,70 @@ class MapRouteProvider with ChangeNotifier {
   }
 
   /// Initialize the provider by fetching routes.
-  Future<void> initialize(
-      BuildContext context, double newEndLat, double newEndLng) async {
+  Future<void> initialize(BuildContext context, double newEndLat,
+      double newEndLng, MapController mapController) async {
     final permissionsProvider =
         Provider.of<Permissions>(context, listen: false);
+    // unlike user app, we dont need a search provider because the end lat lng are already passed
+
     endLat = newEndLat;
     endLng = newEndLng;
+
     // users current pos as starting point
     if (permissionsProvider.position != null) {
       startLat = permissionsProvider.position!.latitude;
       startLng = permissionsProvider.position!.longitude;
     }
-    await _loadRoutes(context);
+
+    await _loadRoutes(context).then((_) {
+      if (alternativeRoutes.isNotEmpty) {
+        // after routes load this fits the first route on the screen
+        mapController.fitCamera(
+          CameraFit.bounds(
+            bounds: bounds,
+            padding: const EdgeInsets.fromLTRB(50.0, 150.0, 50.0, 300.0),
+          ),
+        );
+      }
+    });
   }
 
   Future<void> _loadRoutes(BuildContext context) async {
     try {
       final userSettings =
           Provider.of<UserSettingsProvider>(context, listen: false);
+
+      // Fetch routes from the repository
+      dev.log("Before calling the fetchRoute repo function.");
       RouteResponse routeResponse = await repository.fetchRoute(
         startLat: startLat,
         startLng: startLng,
         endLat: endLat,
         endLng: endLng,
-        profile: userSettings.profile,
       );
 
-      List<List<LatLng>> routesList = [];
-      List<RouteModel> routeModels = [];
-      PolylinePoints polylinePoints = PolylinePoints();
+      dev.log(routeResponse.toString());
 
-      for (RouteModel route in routeResponse.routes) {
-        routeModels.add(route);
-        if (route.legs.isNotEmpty) {
-          final leg = route.legs.first;
-          List<LatLng> decodedPoints = [];
-          for (var step in leg.steps) {
-            final points = polylinePoints.decodePolyline(step.geometry);
-            decodedPoints
-                .addAll(points.map((p) => LatLng(p.latitude, p.longitude)));
-          }
-          routesList.add(decodedPoints);
-        }
-      }
-
-      // Update state
-      alternativeRoutes = routesList;
-      routes = routeModels;
+      alternativeRoutes = routeResponse.routes;
       isLoading = false;
-      if (routes.isNotEmpty) {
+
+      if (alternativeRoutes.isNotEmpty) {
+        routeAvailable = true;
         selectedRouteIndex = 0;
-        _calculateBounds(alternativeRoutes[0]);
+        _calculateBounds(alternativeRoutes.first);
       }
     } catch (e) {
-      dev.log("Error loading routes: $e");
+      dev.log("Inside routeProvider, Error loading routes: $e");
       isLoading = false;
+      routeAvailable = false;
     }
     notifyListeners();
   }
 
-  /// Calculate the bounds for a set of route points.
-  void _calculateBounds(List<LatLng> routePoints) {
+  /// Calculate the bounds for a given route.
+  void _calculateBounds(RouteModel route) {
+    List<LatLng> routePoints =
+        route.segments.expand((s) => s.geometry.coordinates).toList();
     if (routePoints.isEmpty) return;
 
     double minLat =
@@ -129,11 +128,11 @@ class MapRouteProvider with ChangeNotifier {
 
   /// Update selected route index and recalculate bounds.
   void updateSelectedRoute(int index) {
-    selectedRouteIndex = index;
-    if (index < alternativeRoutes.length) {
+    if (index >= 0 && index < alternativeRoutes.length) {
+      selectedRouteIndex = index;
       _calculateBounds(alternativeRoutes[index]);
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   /// Mark that the navigation has started.
@@ -142,7 +141,7 @@ class MapRouteProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  /// Mark that the navigation has stopped
+  /// Mark that the navigation has stopped.
   void stopRouteNavigation() {
     startNavigation = false;
     notifyListeners();
@@ -152,15 +151,16 @@ class MapRouteProvider with ChangeNotifier {
     isLoading = true;
   }
 
-  /// Get the current route model, ensuring a valid index.
+  /// Get the currently selected route.
   RouteModel get currentRoute =>
-      (selectedRouteIndex >= 0 && selectedRouteIndex < routes.length)
-          ? routes[selectedRouteIndex]
-          : RouteModel(legs: [], distance: 0, duration: 0, summary: '');
-
-  /// Get current route points.
-  List<LatLng> get currentRoutePoints =>
       (selectedRouteIndex >= 0 && selectedRouteIndex < alternativeRoutes.length)
           ? alternativeRoutes[selectedRouteIndex]
-          : [];
+          : RouteModel(segments: [], legs: []);
+
+  /// Get the segments of the currently selected route.
+  List<RouteSegment> get currentRouteSegments => currentRoute.segments ?? [];
+
+  /// Get the coordinates of the currently selected route.
+  List<LatLng> get currentRoutePoints =>
+      currentRouteSegments.expand((s) => s.geometry.coordinates).toList();
 }

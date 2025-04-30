@@ -27,26 +27,6 @@ class _SearchPlaceState extends State<SearchPlace> {
     _searchController = SearchController();
   }
 
-  /// Returns a single suggestion ListTile
-  ListTile buildPlaceItem(dynamic place, SearchController controller) {
-    return ListTile(
-      title: Text(
-        place['display_name'] ?? 'Unknown Place',
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
-      subtitle: Text(
-        place['address']?['country'] ?? 'Address not available',
-      ),
-      leading: Icon(
-        Icons.location_on_rounded,
-        color: Theme.of(context).colorScheme.primary,
-      ),
-      onTap: () {
-        userTapsSearchResult(place, controller);
-      },
-    );
-  }
-
   /// Callback when user taps a search result
   void userTapsSearchResult(dynamic place, SearchController controller) {
     dev.log(place.toString());
@@ -61,10 +41,32 @@ class _SearchPlaceState extends State<SearchPlace> {
           double.parse(place['boundingbox'][3])),
     );
 
-    widget.mapController.fitCamera(
-        CameraFit.bounds(bounds: bounds, padding: const EdgeInsets.all(50.0)));
+    widget.mapController.fitCamera(CameraFit.bounds(bounds: bounds));
     widget.mapController.rotate(0);
     controller.closeView(place['display_name']);
+  }
+
+  Future<void> _performSearch(Search search) async {
+    FocusScope.of(context).unfocus(); // Hide keyboard
+
+    await search.getSuggestions(_searchController.text.trim());
+
+    if (search.errorMessage != null) {
+      _showErrorSnackbar(search.errorMessage!);
+    } else if (search.searchSuggestions.isEmpty) {
+      _showErrorSnackbar("No results found.");
+    } else {
+      _searchController.openView();
+    }
+  }
+
+  void _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   @override
@@ -83,32 +85,32 @@ class _SearchPlaceState extends State<SearchPlace> {
                 )
               : SearchBar(
                   controller: controller,
-                  onSubmitted: (_) async {
-                    await search.getSuggestions(controller.text.toString());
-                    controller.openView();
-                  },
+                  onSubmitted: (_) async => await _performSearch(search),
                   trailing: [
                     IconButton(
-                        onPressed: () async {
-                          await search
-                              .getSuggestions(controller.text.toString());
-                          controller.openView();
-                        },
-                        icon: const Icon(Icons.search)),
+                      onPressed: () async => await _performSearch(search),
+                      icon: const Icon(Icons.search),
+                    ),
                   ],
                   hintText: "Search Map",
-                  elevation: WidgetStateProperty.all(0), // Remove shadow
+                  elevation: WidgetStateProperty.all(0),
                 );
         },
         suggestionsBuilder:
             (BuildContext context, SearchController controller) {
-          List<ListTile> suggestions = search.searchSuggestions
-              .map((place) => buildPlaceItem(place, controller))
+          return search.searchSuggestions
+              .map((place) => ListTile(
+                    title: Text(
+                      place['display_name'] ?? 'Unknown Place',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      place['address']?['country'] ?? 'Address not available',
+                    ),
+                    leading: const Icon(Icons.location_on, color: Colors.blue),
+                    onTap: () => userTapsSearchResult(place, controller),
+                  ))
               .toList();
-
-          dev.log('Total search results: ${suggestions.length}');
-
-          return suggestions;
         },
         viewOnSubmitted: (_) async {
           await search.getSuggestions(_searchController.text.toString());

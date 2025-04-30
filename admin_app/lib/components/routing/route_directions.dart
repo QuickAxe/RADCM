@@ -1,9 +1,9 @@
+import 'package:admin_app/utils/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../data/models/osrm_models.dart';
+import '../../data/models/route_models.dart';
 import '../../utils/route_utils.dart';
-import '../../utils/string_utils.dart';
 
 /// A widget that displays detailed turn-by-turn directions for a chosen route
 class RouteDirections extends StatelessWidget {
@@ -12,41 +12,29 @@ class RouteDirections extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    if (route.legs.isEmpty) {
-      return const Center(child: Text("No directions available"));
-    }
-
-    final leg = route.legs.first;
-
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: leg.steps.length,
+      itemCount: route.segments.length,
       padding: const EdgeInsets.all(8.0),
       separatorBuilder: (context, index) => const Divider(),
       itemBuilder: (context, index) {
-        final step = leg.steps[index];
+        String? turnDirection = route.segments[index].maneuver.turnDirection;
 
-        String roadName =
-            step.name.isNotEmpty ? capitalize(step.name) : "Unnamed road";
-        String instruction =
-            "${capitalize(step.maneuver.type)} ${step.maneuver.modifier ?? ''} on $roadName";
+        String instruction = _getManeuverInstruction(
+            turnDirection, formatDistance(route.segments[index].cost));
 
         return ListTile(
-          leading: Icon(
-            _getManeuverIcon(
-                step.maneuver.type, step.maneuver.modifier.toString()),
-            color: colorScheme.primary,
-          ), // Icon based on maneuver type
+          leading: Icon(_getManeuverIcon(turnDirection),
+              color:
+                  context.colorScheme.primary), // Icon based on turnDirection
           title: Text(
             instruction,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           subtitle: Text(
-            "Distance: ${formatDistance(step.distance)} | Duration: ${formatDuration(step.duration)}",
-            style: TextStyle(color: Colors.grey[700]),
+            "Distance: ${formatDistance(route.segments[index].cost)}",
+            style: TextStyle(color: context.colorScheme.secondary),
           ),
         );
       },
@@ -54,48 +42,43 @@ class RouteDirections extends StatelessWidget {
   }
 
   /// Returns an appropriate icon for the given maneuver type
-  IconData _getManeuverIcon(String maneuverType, String modifier) {
-    switch (maneuverType) {
-      case "depart":
+  IconData _getManeuverIcon(String? turnDirection) {
+    switch (turnDirection) {
+      case "START":
         return LucideIcons.navigation;
-      case "turn":
-        if (modifier == "left") {
-          return LucideIcons.cornerUpLeft;
-        } else {
-          return LucideIcons.cornerUpRight;
-        }
-      case "continue":
-        if (modifier == "left") {
-          return LucideIcons.cornerUpLeft;
-        } else if (modifier == "right") {
-          return LucideIcons.cornerUpRight;
-        } else if (modifier == "straight") {
-          return LucideIcons.arrowUp;
-        } else {
-          return LucideIcons.map;
-        }
-      case "roundabout":
-        return LucideIcons.rotateCw;
-      case "merge":
-        return LucideIcons.merge;
-      case "exit":
-        return LucideIcons.logOut;
-      case "straight":
+      case "STRAIGHT":
         return LucideIcons.arrowUp;
-      case "arrive":
-        return LucideIcons.partyPopper;
+      case "LEFT":
+        return LucideIcons.arrowLeft;
+      case "SLIGHTLY LEFT":
+        return LucideIcons.cornerUpLeft;
+      case "RIGHT":
+        return LucideIcons.arrowRight;
+      case "SLIGHTLY RIGHT":
+        return LucideIcons.cornerUpRight;
       default:
-        if (modifier == "left") {
-          return LucideIcons.cornerUpLeft;
-        } else if (modifier == "right") {
-          return LucideIcons.cornerUpRight;
-        } else if (modifier == "straight") {
-          return LucideIcons.arrowUp;
-        } else if (modifier == "slight left") {
-          return LucideIcons.arrowUpLeft;
-        } else {
-          return LucideIcons.map;
-        }
+        return LucideIcons.arrowUp;
+    }
+  }
+
+  /// Returns an appropriate icon for the given maneuver type
+  String _getManeuverInstruction(
+      String? turnDirection, String formattedDistance) {
+    switch (turnDirection) {
+      case "START":
+        return "Start your journey & continue ahead";
+      case "STRAIGHT":
+        return "Continue Straight for $formattedDistance";
+      case "LEFT":
+        return "Take the next left";
+      case "SLIGHTLY LEFT":
+        return "At the incoming fork, take a slight left";
+      case "RIGHT":
+        return "Take the next right";
+      case "SLIGHTLY RIGHT":
+        return "At the incoming fork, take a slight right";
+      default:
+        return "Start your journey & continue ahead";
     }
   }
 }

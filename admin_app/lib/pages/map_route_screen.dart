@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import '../services/providers/route_provider.dart';
 
 class MapRouteScreen extends StatefulWidget {
+  // these 2 are needed to support go to anomaly
   final double endLat;
   final double endLng;
 
@@ -27,8 +28,9 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final mapProvider = Provider.of<MapRouteProvider>(context, listen: false);
-      mapProvider.initialize(context, widget.endLat, widget.endLng);
+      final mapProvider = Provider.of<RouteProvider>(context, listen: false);
+      mapProvider.initialize(
+          context, widget.endLat, widget.endLng, _mapController);
     });
   }
 
@@ -36,7 +38,7 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    return Consumer<MapRouteProvider>(
+    return Consumer<RouteProvider>(
       builder: (context, mapProvider, child) {
         return Scaffold(
           extendBodyBehindAppBar: true,

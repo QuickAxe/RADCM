@@ -1,4 +1,5 @@
 import 'package:app/components/OSM_Attribution.dart';
+import 'package:app/util/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
@@ -125,11 +126,14 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
                           ),
                         ),
                         title: Text(
-                          index == 0
-                              ? "Shortest Route"
-                              : "Route avoiding anomalies",
-                          style: theme.textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.bold),
+                          routeProvider.alternativeRoutes.length == 1
+                              ? "Shortest Route (Avoids anomalies)"
+                              : index == 0
+                                  ? "Shortest Route"
+                                  : "Route avoiding anomalies",
+                          style: context.theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         subtitle: Text(
                             "Distance: ${route.distance != null ? formatDistance(route.distance!) : "N/A"}"
@@ -192,8 +196,7 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
         children: [
           TileLayer(
             panBuffer: 0,
-            urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-            // retinaMode: true,
+            urlTemplate: tileServerUrl,
             tileBuilder:
                 themeMode == ThemeMode.dark ? customDarkModeTileBuilder : null,
             userAgentPackageName: 'com.example.app',

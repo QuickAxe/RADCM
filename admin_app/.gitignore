@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+/lib/data/models/anomaly_marker_model.g.dart
+/devtools_options.yaml

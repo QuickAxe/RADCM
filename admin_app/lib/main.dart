@@ -44,7 +44,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => Permissions()),
         ChangeNotifierProvider(create: (context) => Search()),
         ChangeNotifierProvider(create: (context) => UserSettingsProvider()),
-        ChangeNotifierProvider(create: (context) => MapRouteProvider()),
+        ChangeNotifierProvider(create: (context) => RouteProvider()),
       ],
       child:
           MyApp(isDev: currentPrefs["isDev"], isUser: currentPrefs["isUser"]),
@@ -67,23 +67,28 @@ class _MyAppState extends State<MyApp> {
     final settings = Provider.of<UserSettingsProvider>(context);
     TextTheme textTheme = createTextTheme(context, "Albert Sans", "ABeeZee");
     MaterialTheme theme = MaterialTheme(textTheme);
-    return MaterialApp(
-        themeMode: settings.themeMode,
-        theme: theme.light(),
-        darkTheme: theme.dark(),
-        debugShowCheckedModeBanner: false,
-        home: widget.isDev == null && widget.isUser == null
-            ? LoginPage()
-            : const HomeScreen(),
-        routes: {
-          '/login': (context) => LoginPage(),
-          '/home': (context) => const HomeScreen(),
-          '/settings': (context) => const SettingsScreen(),
-          '/toggle_anomalies': (context) => const ToggleAnomaliesScreen(),
-          '/routines': (context) => const RoutinesScreen(),
-          '/voice_engine': (context) => const VoiceEngineScreen(),
-          '/additional_settings': (context) => const AdditionalSettings(),
-          '/navigation_preferences': (context) => const NavigationPreferences(),
-        });
+    return MediaQuery(
+      data: MediaQuery.of(context)
+          .copyWith(textScaler: const TextScaler.linear(0.8)),
+      child: MaterialApp(
+          themeMode: settings.themeMode,
+          theme: theme.light(),
+          // darkTheme: theme.dark(),
+          debugShowCheckedModeBanner: false,
+          home: widget.isDev == null && widget.isUser == null
+              ? LoginPage()
+              : const HomeScreen(),
+          routes: {
+            '/login': (context) => LoginPage(),
+            '/home': (context) => const HomeScreen(),
+            '/settings': (context) => const SettingsScreen(),
+            '/toggle_anomalies': (context) => const ToggleAnomaliesScreen(),
+            '/routines': (context) => const RoutinesScreen(),
+            '/voice_engine': (context) => const VoiceEngineScreen(),
+            '/additional_settings': (context) => const AdditionalSettings(),
+            '/navigation_preferences': (context) =>
+                const NavigationPreferences(),
+          }),
+    );
   }
 }

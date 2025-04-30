@@ -1,5 +1,5 @@
-import 'package:admin_app/components/transport_profile_selector_row.dart';
 import 'package:admin_app/pages/map_route_screen.dart';
+import 'package:admin_app/utils/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:provider/provider.dart';
@@ -24,18 +24,18 @@ class _BottomPanelState extends State<BottomPanelNav> {
   @override
   Widget build(BuildContext context) {
     final searchProvider = Provider.of<Search>(context, listen: true);
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return SlidingUpPanel(
-      color: colorScheme.surfaceContainer, // Use themed surface color
+      isDraggable: false,
+      color: context.colorScheme.surfaceContainer, // Use themed surface color
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       borderRadius: const BorderRadius.only(
         topLeft: Radius.circular(25.0),
         topRight: Radius.circular(25.0),
       ),
-      minHeight: 250,
-      maxHeight: 400,
+      // TODO: Mediauery dis
+      minHeight: 200,
+      maxHeight: 700,
       // NOTE: Change the maxHeight if content overflows (Alternatively, adjust the text style)
       panel: Column(
         children: [
@@ -49,11 +49,11 @@ class _BottomPanelState extends State<BottomPanelNav> {
               children: [
                 ListTile(
                   leading: Icon(Icons.location_on_rounded,
-                      color: colorScheme.primary),
+                      color: context.colorScheme.primary),
                   title: Text(
                     searchProvider.currentSelected['name'] ??
                         'Unknown Location',
-                    style: theme.textTheme.titleLarge
+                    style: context.theme.textTheme.titleLarge
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Column(
@@ -63,7 +63,8 @@ class _BottomPanelState extends State<BottomPanelNav> {
                         Text(
                           capitalize(searchProvider.currentSelected['type']
                               .toString()),
-                          style: TextStyle(color: colorScheme.onSurfaceVariant),
+                          style: TextStyle(
+                              color: context.colorScheme.onSurfaceVariant),
                         ),
                       if (searchProvider.currentSelected['address'] != null)
                         Text(
@@ -80,7 +81,7 @@ class _BottomPanelState extends State<BottomPanelNav> {
                           ].where((element) => element.isNotEmpty).join(', '),
                           style: TextStyle(
                               fontSize: 12,
-                              color: colorScheme.onSurfaceVariant),
+                              color: context.colorScheme.onSurfaceVariant),
                         ),
                     ],
                   ),
@@ -89,18 +90,19 @@ class _BottomPanelState extends State<BottomPanelNav> {
             ),
 
           /// Transport options
-          const TransportProfileSelectorRow(),
+          // const TransportProfileSelectorRow(),
 
           /// CTA -> Go to
           Padding(
             padding: const EdgeInsets.fromLTRB(10.0, 8.0, 10.0, 10.0),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: colorScheme.primary,
+                backgroundColor: context.colorScheme.primary,
                 minimumSize: const Size.fromHeight(40),
               ),
               onPressed: () => Navigator.push(
                 context,
+                // COMPARE
                 MaterialPageRoute(
                   builder: (context) => MapRouteScreen(
                     endLat: double.parse(searchProvider.currentSelected['lat']),
@@ -110,8 +112,9 @@ class _BottomPanelState extends State<BottomPanelNav> {
               ),
               child: Text(
                 "Get Routes",
-                style: theme.textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.bold, color: colorScheme.onPrimary),
+                style: context.theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: context.colorScheme.onPrimary),
               ),
             ),
           )
