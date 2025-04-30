@@ -87,7 +87,7 @@ class _NavigationModeState extends State<NavigationMode> {
             // tileBuilder:
             //     themeMode == ThemeMode.dark ? customDarkModeTileBuilder : null,
             // o.o
-            userAgentPackageName: 'com.example.app',
+            userAgentPackageName: 'com.example.admin_app',
             // This part allows caching tiles
             tileProvider: FMTCTileProvider(
               stores: const {'mapStore': BrowseStoreStrategy.readUpdateCreate},

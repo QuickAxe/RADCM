@@ -1,11 +1,7 @@
-// lib/splash_screen.dart
 import 'dart:developer' as dev;
-import 'dart:ui';
 
-import 'package:app/data/models/anomaly_marker_model.dart';
-import 'package:app/services/background/activity_tracker.dart';
-import 'package:app/util/context_extensions.dart';
-import 'package:app/util/general_utils.dart';
+import 'package:admin_app/data/models/anomaly_marker_model.dart';
+import 'package:admin_app/utils/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
@@ -13,6 +9,7 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 
 import '../services/providers/permissions.dart';
+import '../utils/general_utils.dart';
 import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -65,15 +62,7 @@ class _SplashScreenState extends State<SplashScreen>
 
       // Initialize permission logic and start the activity tracker
       final permissions = Provider.of<Permissions>(context, listen: false);
-      await permissions.fetchPosition().then((_) async {
-        await ActivityTracker().startTracker().then((_) {
-          showToast("Activity Tracker started.");
-        }).catchError((error) {
-          dev.log("didnt start activity tracker: $error");
-        });
-      }).catchError((error) {
-        dev.log("failed fetchlocation: $error");
-      });
+      await permissions.fetchPosition();
 
       // Log a message indicating initialization is complete.
       dev.log('Initialization complete. Navigating to HomeScreen.');
@@ -124,16 +113,6 @@ class _SplashScreenState extends State<SplashScreen>
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(
-            "assets/splash_background_dark.jpg",
-            fit: BoxFit.cover,
-          ),
-          BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-            child: Container(
-              color: Colors.black.withOpacity(0.5),
-            ),
-          ),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -145,11 +124,8 @@ class _SplashScreenState extends State<SplashScreen>
               FadeTransition(
                 opacity: _fadeAnimation,
                 child: Text(
-                  "Rosto Radar",
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  "Rosto Radar: Admin",
+                  style: Theme.of(context).textTheme.displaySmall,
                 ),
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.05),

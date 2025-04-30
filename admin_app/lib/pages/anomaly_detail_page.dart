@@ -6,7 +6,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
 import '../components/OSM_Attribution.dart';
-import '../data/models/anomaly_marker.dart';
+import '../data/models/anomaly_marker_model.dart';
 import '../services/providers/user_settings.dart';
 import '../utils/fix_anomaly_dialog.dart';
 import '../utils/map_utils.dart';
@@ -59,9 +59,9 @@ class AnomalyDetailPage extends StatelessWidget {
                       TileLayer(
                         urlTemplate:
                             "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                        tileBuilder: themeMode == ThemeMode.dark
-                            ? customDarkModeTileBuilder
-                            : null,
+                        // tileBuilder: themeMode == ThemeMode.dark
+                        //     ? customDarkModeTileBuilder
+                        //     : null,
                       ),
                       MarkerLayer(
                         markers: [

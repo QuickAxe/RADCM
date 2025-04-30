@@ -179,11 +179,25 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
             // ==================== FALLBACK - NO ROUTES
             : Padding(
                 padding: const EdgeInsets.all(30.0),
-                child: Text(
-                  "No Routes",
-                  style: theme.textTheme.titleLarge
-                      ?.copyWith(fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "No Routes Available",
+                      style: context.theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Please check your internet connection or try again later.",
+                      style: context.theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey[600],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
       ),

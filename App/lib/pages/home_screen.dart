@@ -14,11 +14,10 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
     return Scaffold(
       extendBodyBehindAppBar: true,
       key: GlobalKey<ScaffoldState>(),
-      appBar: _buildAppBar(context, colorScheme),
+      appBar: _buildAppBar(context, context.colorScheme),
       drawer: const AppDrawer(),
       body: Stack(
         children: [
@@ -29,7 +28,7 @@ class HomeScreen extends StatelessWidget {
             child: FloatingActionButton(
               heroTag: "capture_anomaly",
               onPressed: () => Navigator.pushNamed(context, '/capture'),
-              backgroundColor: colorScheme.primaryContainer,
+              backgroundColor: context.colorScheme.primaryContainer,
               tooltip: "See an anomaly? Capture it!",
               elevation: 6,
               child: const Icon(LucideIcons.camera),

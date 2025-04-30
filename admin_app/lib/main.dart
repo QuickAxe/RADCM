@@ -6,6 +6,9 @@ import 'package:admin_app/pages/settings_screens/navigation_preferences.dart';
 import 'package:admin_app/pages/settings_screens/routines.dart';
 import 'package:admin_app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:admin_app/pages/settings_screens/voice_engine.dart';
+import 'package:admin_app/pages/splash_screen.dart';
+import 'package:admin_app/services/providers/anomaly_provider.dart';
+import 'package:admin_app/services/providers/map_controller_provider.dart';
 import 'package:admin_app/services/providers/permissions.dart';
 import 'package:admin_app/services/providers/route_provider.dart';
 import 'package:admin_app/services/providers/search.dart';
@@ -13,20 +16,11 @@ import 'package:admin_app/services/providers/user_settings.dart';
 import 'package:admin_app/theme/theme.dart';
 import 'package:admin_app/theme/util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Load .env
-  await dotenv.load(fileName: ".env");
-
-  // Flutter Map Caching
-  await FMTCObjectBoxBackend().initialise();
-  await const FMTCStore('mapStore').manage.create();
 
   Future<Map<String, String?>> loadPrefs() async {
     final prefs = await SharedPreferences.getInstance();
@@ -45,6 +39,8 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => Search()),
         ChangeNotifierProvider(create: (context) => UserSettingsProvider()),
         ChangeNotifierProvider(create: (context) => RouteProvider()),
+        ChangeNotifierProvider(create: (context) => AnomalyProvider()),
+        ChangeNotifierProvider(create: (context) => MapControllerProvider()),
       ],
       child:
           MyApp(isDev: currentPrefs["isDev"], isUser: currentPrefs["isUser"]),
@@ -67,6 +63,7 @@ class _MyAppState extends State<MyApp> {
     final settings = Provider.of<UserSettingsProvider>(context);
     TextTheme textTheme = createTextTheme(context, "Albert Sans", "ABeeZee");
     MaterialTheme theme = MaterialTheme(textTheme);
+
     return MediaQuery(
       data: MediaQuery.of(context)
           .copyWith(textScaler: const TextScaler.linear(0.8)),
@@ -77,7 +74,7 @@ class _MyAppState extends State<MyApp> {
           debugShowCheckedModeBanner: false,
           home: widget.isDev == null && widget.isUser == null
               ? LoginPage()
-              : const HomeScreen(),
+              : const SplashScreen(),
           routes: {
             '/login': (context) => LoginPage(),
             '/home': (context) => const HomeScreen(),

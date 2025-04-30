@@ -1,6 +1,6 @@
 import 'dart:developer' as dev;
 
-import 'package:admin_app/pages/home_screen.dart';
+import 'package:admin_app/pages/splash_screen.dart';
 import 'package:admin_app/services/api%20services/authority_service.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -44,7 +44,7 @@ class _LoginPageState extends State<LoginPage> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
+        MaterialPageRoute(builder: (context) => const SplashScreen()),
       );
     } else {
       final authService = AuthorityService(DioClientAuth());
@@ -63,7 +63,10 @@ class _LoginPageState extends State<LoginPage> {
           toastLength: Toast.LENGTH_LONG,
         );
 
-        Navigator.pushReplacementNamed(context, '/home');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const SplashScreen()),
+        );
       } else {
         Fluttertoast.showToast(
           msg: "Incorrect Credentials",

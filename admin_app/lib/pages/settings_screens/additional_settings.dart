@@ -14,7 +14,7 @@ class AdditionalSettings extends StatelessWidget {
     if (Platform.isAndroid) {
       const intent = AndroidIntent(
         action: 'android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS',
-        data: 'package:com.example.app',
+        data: 'package:com.example.admin_pp',
         flags: [Flag.FLAG_ACTIVITY_NEW_TASK],
       );
       await intent.launch();
