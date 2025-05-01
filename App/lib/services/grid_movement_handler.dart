@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:app/services/providers/anomaly_provider.dart';
+import 'package:app/services/providers/user_settings.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:hive/hive.dart';
@@ -58,10 +59,15 @@ class GridMovementHandler {
 
   void _onMapMoved() {
     _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 400), () {
+    _debounceTimer = Timer(const Duration(milliseconds: 1000), () {
       final mapCenter = mapController.camera.center;
       _checkIfMovedToNewGrid(mapCenter);
     });
+  }
+
+  void retryFetchCurrentGrid() {
+    final currentCenter = mapController.camera.center;
+    _checkIfMovedToNewGrid(currentCenter);
   }
 
   void _checkIfMovedToNewGrid(LatLng newCenter) {
@@ -102,6 +108,9 @@ class GridMovementHandler {
         throw Exception("API returned null data");
       }
 
+      Provider.of<UserSettingsProvider>(context, listen: false)
+          .setDirtyAnomalies(false);
+
       // fetch successful
       final List<dynamic> anomalies = response.data['anomalies'] ?? [];
 
@@ -126,6 +135,8 @@ class GridMovementHandler {
       // update the stored anomalies in Hive
       _saveVisitedGrids();
     } catch (e) {
+      Provider.of<UserSettingsProvider>(context, listen: false)
+          .setDirtyAnomalies(true);
       log("Error fetching anomalies: $e");
     }
   }

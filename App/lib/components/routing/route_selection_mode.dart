@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
@@ -178,24 +179,57 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
               )
             // ==================== FALLBACK - NO ROUTES
             : Padding(
-                padding: const EdgeInsets.all(30.0),
+                padding:
+                    const EdgeInsets.only(left: 30.0, right: 30.0, top: 60.0),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    Icon(LucideIcons.mapPinOff,
+                        size: 64, color: Colors.grey[500]),
+                    const SizedBox(height: 20),
                     Text(
                       "No Routes Available",
-                      style: context.theme.textTheme.titleLarge?.copyWith(
+                      style: context.theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
+                        color: context.colorScheme.onSurface,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     Text(
-                      "Please check your internet connection or try again later.",
+                      "Please check your internet connection.\nIf you are connected, the server might be down, try again!",
                       style: context.theme.textTheme.bodyMedium?.copyWith(
                         color: Colors.grey[600],
                       ),
                       textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 15),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        OutlinedButton.icon(
+                          icon: const Icon(LucideIcons.home),
+                          label: const Text("Go Home"),
+                          onPressed: () {
+                            context.read<RouteProvider>().stopRouteNavigation();
+                            context.read<RouteProvider>().flushRoutes();
+                            Navigator.of(context).pushNamedAndRemoveUntil(
+                              '/home',
+                              (route) => false,
+                            );
+                          },
+                        ),
+                        const SizedBox(width: 20),
+                        ElevatedButton.icon(
+                          icon: const Icon(LucideIcons.refreshCcw),
+                          label: const Text("Try Again"),
+                          onPressed: () {
+                            context.read<RouteProvider>().stopRouteNavigation();
+                            context.read<RouteProvider>().flushRoutes();
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),

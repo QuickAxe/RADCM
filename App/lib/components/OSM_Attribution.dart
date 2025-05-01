@@ -1,5 +1,6 @@
 import 'package:app/util/context_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:popover/popover.dart';
 
 class Attribution extends StatelessWidget {
@@ -21,20 +22,9 @@ class Attribution extends StatelessWidget {
           ),
         ),
       ),
-      child: Image.network(
-        'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Openstreetmap_logo.svg/256px-Openstreetmap_logo.svg.png',
-        width: 35,
-        height: 35,
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return const SizedBox(
-            width: 35,
-            height: 35,
-            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-          );
-        },
+      child: Icon(
+        LucideIcons.map,
+        color: context.colorScheme.secondary,
       ),
     );
   }

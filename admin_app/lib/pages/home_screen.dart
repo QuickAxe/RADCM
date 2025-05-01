@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../components/app_drawer.dart';
 import '../services/providers/search.dart';
+import '../services/providers/user_settings.dart';
 import 'custom_buttons.dart';
 import 'loading_overlay.dart';
 
@@ -43,6 +44,20 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
       actions: [
+        ValueListenableBuilder<bool>(
+          valueListenable: context.read<UserSettingsProvider>().dirtyAnomalies,
+          builder: (context, isDirty, _) {
+            return AnimatedSwitcher(
+              duration: const Duration(milliseconds: 1000),
+              transitionBuilder: (child, animation) {
+                return FadeTransition(opacity: animation, child: child);
+              },
+              child: isDirty
+                  ? const DirtyAnomalies(key: ValueKey('dirty'))
+                  : const SizedBox.shrink(key: ValueKey('clean')),
+            );
+          },
+        ),
         Consumer<Search>(builder: (context, search, child) {
           if (search.isCurrentSelected) {
             return const ReturnButton();

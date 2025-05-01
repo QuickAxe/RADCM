@@ -1,6 +1,8 @@
+import 'package:admin_app/utils/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:popover/popover.dart';
 import 'package:provider/provider.dart';
 
 import '../constants.dart';
@@ -61,6 +63,77 @@ class ReturnButton extends StatelessWidget {
               0.0);
         },
         child: const Icon(LucideIcons.arrowLeft),
+      ),
+    );
+  }
+}
+
+class DirtyAnomalies extends StatelessWidget {
+  const DirtyAnomalies({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: FloatingActionButton(
+        heroTag: "dirty_anomalies",
+        backgroundColor: Colors.amberAccent,
+        onPressed: () {
+          showPopover(
+            direction: PopoverDirection.bottom,
+            context: context,
+            barrierColor: Colors.transparent,
+            radius: 10,
+            width: 220,
+            backgroundColor: context.colorScheme.surfaceContainer,
+            bodyBuilder: (context) {
+              return Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Anomalies weren't fetched",
+                        style: context.theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        )),
+                    const SizedBox(height: 8),
+                    Text(
+                      "An error prevented the latest anomalies from being fetched.",
+                      style: context.theme.textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.refresh),
+                      label: const Text("Retry"),
+                      onPressed: () {
+                        // Your refresh logic here
+                        Navigator.of(context).pop();
+
+                        // move the map slightly to trigger the onMoved
+                        final mapController =
+                            context.read<MapControllerProvider>().mapController;
+                        final currentCenter = mapController.camera.center;
+
+                        final nudgedCenter = LatLng(
+                          currentCenter.latitude + 0.0000001,
+                          currentCenter.longitude + 0.0000001,
+                        );
+
+                        mapController.move(
+                            nudgedCenter, mapController.camera.zoom);
+                      },
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+        child: const Icon(
+          LucideIcons.alertCircle,
+          color: Colors.black87,
+        ),
       ),
     );
   }

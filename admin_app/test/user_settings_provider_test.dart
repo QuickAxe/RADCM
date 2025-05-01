@@ -20,7 +20,7 @@ void main() {
       expect(userSettings.speechRate, 0.6);
       expect(userSettings.autoDetectRoutines, false);
       expect(userSettings.profile, "driving");
-      expect(userSettings.themeMode, ThemeMode.dark);
+      expect(userSettings.themeMode, ThemeMode.light);
     });
 
     test('toggleVoiceEnabled switches value', () {

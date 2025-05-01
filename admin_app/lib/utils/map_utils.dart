@@ -24,16 +24,16 @@ Widget mapMarkerIcon(String iconPath, Color shadowColor) {
       Container(
         width: 50,
         height: 50,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: shadowColor,
-              blurRadius: 10,
-              spreadRadius: 2,
-              offset: const Offset(2, 3),
-            ),
-          ],
+          // boxShadow: [
+          //   BoxShadow(
+          //     color: shadowColor,
+          //     blurRadius: 10,
+          //     spreadRadius: 2,
+          //     offset: const Offset(2, 3),
+          //   ),
+          // ],
         ),
       ),
       Image.asset(

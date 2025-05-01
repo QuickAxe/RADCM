@@ -10,9 +10,10 @@ class ToggleAnomaliesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final settings = Provider.of<UserSettingsProvider>(context);
     List<Map<String, String>> anomalies = [
-      {"name": "Speedbreaker", "icon": "assets/icons/ic_speedbreaker.png"},
+      {"name": "Pothole", "icon": "assets/icons/ic_pothole.png"},
+      {"name": "SpeedBreaker", "icon": "assets/icons/ic_speedbreaker.png"},
       {"name": "Rumbler", "icon": "assets/icons/ic_rumbler.png"},
-      {"name": "Obstacle", "icon": "assets/icons/ic_obstacle.png"},
+      {"name": "Cracks", "icon": "assets/icons/ic_cracks.png"},
     ];
 
     return Scaffold(

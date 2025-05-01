@@ -32,14 +32,32 @@ class AdditionalSettings extends StatelessWidget {
       body: ListView(
         children: [
           ListTile(
-            trailing: Icon(
-              Icons.arrow_forward_rounded,
-              color: Theme.of(context).colorScheme.primary,
+            trailing: GestureDetector(
+              onTap: () => openBatteryOptimizationSettings(context),
+              child: Icon(
+                Icons.arrow_forward_rounded,
+                color: Theme.of(context).colorScheme.primary,
+              ),
             ),
-            title: const Text('Toggle Battery Optimization'),
+            title: Row(
+              children: [
+                const Text('Toggle Battery Optimization'),
+                const SizedBox(width: 6),
+                Tooltip(
+                  triggerMode: TooltipTriggerMode.tap,
+                  showDuration: const Duration(seconds: 4),
+                  enableTapToDismiss: true,
+                  message: 'This may not work on certain devices',
+                  child: Icon(
+                    Icons.info_outline,
+                    size: 18,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
             subtitle: const Text(
                 'Battery Optimization may prevent normal operation of the app. To avoid issues we recommend disabling it.'),
-            onTap: () => openBatteryOptimizationSettings(context),
           ),
           ListTile(
             title: const Text("Theme"),
