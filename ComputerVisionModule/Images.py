@@ -1,5 +1,80 @@
 import cv2 as cv
 import time 
+from PIL import Image
+import piexif
+import piexif.helper
+
+import glob
+
+import requests 
+
+# function to save the image with it's location encoded as part of it's EXIF data, in the UserComment field
+def saveImage(image, lat, lng, imageNumber):
+        
+    # convert the image to PIL format because opencv is stupid and messes up EXIF data (ok it's not stupid, sorry opencv)
+    image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
+    image = Image.fromarray(image)
+
+    # create a "comment" and convert it to bytes 
+    commentText = f"{lat} {lng}"
+    commentBytes = piexif.helper.UserComment.dump(commentText, encoding="unicode")
+
+    # create the default EXIF dict and store the above comment in it 
+    exifDict = {"0th": {}, "Exif": {piexif.ExifIFD.UserComment: commentBytes}, "GPS": {}, "1st": {}, "thumbnail": None}
+    exifBytes = piexif.dump(exifDict)
+
+    # save the image finally 
+    image.save(f"Images/{imageNumber}.jpg", exif=exifBytes)
+
+
+# I did not code this function, cgpt did 
+# ughh it just makes things so.. easy 
+def extract_user_comment(image_path):
+    try:
+        exif_dict = piexif.load(image_path)
+        user_comment = exif_dict['Exif'].get(piexif.ExifIFD.UserComment)
+        if user_comment:
+            if user_comment.startswith(b'ASCII\x00\x00\x00'):
+                return user_comment[8:].decode('ascii')
+            elif user_comment.startswith(b'UNICODE\x00'):
+                return user_comment[8:].decode('utf-16')
+            elif user_comment.startswith(b'JIS\x00\x00\x00'):
+                return user_comment[8:].decode('shift_jis')
+            else:
+                return user_comment.decode('utf-8', errors='ignore')
+        return None
+    except Exception as e:
+        return f"Error reading EXIF: {e}"
+
+
+def sendImages():
+    
+    imagePaths = glob.glob("Images/*.jpg")
+
+    # !=========================
+    url = "add server URL here "
+    # !=========================
+
+    for imagePath in imagePaths:
+        
+        location = extract_user_comment(imagePath).spilt()
+        lat = float(location[0])
+        lng = float(location[1])
+
+        data = {
+            "source" : "imageModule",
+            "lat": lat,
+            "lng": lng,
+        }
+
+        with open(imagePath, 'rb') as imgage:
+            files = {'file': imgage}
+            response = requests.post(url, files=files, data=data)
+    
+        print(f"Sent {imagePath} - Status: {response.status_code}")
+        print(response.text)   
+
+    
 
 def handleImages(messageQue, cap, timeBetweenImages):
     
@@ -7,7 +82,7 @@ def handleImages(messageQue, cap, timeBetweenImages):
 
     while True:
 
-        # check if the queue has a value, meaning that the survey should continue 
+        # check if the current command is to start the survey  
         if( not messageQue.empty() and messageQue.queue[0] == "start"):
             ret, frame = cap.read()
         
@@ -24,16 +99,36 @@ def handleImages(messageQue, cap, timeBetweenImages):
             lat = 12.42
 
             # save the image to the... "database", a local file directory in our case :)
-            filename = f"images/{imageNo}.jpg"        
-            cv.imwrite(filename, frame)
+            saveImage(frame, lat, lng, imageNo)
 
-            print("survey running, sending {imageNo} image...")
+            print(f"survey running, sending image-{imageNo} ...")
 
             # wait for a certain time to take the next image 
             time.sleep(timeBetweenImages)
         
         elif( not messageQue.empty() and messageQue.queue[0] == "stop"):
             
-            #! send all images back to the server? or to the phone??
-            print("hello survey stopped, sending all images now...")
+            # stop survey now...
+            print("hello survey stopped...")
+            # remove the "stop" command from the queue 
+            messageQue.get()
+        
+        elif( not messageQue.empty() and messageQue.queue[0] == "sendImages"):
+            # send all the images in the "database"
+            sendImages()
+            # remove the "sendImages" command from the queue 
+            messageQue.get()
+        
+        elif( not messageQue.empty()):
+            # should be an unreachable state, but just incase it's reached....
+            messageQue.get()
+            print("strange error, message in the queue that doesn't belong there")
+            time.sleep(0.1)
+        
+        # to prevent this thread from just going ham when the queue is empty, adding a tiny delay 
+        else:
+            time.sleep(0.1)
+
+
+
             

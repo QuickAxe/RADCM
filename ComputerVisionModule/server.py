@@ -46,8 +46,15 @@ class Server(BaseHTTPRequestHandler):
                 self.messageQue.get()
                 self.messageQue.put("stop")
                 self.send_response(200)
+       
+        elif data["command"] == "sendImages":
+            if( not self.messageQue.empty() and self.messageQue.queue[0] == "start"):
+                self.send_response(400, message="SendImages command given, but previous survey is still going on, please end survey first...")
+            else:
+                self.messageQue.put("sendImages")
+
         else:
-            self.send_response(400, message="wrong command sent, what are you on buddy? (send me some too, instead of whatever message you sent)")
+            self.send_response(400, message="wrong command sent, what are you on friendo? (send me some too, instead of whatever message you sent)")
         
         self.send_header('Content-type', 'text/html')
         self.end_headers()        
