@@ -1,6 +1,7 @@
 import 'package:admin_app/pages/map_view.dart';
 import 'package:admin_app/utils/context_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../components/app_drawer.dart';
@@ -19,10 +20,25 @@ class HomeScreen extends StatelessWidget {
       key: GlobalKey<ScaffoldState>(),
       appBar: _buildAppBar(context, context.colorScheme),
       drawer: const AppDrawer(),
-      body: const Stack(
+      body: Stack(
         children: [
-          MapView(),
-          LoadingOverlay(),
+          const MapView(),
+          Positioned(
+            left: 16,
+            bottom: 210,
+            child: FloatingActionButton.extended(
+              heroTag: "survey",
+              onPressed: () => Navigator.pushNamed(context, '/survey'),
+              tooltip: "Start a survey by scanning a QR code",
+              elevation: 6,
+              label: Text(
+                'Survey',
+                style: context.theme.textTheme.labelLarge,
+              ),
+              icon: const Icon(LucideIcons.qrCode),
+            ),
+          ),
+          const LoadingOverlay(),
         ],
       ),
     );

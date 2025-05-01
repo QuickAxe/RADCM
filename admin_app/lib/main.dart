@@ -7,6 +7,7 @@ import 'package:admin_app/pages/settings_screens/routines.dart';
 import 'package:admin_app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:admin_app/pages/settings_screens/voice_engine.dart';
 import 'package:admin_app/pages/splash_screen.dart';
+import 'package:admin_app/pages/survey/survey_screen.dart';
 import 'package:admin_app/services/providers/anomaly_provider.dart';
 import 'package:admin_app/services/providers/map_controller_provider.dart';
 import 'package:admin_app/services/providers/permissions.dart';
@@ -85,6 +86,7 @@ class _MyAppState extends State<MyApp> {
             '/additional_settings': (context) => const AdditionalSettings(),
             '/navigation_preferences': (context) =>
                 const NavigationPreferences(),
+            '/survey': (context) => SurveyScreen(),
           }),
     );
   }
