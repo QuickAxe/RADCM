@@ -5,7 +5,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
-import '../components/OSM_Attribution.dart';
+import '../components/attribution.dart';
 import '../data/models/anomaly_marker_model.dart';
 import '../services/providers/user_settings.dart';
 import '../utils/fix_anomaly_dialog.dart';

@@ -1,4 +1,4 @@
-import 'package:admin_app/components/OSM_Attribution.dart';
+import 'package:admin_app/components/attribution.dart';
 import 'package:admin_app/utils/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';

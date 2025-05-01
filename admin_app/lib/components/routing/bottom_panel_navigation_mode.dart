@@ -1,4 +1,4 @@
-import 'package:admin_app/components/OSM_Attribution.dart';
+import 'package:admin_app/components/attribution.dart';
 import 'package:admin_app/components/routing/dynamic_route_directions.dart';
 import 'package:admin_app/constants.dart';
 import 'package:admin_app/utils/context_extensions.dart';

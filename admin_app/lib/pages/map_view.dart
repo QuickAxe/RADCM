@@ -7,7 +7,7 @@ import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
-import '../components/OSM_Attribution.dart';
+import '../components/attribution.dart';
 import '../constants.dart';
 import '../services/grid_movement_handler.dart';
 import '../services/providers/anomaly_marker_layer.dart';
