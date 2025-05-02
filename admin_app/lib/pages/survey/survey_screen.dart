@@ -26,7 +26,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
       ),
       body: MobileScanner(
         controller: MobileScannerController(
-          detectionSpeed: DetectionSpeed.noDuplicates, // fires continuously
+          detectionSpeed: DetectionSpeed.noDuplicates, // fires once per qr
         ),
         // onDetect is run when a qrcode is detected
         onDetect: (capture) async {
@@ -55,11 +55,11 @@ class _SurveyScreenState extends State<SurveyScreen> {
                 isWifiConnectionAttempted = await WiFiForIoTPlugin.connect(ssid,
                     password: password,
                     security: NetworkSecurity.WPA,
-                    withInternet: true);
+                    withInternet: false);
               }
 
               if (isWifiConnectionAttempted) {
-                bool isWifiConnected = true;
+                bool isWifiConnected = false;
                 print("-----------------------------> ATTEMPT SUCCESS");
 
                 showDialog(
@@ -81,14 +81,15 @@ class _SurveyScreenState extends State<SurveyScreen> {
                 final startTime = DateTime.now();
                 const timeout = Duration(seconds: 10);
 
-                while (await WiFiForIoTPlugin.isConnected() == false) {
+
+                do {
+                  isWifiConnected = await WiFiForIoTPlugin.isConnected();
                   if (DateTime.now().difference(startTime) > timeout) {
-                    isWifiConnected = false;
                     break;
                   } else {
                     await Future.delayed(const Duration(seconds: 1));
                   }
-                }
+                }while (isWifiConnected == false);
 
                 Navigator.of(context).pop();
 

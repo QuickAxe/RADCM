@@ -6,10 +6,12 @@ import 'package:provider/provider.dart';
 import 'package:wifi_iot/wifi_iot.dart';
 
 import '../components/app_drawer.dart';
+import '../services/providers/permissions.dart';
 import '../services/providers/search.dart';
 import '../services/providers/user_settings.dart';
 import 'custom_buttons.dart';
 import 'loading_overlay.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -29,7 +31,8 @@ class _HomeScreenState extends State<HomeScreen> {
           content: const SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('To connect to the UAV, Wi-Fi access is required.'),
+                Text(
+                    'To connect to the UAV, Wi-Fi access and nearby devices permissions are required.'),
               ],
             ),
           ),
@@ -47,14 +50,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _onSurveyPressed() async {
+    Provider.of<Permissions>(context, listen: false)
+        .requestNearbyDevicesPermission();
+
     bool isWifiEnabled = await WiFiForIoTPlugin.isEnabled();
     if (isWifiEnabled == false) {
       await _showMyDialog();
-      isWifiEnabled =
-          await WiFiForIoTPlugin.setEnabled(true, shouldOpenSettings: true);
+      await WiFiForIoTPlugin.setEnabled(true, shouldOpenSettings: true);
+    } else {
+      Navigator.pushNamed(context, '/survey');
     }
-
-    Navigator.pushNamed(context, '/survey');
   }
 
   @override

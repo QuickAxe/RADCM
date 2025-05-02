@@ -3,6 +3,7 @@ import 'dart:developer' as dev;
 import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class Permissions extends ChangeNotifier with WidgetsBindingObserver {
   Position? position;
@@ -97,6 +98,25 @@ class Permissions extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
 
     // checkBatteryOptimizationStatus();
+  }
+
+
+  Future<void> requestNearbyDevicesPermission() async {
+    final status = await Permission.nearbyWifiDevices.status;
+
+    if (status.isDenied || status.isPermanentlyDenied) {
+      final result = await Permission.nearbyWifiDevices.request();
+      if (result.isGranted) {
+        print("Permission granted");
+      } else if (result.isPermanentlyDenied) {
+        // Redirect to app settings
+        openAppSettings();
+      } else {
+        print("Permission denied");
+      }
+    } else {
+      print("Already granted");
+    }
   }
 
   // Future<void> checkBatteryOptimizationStatus() async {
