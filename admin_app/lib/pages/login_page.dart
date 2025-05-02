@@ -47,11 +47,13 @@ class _LoginPageState extends State<LoginPage> {
         MaterialPageRoute(builder: (context) => const SplashScreen()),
       );
     } else {
+      print("------------------------------- im gonna check pass --------------------------------------");
       final authService = AuthorityService(DioClientAuth());
       bool isAuthenticated = await authService.login(
           usernameController.text.toString(),
           passwordController.text.toString());
 
+      print("------------------------------- ive checked pass --------------------------------------");
       setState(() {
         isLoading = false;
       });

@@ -8,6 +8,7 @@ class AuthorityService {
   AuthorityService(this.dioClient);
 
   Future<bool> login(String username, String password) async {
+    print("---------------------------------- im in the login api caller ---------------------------------------");
     try {
       Response response = await dioClient.dio.post(
         "token/",

@@ -49,8 +49,6 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _initializeApp() async {
     try {
-      // Load environment variables.
-      await dotenv.load(fileName: ".env");
 
       // Initialize FMTC and create the map store.
       await FMTCObjectBoxBackend().initialise();
