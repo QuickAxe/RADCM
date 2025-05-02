@@ -19,7 +19,9 @@ import '../utils/map_utils.dart';
 
 class MapView extends StatefulWidget {
   final PolylineLayer? polylineLayer;
-  const MapView({super.key, this.polylineLayer});
+  final UserSettingsProvider userSettingsProvider;
+  const MapView(
+      {super.key, this.polylineLayer, required this.userSettingsProvider});
 
   @override
   State<MapView> createState() => _MapViewState();
@@ -32,11 +34,18 @@ class _MapViewState extends State<MapView> {
 
   @override
   void initState() {
-    dev.log("Initializing the map");
+    dev.log(
+        "Initializing the map -------------------------------------------------");
     super.initState();
     _mapController = context.read<MapControllerProvider>().mapController;
-    _gridHandler =
-        GridMovementHandler(mapController: _mapController, context: context);
+    dev.log(
+        'UserSettingsProvider: $widget.userSettingsProvider ------------------------------');
+    GridMovementHandler.initOnce(
+      mapController: _mapController,
+      userSettingsProvider: widget.userSettingsProvider,
+      context: context,
+    );
+    _gridHandler = GridMovementHandler.instance;
     Provider.of<AnomalyProvider>(context, listen: false).init();
 
     _mapController.mapEventStream.listen((event) {

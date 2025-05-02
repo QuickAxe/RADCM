@@ -64,6 +64,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userSettingsProvider = context.read<UserSettingsProvider>();
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       key: GlobalKey<ScaffoldState>(),
@@ -71,7 +73,9 @@ class _HomeScreenState extends State<HomeScreen> {
       drawer: const AppDrawer(),
       body: Stack(
         children: [
-          const MapView(),
+          MapView(
+            userSettingsProvider: context.read<UserSettingsProvider>(),
+          ),
           Positioned(
             left: 16,
             bottom: 210,

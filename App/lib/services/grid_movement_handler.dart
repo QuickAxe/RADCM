@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as dev;
 import 'dart:developer';
 
 import 'package:app/services/providers/anomaly_provider.dart';
@@ -13,32 +14,67 @@ import '../data/models/anomaly_marker_model.dart';
 import 'api_service/dio_client_user_service.dart';
 
 class GridMovementHandler {
+  static GridMovementHandler? _instance;
+
   final MapController mapController;
+  final BuildContext context;
+  final UserSettingsProvider userSettingsProvider;
+  bool _listenerAttached = false;
+
   final double gridSize = 0.72; // 80km grid in degrees
   Timer? _debounceTimer;
-  final Set<LatLng> visitedGrids = {};
-  final Map<LatLng, List<AnomalyMarker>> anomalyCache = {};
-  final BuildContext context;
-  late Box<List<String>> _hiveBox; // to load visitedGrids from cache
 
-  GridMovementHandler({required this.mapController, required this.context}) {
+  GridMovementHandler._internal(
+      this.mapController, this.userSettingsProvider, this.context) {
     _initHive().then((_) {
-      mapController.mapEventStream.listen((event) {
-        _onMapMoved();
-      });
+      _attachMapListener();
+    });
+    log("GridMovementHandler initialized --------------------------------------------");
+  }
+
+  static void initOnce({
+    required MapController mapController,
+    required UserSettingsProvider userSettingsProvider,
+    required BuildContext context,
+  }) {
+    dev.log(
+        'UserSettingsProvider in initOnce: $userSettingsProvider ------------------------------');
+    _instance ??= GridMovementHandler._internal(
+        mapController, userSettingsProvider, context);
+    _instance?._onMapMoved();
+  }
+
+  static GridMovementHandler get instance {
+    assert(
+      _instance != null,
+      'GridMovementHandler.initOnce() must be called before accessing the instance.',
+    );
+    return _instance!;
+  }
+
+  Future<void> _initHive() async {
+    _hiveBox = await Hive.openBox<List<String>>('visitedGrids');
+  }
+
+  void _attachMapListener() {
+    if (_listenerAttached) return;
+    _listenerAttached = true;
+    mapController.mapEventStream.listen((event) {
       _onMapMoved();
     });
   }
 
-  final DioClientUser _dioClient = DioClientUser();
-
-  Future<void> _initHive() async {
-    _hiveBox = await Hive.openBox<List<String>>('visitedGrids');
-
-    LatLng mapCenter = mapController.camera.center;
-    _checkIfMovedToNewGrid(mapCenter);
-    // _loadVisitedGrids();
+  void _onMapMoved() {
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 400), () {
+      final mapCenter = mapController.camera.center;
+      _checkIfMovedToNewGrid(mapCenter);
+    });
   }
+
+  final Set<LatLng> visitedGrids = {};
+  final Map<LatLng, List<AnomalyMarker>> anomalyCache = {};
+  late Box<List<String>> _hiveBox; // to load visitedGrids from cache
 
   void _loadVisitedGrids() {
     List<String> storedGrids = _hiveBox.get('visitedGrids', defaultValue: [])!;
@@ -46,28 +82,6 @@ class GridMovementHandler {
       visitedGrids.add(_parseLatLng(key));
     }
     log("Loaded visited grids from hive, size of visitedGrids: ${visitedGrids.length}");
-  }
-
-  String _latLngToKey(LatLng latLng) =>
-      "${latLng.latitude},${latLng.longitude}";
-
-  /// Convert string back to LatLng
-  LatLng _parseLatLng(String key) {
-    var parts = key.split(',');
-    return LatLng(double.parse(parts[0]), double.parse(parts[1]));
-  }
-
-  void _onMapMoved() {
-    _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(milliseconds: 1000), () {
-      final mapCenter = mapController.camera.center;
-      _checkIfMovedToNewGrid(mapCenter);
-    });
-  }
-
-  void retryFetchCurrentGrid() {
-    final currentCenter = mapController.camera.center;
-    _checkIfMovedToNewGrid(currentCenter);
   }
 
   void _checkIfMovedToNewGrid(LatLng newCenter) {
@@ -83,19 +97,11 @@ class GridMovementHandler {
     _fetchAnomalies(newGridCenter);
   }
 
-  /// Finds the grid center for a given point
-  LatLng getGridCenter(LatLng point) {
-    double lat =
-        (point.latitude / gridSize).floor() * gridSize + (gridSize / 2);
-    double lon =
-        (point.longitude / gridSize).floor() * gridSize + (gridSize / 2);
-    return LatLng(lat, lon);
-  }
-
   /// Fetch anomalies for a given grid center
   Future<void> _fetchAnomalies(LatLng gridCenter) async {
+    final DioClientUser dioClient = DioClientUser();
     try {
-      final response = await _dioClient.getRequest('anomalies/', queryParams: {
+      final response = await dioClient.getRequest('anomalies/', queryParams: {
         "latitude": gridCenter.latitude,
         "longitude": gridCenter.longitude,
         // NOTE: Radius is an optional parameter
@@ -108,8 +114,7 @@ class GridMovementHandler {
         throw Exception("API returned null data");
       }
 
-      Provider.of<UserSettingsProvider>(context, listen: false)
-          .setDirtyAnomalies(false);
+      userSettingsProvider.setDirtyAnomalies(false);
 
       // fetch successful
       final List<dynamic> anomalies = response.data['anomalies'] ?? [];
@@ -135,8 +140,7 @@ class GridMovementHandler {
       // update the stored anomalies in Hive
       _saveVisitedGrids();
     } catch (e) {
-      Provider.of<UserSettingsProvider>(context, listen: false)
-          .setDirtyAnomalies(true);
+      userSettingsProvider.setDirtyAnomalies(true);
       log("Error fetching anomalies: $e");
     }
   }
@@ -146,5 +150,25 @@ class GridMovementHandler {
         visitedGrids.map((grid) => _latLngToKey(grid)).toList();
     log("Saved visited grids in Hive");
     _hiveBox.put('visitedGrids', storedGrids);
+  }
+
+  // Helper functions
+  /// Finds the grid center for a given point
+  LatLng getGridCenter(LatLng point) {
+    double lat =
+        (point.latitude / gridSize).floor() * gridSize + (gridSize / 2);
+    double lon =
+        (point.longitude / gridSize).floor() * gridSize + (gridSize / 2);
+    return LatLng(lat, lon);
+  }
+
+  /// Converts a LatLng to a string to be used as a key in hive
+  String _latLngToKey(LatLng latLng) =>
+      "${latLng.latitude},${latLng.longitude}";
+
+  /// Convert string back to LatLng
+  LatLng _parseLatLng(String key) {
+    var parts = key.split(',');
+    return LatLng(double.parse(parts[0]), double.parse(parts[1]));
   }
 }
