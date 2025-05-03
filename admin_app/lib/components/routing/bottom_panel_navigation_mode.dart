@@ -7,6 +7,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
@@ -15,6 +16,7 @@ import '../../services/providers/route_provider.dart';
 import '../../services/providers/user_settings.dart';
 import '../../utils/fix_anomaly_dialog.dart';
 import '../../utils/route_utils.dart';
+import 'anomaly_alerts.dart';
 
 class NavigationMode extends StatefulWidget {
   final RouteProvider mapProvider;
@@ -49,7 +51,7 @@ class _NavigationModeState extends State<NavigationMode> {
       borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(25.0), topRight: Radius.circular(25.0)),
       minHeight: screenHeight * 0.18,
-      maxHeight: screenHeight * 0.18,
+      maxHeight: screenHeight * 0.3,
       // NOTE: Change the maxHeight if content overflows (Alternatively, adjust the text style)
       panel: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -58,11 +60,11 @@ class _NavigationModeState extends State<NavigationMode> {
             Expanded(
               child: Column(
                 children: [
-                  Text(
-                    "Next Move",
-                    style: theme.textTheme.headlineSmall
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                  ),
+                  // Text(
+                  //   "Next Move",
+                  //   style: theme.textTheme.headlineSmall
+                  //       ?.copyWith(fontWeight: FontWeight.bold),
+                  // ),
                   DynamicRouteDirections(
                       route: widget.mapProvider.currentRoute),
                 ],
@@ -130,8 +132,8 @@ class _NavigationModeState extends State<NavigationMode> {
           ),
           const AnomalyMarkerLayer(),
           Positioned(
-            left: 85,
-            bottom: 210,
+            left: 16,
+            bottom: screenHeight * 0.29,
             child: FloatingActionButton(
               heroTag: "voice_toggle",
               onPressed: () => settings.toggleVoiceEnabled(),
@@ -154,7 +156,7 @@ class _NavigationModeState extends State<NavigationMode> {
           ),
           Positioned(
             left: 16,
-            bottom: 210,
+            bottom: screenHeight * 0.38,
             child: FloatingActionButton(
               heroTag: "fix_anomaly",
               onPressed: () {
@@ -169,7 +171,83 @@ class _NavigationModeState extends State<NavigationMode> {
               ),
             ),
           ),
-          // TODO: Anomaly alerts
+          // button to toggle anomaly alerts when navigating
+          Positioned(
+            left: 16,
+            bottom: screenHeight * 0.20,
+            child: FloatingActionButton(
+              heroTag: "anomaly_filter_while_navigating",
+              tooltip: "Toggle Anomaly Alerts while Navigating",
+              backgroundColor: colorScheme.tertiaryContainer,
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                  builder: (_) => _AnomalyToggleSheet(),
+                );
+              },
+              child: Icon(LucideIcons.alertTriangle,
+                  color: colorScheme.onTertiaryContainer),
+            ),
+          ),
+
+          AnomalyAlerts(segments: widget.mapProvider.currentRoute.segments),
+        ],
+      ),
+    );
+  }
+}
+
+class _AnomalyToggleSheet extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final settings = Provider.of<UserSettingsProvider>(context);
+    List<Map<String, String>> anomalies = [
+      {"name": "Pothole", "icon": "assets/icons/ic_pothole.png"},
+      {"name": "SpeedBreaker", "icon": "assets/icons/ic_speedbreaker.png"},
+      {"name": "Rumbler", "icon": "assets/icons/ic_rumbler.png"},
+      {"name": "Cracks", "icon": "assets/icons/ic_cracks.png"},
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text("Anomaly Alerts", style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 12),
+          ...anomalies.map((anomaly) {
+            final name = anomaly['name']!;
+            return SwitchListTile(
+              contentPadding: const EdgeInsets.symmetric(vertical: 4),
+              title: Text(name),
+              value: settings.alertWhileRiding[name]!,
+              onChanged: (val) {
+                switch (name) {
+                  case "Pothole":
+                    settings.toggleAlertWhileRiding(name);
+                    break;
+                  case "SpeedBreaker":
+                    settings.toggleAlertWhileRiding(name);
+                    break;
+                  case "Rumbler":
+                    settings.toggleAlertWhileRiding(name);
+                    break;
+                  case "Cracks":
+                    settings.toggleAlertWhileRiding(name);
+                    break;
+                }
+              },
+              secondary: Image.asset(
+                anomaly['icon']!,
+                width: 28,
+                height: 28,
+              ),
+            );
+          }),
         ],
       ),
     );

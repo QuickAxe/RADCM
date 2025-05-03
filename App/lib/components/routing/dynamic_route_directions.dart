@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app/util/context_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -10,7 +11,6 @@ import '../../data/models/route_models.dart';
 import '../../services/providers/user_settings.dart';
 import '../../services/tbt_location_service.dart';
 import '../../services/tts_service.dart';
-import '../../util/route_utils.dart';
 
 /// A widget that displays the next valid turn-by-turn direction dynamically.
 class DynamicRouteDirections extends StatefulWidget {
@@ -25,6 +25,8 @@ class DynamicRouteDirections extends StatefulWidget {
 class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
   final TbtLocationService _locationService = TbtLocationService();
   late TtsService _ttsService;
+  String?
+      _lastSpokenInstruction; // This is required to prevent TTS from repeating instructions
 
   StreamSubscription<Position>? posStream;
   int _currentIndex = 0;
@@ -41,6 +43,7 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
   @override
   void dispose() {
     _locationService.cancelStream();
+    posStream?.cancel();
     super.dispose();
   }
 
@@ -58,7 +61,7 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
 
       if (_currentIndex < widget.route.segments.length - 1) {
         final step1 = widget.route.segments[_currentIndex].geometry;
-        final step2 =  widget.route.segments[_currentIndex + 1].geometry;
+        final step2 = widget.route.segments[_currentIndex + 1].geometry;
 
         double step1Lat = step1.coordinates[0].latitude;
         double step1Lng = step1.coordinates[0].longitude;
@@ -72,9 +75,10 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
       } else {
         // dont need stream after user reaches the last
         posStream!.cancel();
+        return;
       }
 
-      if (bestIndex != _currentIndex) {
+      if (bestIndex != _currentIndex && mounted) {
         setState(() {
           _currentIndex = bestIndex;
         });
@@ -139,18 +143,20 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     // final step = widget.route.legs.first.steps[_currentStepIndex];
     widget.route.segments[_currentIndex].maneuver.turnDirection;
 
     String roadName = "Unnamed road";
-    String? turnDirection = widget.route.segments[_currentIndex].maneuver.turnDirection;
+    String? turnDirection =
+        widget.route.segments[_currentIndex].maneuver.turnDirection;
 
-    String instruction = _getManeuverInstruction(turnDirection, "${widget.route.segments[_currentIndex].cost.toInt()} meters");
-    _ttsService.speak(instruction);
-    _ttsService.getVoices();
+    String instruction = _getManeuverInstruction(turnDirection,
+        "${widget.route.segments[_currentIndex].cost.toInt()} meters");
+
+    if (_lastSpokenInstruction != instruction) {
+      _ttsService.speak(instruction);
+      _lastSpokenInstruction = instruction;
+    }
 
     return ListView(
       shrinkWrap: true,
@@ -158,21 +164,17 @@ class _DynamicRouteDirectionsState extends State<DynamicRouteDirections> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       children: [
         ListTile(
+          titleAlignment: ListTileTitleAlignment.center,
           leading: Icon(
             _getManeuverIcon(
                 widget.route.segments[_currentIndex].maneuver.turnDirection),
-            color: theme.colorScheme.primary,
+            color: context.theme.colorScheme.primary,
           ),
           title: Text(
             instruction,
-            style: theme.textTheme.titleLarge
+            style: context.theme.textTheme.titleLarge
                 ?.copyWith(fontWeight: FontWeight.bold),
           ),
-          // subtitle: Text(
-          //   "instruction: ${instruction}",
-          //   style: theme.textTheme.bodyLarge?.copyWith(
-          //       fontWeight: FontWeight.bold, color: colorScheme.secondary),
-          // ),
         ),
       ],
     );

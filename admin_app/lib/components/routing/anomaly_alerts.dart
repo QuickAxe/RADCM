@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:app/util/context_extensions.dart';
+import 'package:admin_app/utils/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
