@@ -1,4 +1,5 @@
 import 'package:admin_app/pages/survey/survey_control_screen.dart';
+import 'package:admin_app/services/wifi_qr_code.dart';
 import 'package:admin_app/utils/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
@@ -39,29 +40,14 @@ class _SurveyScreenState extends State<SurveyScreen> {
               final qrCode = barcode.rawValue;
               if (qrCode == null) return;
 
+              final qrCodeDisassembler = WifiQrCode(qrCode);
+
               print(
-                  "------------------------------------------ QR Code: $qrCode ------------------------------------------");
+                  "------------------------------------------ QR Code: ${qrCodeDisassembler.qrCode} ------------------------------------------");
 
-              // Format -> 'WIFI:S:SUPERIOR;T:WPA;P:12345678;H:false;;';
-              bool isWifiConnectionAttempted = false;
-
-              // break the qr into a list of its components
-              List<String> qrCodeSplit = qrCode.split(';');
-              if (qrCodeSplit.length >= 3) {
-                String ssid = qrCodeSplit[0].split(':')[2];
-                String password = qrCodeSplit[2].split(':')[1];
-
-                // connect to wifi
-                isWifiConnectionAttempted = await WiFiForIoTPlugin.connect(ssid,
-                    password: password,
-                    security: NetworkSecurity.WPA,
-                    withInternet: false);
-              }
-
-              if (isWifiConnectionAttempted) {
-                bool isWifiConnected = false;
-                print("-----------------------------> ATTEMPT SUCCESS");
-
+              if (qrCodeDisassembler.fields.containsKey('S') &&
+                  qrCodeDisassembler.fields.containsKey('P')) {
+                // show connection attempt dialog
                 showDialog(
                   context: context,
                   barrierDismissible: false,
@@ -78,42 +64,41 @@ class _SurveyScreenState extends State<SurveyScreen> {
                   },
                 );
 
-                final startTime = DateTime.now();
-                const timeout = Duration(seconds: 10);
+                bool isWifiConnectionAttempted =
+                    await qrCodeDisassembler.attemptWifiConnection();
 
+                if (isWifiConnectionAttempted) {
+                  bool isWifiConnected = await WiFiForIoTPlugin.isConnected();
+                  print("-----------------------------> SUCCESS");
 
-                do {
-                  isWifiConnected = await WiFiForIoTPlugin.isConnected();
-                  if (DateTime.now().difference(startTime) > timeout) {
-                    break;
-                  } else {
-                    await Future.delayed(const Duration(seconds: 1));
-                  }
-                }while (isWifiConnected == false);
-
-                Navigator.of(context).pop();
-
-                if(isWifiConnected) {
-                  Fluttertoast.showToast(
-                    msg: "Connection successful",
-                    toastLength: Toast.LENGTH_LONG,
-                  );
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                        builder: (context) => const SurveyControlScreen()),
-                  );
-                }
-                else {
-                  Fluttertoast.showToast(
-                    msg: "Error - connection timed out, please retry",
-                    toastLength: Toast.LENGTH_LONG,
-                  );
                   Navigator.of(context).pop();
+                  if (isWifiConnected) {
+                    Fluttertoast.showToast(
+                      msg: "Connection successful",
+                      toastLength: Toast.LENGTH_LONG,
+                    );
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                          builder: (context) => const SurveyControlScreen()),
+                    );
+                  } else {
+                    Fluttertoast.showToast(
+                      msg: "Error - connection timed out, please retry",
+                      toastLength: Toast.LENGTH_LONG,
+                    );
+                    Navigator.of(context).pop();
+                  }
+                } else {
+                  print("-----------------------------> FAIL");
+                  Navigator.of(context).pop();
+                  Fluttertoast.showToast(
+                    msg: "Error - couldn't connect to the Wi-Fi, please retry",
+                    toastLength: Toast.LENGTH_LONG,
+                  );
                 }
               } else {
-                print("-----------------------------> FAIL");
                 Fluttertoast.showToast(
-                  msg: "Error - couldn't connect to Wi-Fi, please retry",
+                  msg: "why u playin ??",
                   toastLength: Toast.LENGTH_LONG,
                 );
               }
