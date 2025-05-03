@@ -29,7 +29,7 @@ class Search extends ChangeNotifier {
     searchSuggestions.clear(); // clear previous search results
 
     try {
-      const String baseUrl = "https://nominatim.openstreetmap.org/";
+      const String baseUrl = "https://nominatim.sorciermahep.tech/";
       const String endpoint = "search";
 
       Map<String, dynamic> queryParams = {
@@ -37,6 +37,7 @@ class Search extends ChangeNotifier {
         "format": "json",
         "addressdetails": "1",
         "limit": "50",
+        "countrycodes": "in",
       };
 
       // final url = Uri.parse(
