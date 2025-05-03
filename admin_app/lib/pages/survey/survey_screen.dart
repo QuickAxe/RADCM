@@ -2,9 +2,13 @@ import 'package:admin_app/pages/survey/survey_control_screen.dart';
 import 'package:admin_app/services/wifi_qr_code.dart';
 import 'package:admin_app/utils/context_extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:wifi_iot/wifi_iot.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:provider/provider.dart';
+import 'package:wifi_iot/wifi_iot.dart';
+
+import '../../services/providers/user_settings.dart';
 
 class SurveyScreen extends StatefulWidget {
   const SurveyScreen({super.key});
@@ -14,23 +18,68 @@ class SurveyScreen extends StatefulWidget {
 }
 
 class _SurveyScreenState extends State<SurveyScreen> {
+  bool _isTorchOn = false;
+  final MobileScannerController _scannerController = MobileScannerController(
+    detectionSpeed: DetectionSpeed.noDuplicates,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final settings = context.read<UserSettingsProvider>();
+      if (settings.showSurveyInfo) {
+        showSurveyHelpDialog(settings, context);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scannerController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {
+            _isTorchOn = !_isTorchOn;
+          });
+          _scannerController.toggleTorch();
+        },
+        child: Icon(
+            _isTorchOn ? LucideIcons.flashlightOff : LucideIcons.flashlight),
+      ),
       appBar: AppBar(
         centerTitle: true,
         title: Text(
           "Start a Survey",
           style: context.theme.textTheme.titleLarge,
         ),
+        actions: [
+          IconButton(
+              onPressed: () {
+                final settings = context.read<UserSettingsProvider>();
+                showSurveyHelpDialog(settings, context);
+              },
+              icon: const Icon(Icons.question_mark_rounded))
+        ],
       ),
       body: MobileScanner(
-        controller: MobileScannerController(
-          detectionSpeed: DetectionSpeed.noDuplicates, // fires once per qr
-        ),
+        controller: _scannerController,
         // onDetect is run when a qrcode is detected
         onDetect: (capture) async {
+          if (_isTorchOn) {
+            setState(() {
+              _isTorchOn = !_isTorchOn;
+            });
+            _scannerController.toggleTorch();
+          }
+
           // check if wifi is enabled
           bool isWifiEnabled = await WiFiForIoTPlugin.isEnabled();
 
@@ -108,4 +157,59 @@ class _SurveyScreenState extends State<SurveyScreen> {
       ),
     );
   }
+}
+
+void showSurveyHelpDialog(UserSettingsProvider settings, BuildContext context) {
+  bool doNotShowAgain = false;
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        backgroundColor: Colors.white,
+        title: const Text("How to Start a Survey"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/uav.png',
+              height: 150,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'To begin a survey, scan the QR code located on the UAV. '
+              'This connects your device to the UAV over Wi-Fi.',
+            ),
+            const SizedBox(height: 12),
+            StatefulBuilder(
+              builder: (context, setState) {
+                return CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text("Do not show this again"),
+                  value: doNotShowAgain,
+                  onChanged: (value) {
+                    setState(() {
+                      doNotShowAgain = value ?? false;
+                    });
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              if (doNotShowAgain) {
+                settings.setShowSurveyInfo(false);
+              }
+              Navigator.of(context).pop();
+            },
+            child: const Text("OK"),
+          ),
+        ],
+      );
+    },
+  );
 }

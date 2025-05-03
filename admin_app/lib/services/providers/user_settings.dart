@@ -14,6 +14,8 @@ class UserSettingsProvider extends ChangeNotifier {
   double _speechRate = 0.6;
   double get speechRate => _speechRate;
   final ValueNotifier<bool> dirtyAnomalies = ValueNotifier(false);
+  bool _showSurveyInfo = true;
+  bool get showSurveyInfo => _showSurveyInfo;
 
   void toggleVoiceEnabled() {
     _voiceEnabled = !_voiceEnabled;
@@ -50,6 +52,7 @@ class UserSettingsProvider extends ChangeNotifier {
     _voiceVolume = 0.5;
     _speechRate = 0.5;
     _selectedLocale = "en-GB";
+    _showSurveyInfo = true;
     notifyListeners();
   }
 
@@ -125,6 +128,14 @@ class UserSettingsProvider extends ChangeNotifier {
     }
   }
 
+  void setShowSurveyInfo(bool value) {
+    if (_showSurveyInfo != value) {
+      _showSurveyInfo = value;
+      _savePreference("showSurveyInfo", _showSurveyInfo);
+      notifyListeners();
+    }
+  }
+
   UserSettingsProvider() {
     _loadPreferences();
   }
@@ -148,6 +159,8 @@ class UserSettingsProvider extends ChangeNotifier {
 
     int themeIndex = prefs.getInt("themeMode") ?? ThemeMode.dark.index;
     _themeMode = ThemeMode.values[themeIndex]; // Convert int back to enum
+
+    _showSurveyInfo = prefs.getBool("showSurveyInfo") ?? true;
 
     notifyListeners();
   }
