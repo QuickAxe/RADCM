@@ -59,7 +59,8 @@ class AppDrawer extends StatelessWidget {
                     isDark ? LucideIcons.sun : LucideIcons.moon,
                     color: context.colorScheme.onSecondaryContainer,
                   ),
-                  title: Text(isDark ? 'Light Mode' : 'Dark Mode',
+                  title: Text(
+                      isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
                       style: context.theme.textTheme.titleMedium?.copyWith(
                           color: context.colorScheme.onSecondaryContainer)),
                   shape: RoundedRectangleBorder(
@@ -69,8 +70,21 @@ class AppDrawer extends StatelessWidget {
                     ),
                   ),
                   onTap: () {
-                    settings.setThemeMode(
-                      isDark ? ThemeMode.light : ThemeMode.dark,
+                    final newMode = isDark ? ThemeMode.light : ThemeMode.dark;
+                    settings.setThemeMode(newMode);
+
+                    final label = newMode == ThemeMode.dark
+                        ? 'Switched to Dark Mode'
+                        : 'Switched to Light Mode';
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(label),
+                        duration: const Duration(seconds: 2),
+                        behavior: SnackBarBehavior.floating,
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                      ),
                     );
                   },
                 );

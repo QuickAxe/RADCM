@@ -45,6 +45,48 @@ class AppDrawer extends StatelessWidget {
               },
             ),
             const Spacer(),
+            const SizedBox(height: 20),
+            Consumer<UserSettingsProvider>(
+              builder: (context, settings, _) {
+                bool isDark = settings.themeMode == ThemeMode.dark;
+                return ListTile(
+                  tileColor: context.colorScheme.secondaryContainer,
+                  leading: Icon(
+                    isDark ? LucideIcons.sun : LucideIcons.moon,
+                    color: context.colorScheme.onSecondaryContainer,
+                  ),
+                  title: Text(
+                      isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode',
+                      style: context.theme.textTheme.titleMedium?.copyWith(
+                          color: context.colorScheme.onSecondaryContainer)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    side: BorderSide(
+                      color: context.colorScheme.secondaryContainer,
+                    ),
+                  ),
+                  onTap: () {
+                    final newMode = isDark ? ThemeMode.light : ThemeMode.dark;
+                    settings.setThemeMode(newMode);
+
+                    final label = newMode == ThemeMode.dark
+                        ? 'Switched to Dark Mode'
+                        : 'Switched to Light Mode';
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(label),
+                        duration: const Duration(seconds: 2),
+                        behavior: SnackBarBehavior.floating,
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+            const SizedBox(height: 20),
             ListTile(
               leading: Icon(
                 LucideIcons.logOut,

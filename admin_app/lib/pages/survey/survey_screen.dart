@@ -166,7 +166,7 @@ void showSurveyHelpDialog(UserSettingsProvider settings, BuildContext context) {
     context: context,
     builder: (context) {
       return AlertDialog(
-        backgroundColor: Colors.white,
+        // backgroundColor: Colors.white,
         title: const Text("How to Start a Survey"),
         content: Column(
           mainAxisSize: MainAxisSize.min,

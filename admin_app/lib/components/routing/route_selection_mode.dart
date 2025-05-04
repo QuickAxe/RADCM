@@ -12,6 +12,7 @@ import '../../constants.dart';
 import '../../services/providers/anomaly_marker_layer.dart';
 import '../../services/providers/route_provider.dart';
 import '../../services/providers/user_settings.dart';
+import '../../utils/map_utils.dart';
 import '../../utils/route_utils.dart';
 import '../anomaly_zoom_popup.dart';
 import 'route_directions.dart';
@@ -240,8 +241,8 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
           TileLayer(
             panBuffer: 0,
             urlTemplate: tileServerUrl,
-            // tileBuilder:
-            //     themeMode == ThemeMode.dark ? customDarkModeTileBuilder : null,
+            tileBuilder:
+                themeMode == ThemeMode.dark ? customDarkModeTileBuilder : null,
             userAgentPackageName: 'com.example.admin_app',
             tileProvider: FMTCTileProvider(
               stores: const {'mapStore': BrowseStoreStrategy.readUpdateCreate},

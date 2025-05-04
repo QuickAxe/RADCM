@@ -157,8 +157,8 @@ class MapTileLayer extends StatelessWidget {
       panBuffer: 0,
       userAgentPackageName: 'com.example.admin_app',
       urlTemplate: tileServerUrl,
-      // tileBuilder:
-      //     themeMode == ThemeMode.dark ? customDarkModeTileBuilder : null,
+      tileBuilder:
+          themeMode == ThemeMode.dark ? customDarkModeTileBuilder : null,
       tileProvider: FMTCTileProvider(
           stores: const {'mapStore': BrowseStoreStrategy.readUpdateCreate}),
     );

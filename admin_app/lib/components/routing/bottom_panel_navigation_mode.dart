@@ -15,6 +15,7 @@ import '../../services/providers/anomaly_marker_layer.dart';
 import '../../services/providers/route_provider.dart';
 import '../../services/providers/user_settings.dart';
 import '../../utils/fix_anomaly_dialog.dart';
+import '../../utils/map_utils.dart';
 import '../../utils/route_utils.dart';
 import 'anomaly_alerts.dart';
 
@@ -86,8 +87,8 @@ class _NavigationModeState extends State<NavigationMode> {
           TileLayer(
             panBuffer: 0,
             urlTemplate: tileServerUrl,
-            // tileBuilder:
-            //     themeMode == ThemeMode.dark ? customDarkModeTileBuilder : null,
+            tileBuilder:
+                themeMode == ThemeMode.dark ? customDarkModeTileBuilder : null,
             // o.o
             userAgentPackageName: 'com.example.admin_app',
             // This part allows caching tiles

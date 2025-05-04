@@ -113,7 +113,7 @@ class UserSettingsProvider extends ChangeNotifier {
   }
 
   // Theme Mode Setting
-  ThemeMode _themeMode = ThemeMode.light; // Default is system
+  ThemeMode _themeMode = ThemeMode.light; // Default is light
   ThemeMode get themeMode => _themeMode;
 
   void setThemeMode(ThemeMode mode) {

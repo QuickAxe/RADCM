@@ -76,7 +76,7 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
           themeMode: settings.themeMode,
           theme: theme.light(),
-          // darkTheme: theme.dark(),
+          darkTheme: theme.dark(),
           debugShowCheckedModeBanner: false,
           home: widget.isDev == null && widget.isUser == null
               ? LoginPage()
