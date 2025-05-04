@@ -11,7 +11,6 @@ import '../services/providers/search.dart';
 import '../services/providers/user_settings.dart';
 import 'custom_buttons.dart';
 import 'loading_overlay.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

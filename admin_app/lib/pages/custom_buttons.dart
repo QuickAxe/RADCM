@@ -9,6 +9,7 @@ import '../constants.dart';
 import '../services/providers/map_controller_provider.dart';
 import '../services/providers/permissions.dart';
 import '../services/providers/search.dart';
+import '../services/providers/user_settings.dart';
 
 class LocationButton extends StatelessWidget {
   const LocationButton({super.key});
@@ -73,68 +74,93 @@ class DirtyAnomalies extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(10.0),
-      child: FloatingActionButton(
-        heroTag: "dirty_anomalies",
-        backgroundColor: Colors.amberAccent,
-        onPressed: () {
-          showPopover(
-            direction: PopoverDirection.bottom,
-            context: context,
-            barrierColor: Colors.transparent,
-            radius: 10,
-            width: 220,
-            backgroundColor: context.colorScheme.surfaceContainer,
-            bodyBuilder: (context) {
-              return Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Anomalies weren't fetched",
-                        style: context.theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        )),
-                    const SizedBox(height: 8),
-                    Text(
-                      "An error prevented the latest anomalies from being fetched.",
-                      style: context.theme.textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 12),
-                    ElevatedButton.icon(
-                      icon: const Icon(Icons.refresh),
-                      label: const Text("Retry"),
+    return Consumer<UserSettingsProvider>(
+      builder: (context, settings, _) {
+        return ValueListenableBuilder<bool>(
+          valueListenable: settings.fetchingAnomalies,
+          builder: (context, isFetching, _) {
+            return Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: isFetching
+                  ? FloatingActionButton.extended(
+                      heroTag: "fetching_anomalies",
+                      backgroundColor: context.colorScheme.secondaryContainer,
+                      onPressed: null,
+                      icon: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: context.colorScheme.primary,
+                        ),
+                      ),
+                      label: Text(
+                        "Fetching anomalies...",
+                        style: context.theme.textTheme.labelLarge,
+                      ),
+                    )
+                  : FloatingActionButton(
+                      heroTag: "dirty_anomalies",
+                      backgroundColor: Colors.amber,
                       onPressed: () {
-                        // Your refresh logic here
-                        Navigator.of(context).pop();
-
-                        // move the map slightly to trigger the onMoved
-                        final mapController =
-                            context.read<MapControllerProvider>().mapController;
-                        final currentCenter = mapController.camera.center;
-
-                        final nudgedCenter = LatLng(
-                          currentCenter.latitude + 0.0000001,
-                          currentCenter.longitude + 0.0000001,
+                        showPopover(
+                          direction: PopoverDirection.bottom,
+                          context: context,
+                          barrierColor: Colors.transparent,
+                          radius: 10,
+                          width: 220,
+                          backgroundColor: context.colorScheme.surfaceContainer,
+                          bodyBuilder: (context) {
+                            return Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("Anomalies weren't fetched",
+                                      style: context.theme.textTheme.titleMedium
+                                          ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                      )),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    "An error prevented the latest anomalies from being fetched.",
+                                    style: context.theme.textTheme.bodyMedium,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  ElevatedButton.icon(
+                                    icon: const Icon(Icons.refresh),
+                                    label: const Text("Retry"),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      final mapController = context
+                                          .read<MapControllerProvider>()
+                                          .mapController;
+                                      final currentCenter =
+                                          mapController.camera.center;
+                                      final nudgedCenter = LatLng(
+                                        currentCenter.latitude + 0.0000001,
+                                        currentCenter.longitude + 0.0000001,
+                                      );
+                                      mapController.move(nudgedCenter,
+                                          mapController.camera.zoom);
+                                    },
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
                         );
-
-                        mapController.move(
-                            nudgedCenter, mapController.camera.zoom);
                       },
+                      child: const Icon(
+                        LucideIcons.alertCircle,
+                        color: Colors.black87,
+                      ),
                     ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
-        child: const Icon(
-          LucideIcons.alertCircle,
-          color: Colors.black87,
-        ),
-      ),
+            );
+          },
+        );
+      },
     );
   }
 }
