@@ -94,6 +94,8 @@ class GridMovementHandler {
 
     log("Moved to a new grid! Fetching anomalies for: $newGridCenter");
 
+    userSettingsProvider.setFetchingAnomalies(true);
+    userSettingsProvider.setDirtyAnomalies(true);
     _fetchAnomalies(newGridCenter);
   }
 
@@ -106,6 +108,8 @@ class GridMovementHandler {
         "longitude": gridCenter.longitude,
         // NOTE: Radius is an optional parameter
       });
+
+      userSettingsProvider.setFetchingAnomalies(false);
 
       // error fetching
       if (!response.success) {

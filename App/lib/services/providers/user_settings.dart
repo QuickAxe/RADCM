@@ -15,6 +15,7 @@ class UserSettingsProvider extends ChangeNotifier {
   double _speechRate = 0.6;
   double get speechRate => _speechRate;
   final ValueNotifier<bool> dirtyAnomalies = ValueNotifier(false);
+  final ValueNotifier<bool> fetchingAnomalies = ValueNotifier(true);
 
   void toggleVoiceEnabled() {
     _voiceEnabled = !_voiceEnabled;
@@ -115,6 +116,12 @@ class UserSettingsProvider extends ChangeNotifier {
   void setDirtyAnomalies(bool value) {
     if (dirtyAnomalies.value != value) {
       dirtyAnomalies.value = value;
+    }
+  }
+
+  void setFetchingAnomalies(bool value) {
+    if (fetchingAnomalies.value != value) {
+      fetchingAnomalies.value = value;
     }
   }
 
