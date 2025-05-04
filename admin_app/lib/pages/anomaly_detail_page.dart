@@ -58,7 +58,7 @@ class AnomalyDetailPage extends StatelessWidget {
                     children: [
                       TileLayer(
                         urlTemplate:
-                            "https://tile.sorciermahep.tech/{z}/{x}/{y}.png",
+                            "https://tileserver.sorciermahep.tech/tile/{z}/{x}/{y}.png",
                         tileBuilder: themeMode == ThemeMode.dark
                             ? customDarkModeTileBuilder
                             : null,

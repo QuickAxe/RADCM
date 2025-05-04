@@ -8,4 +8,4 @@ const LatLng defaultCenter = LatLng(15.4961, 73.8264);
 const double zoomThreshold = 10.0;
 
 // Tiling server
-const String tileServerUrl = 'https://tile.sorciermahep.tech/{z}/{x}/{y}.png';
+const String tileServerUrl = 'https://tileserver.sorciermahep.tech/tile/{z}/{x}/{y}.png';
