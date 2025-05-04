@@ -6,6 +6,13 @@ class Server(BaseHTTPRequestHandler):
 
     def __init__(self, messageQue):
         self.messageQue = messageQue
+    
+    # using this method below to be able to have this class with custom args for it's init method
+    # https://stackoverflow.com/questions/21631799/how-can-i-pass-parameters-to-a-requesthandler 
+    # all hail stackoverflow
+    def __call__(self, *args, **kwargs):
+        """Handle a request."""
+        super().__init__(*args, **kwargs)
 
     def do_POST(self):
         content_length = int(self.headers['Content-Length'])
@@ -21,8 +28,9 @@ class Server(BaseHTTPRequestHandler):
             
             if (self.messageQue.empty()):
                 # if there's no previous "start survey" message in the queue
+                self.send_response(200, "got command successfully")
                 self.messageQue.put("start")
-                self.send_response(200)
+                
             
             elif( not self.messageQue.empty() and self.messageQue.queue[0] == "stop"):
                 self.send_response(400, message="Start command given, but previous survey is still being stopped, please wait...")
@@ -43,15 +51,18 @@ class Server(BaseHTTPRequestHandler):
             else:
                 # valid stop command, do the needful 
                 # remove start message from queue
+                self.send_response(200, "got command successfully")
                 self.messageQue.get()
                 self.messageQue.put("stop")
-                self.send_response(200)
+                
        
         elif data["command"] == "sendImages":
             if( not self.messageQue.empty() and self.messageQue.queue[0] == "start"):
                 self.send_response(400, message="SendImages command given, but previous survey is still going on, please end survey first...")
             else:
                 self.messageQue.put("sendImages")
+                self.send_response(200, "got command successfully")
+
 
         else:
             self.send_response(400, message="wrong command sent, what are you on friendo? (send me some too, instead of whatever message you sent)")
@@ -61,9 +72,10 @@ class Server(BaseHTTPRequestHandler):
 
 
 
-def runServer( messageQue, port=8000):
+def runServer( messageQue, port=3333):
     
     server_class=HTTPServer
+
     handler_class=Server(messageQue)
     server_address = ('', port)
 
@@ -71,5 +83,9 @@ def runServer( messageQue, port=8000):
     print('Starting httpd...')
     httpd.serve_forever()
 
+
+
 if __name__ == "__main__":
-    runServer()
+    from queue import Queue 
+    messageQue = Queue()
+    runServer(messageQue)

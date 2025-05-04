@@ -7,6 +7,9 @@ import piexif.helper
 import glob
 
 import requests 
+import os
+
+DEBUG = True
 
 # function to save the image with it's location encoded as part of it's EXIF data, in the UserComment field
 def saveImage(image, lat, lng, imageNumber):
@@ -17,14 +20,14 @@ def saveImage(image, lat, lng, imageNumber):
 
     # create a "comment" and convert it to bytes 
     commentText = f"{lat} {lng}"
-    commentBytes = piexif.helper.UserComment.dump(commentText, encoding="unicode")
+    commentBytes = piexif.helper.UserComment.dump(commentText)
 
     # create the default EXIF dict and store the above comment in it 
     exifDict = {"0th": {}, "Exif": {piexif.ExifIFD.UserComment: commentBytes}, "GPS": {}, "1st": {}, "thumbnail": None}
     exifBytes = piexif.dump(exifDict)
 
     # save the image finally 
-    image.save(f"Images/{imageNumber}.jpg", exif=exifBytes)
+    image.save(f"ComputerVisionModule/Images/image-{imageNumber}.jpg", exif=exifBytes)
 
 
 # I did not code this function, cgpt did 
@@ -49,15 +52,16 @@ def extract_user_comment(image_path):
 
 def sendImages():
     
-    imagePaths = glob.glob("Images/*.jpg")
+    imagePaths = glob.glob("ComputerVisionModule/Images/*.jpg")
 
-    # !=========================
-    url = "add server URL here "
-    # !=========================
+    #! add proper url here
+    url = "http://127.0.0.1:5000/upload"
+
 
     for imagePath in imagePaths:
         
-        location = extract_user_comment(imagePath).spilt()
+        location = extract_user_comment(imagePath).split()
+        print(location)
         lat = float(location[0])
         lng = float(location[1])
 
@@ -68,7 +72,9 @@ def sendImages():
         }
 
         with open(imagePath, 'rb') as imgage:
-            files = {'file': imgage}
+           
+            files = {'image': imgage}
+            
             response = requests.post(url, files=files, data=data)
     
         print(f"Sent {imagePath} - Status: {response.status_code}")
@@ -80,17 +86,29 @@ def handleImages(messageQue, cap, timeBetweenImages):
     
     imageNo = 0
 
+    if DEBUG:
+        import os
+        print("hello")
+        print( os.getcwd())
+
     while True:
 
         # check if the current command is to start the survey  
         if( not messageQue.empty() and messageQue.queue[0] == "start"):
             ret, frame = cap.read()
         
-            # if frame is read correctly ret is True
-            if not ret:
-                print("Can't capture image, retrying ...")
-                time.sleep(0.33)
-                continue 
+            if not DEBUG:
+                # if frame is read correctly ret is True
+                if not ret:
+                    print("Can't capture image, retrying ...")
+                    time.sleep(0.33)
+                    continue 
+            else:    
+                # if frame is read correctly ret is True
+                if not ret:
+                    print("Can't capture image, exiting ...")
+                    time.sleep(0.33)
+                    break 
                 
             # ! get current gps coordinates.... using a simulated value now, because we have only one gps module that's currently in jimmy
             # this must sound so weird out of context 
@@ -100,8 +118,9 @@ def handleImages(messageQue, cap, timeBetweenImages):
 
             # save the image to the... "database", a local file directory in our case :)
             saveImage(frame, lat, lng, imageNo)
+            imageNo+=1
 
-            print(f"survey running, sending image-{imageNo} ...")
+            print(f"survey running, saving image-{imageNo} ...")
 
             # wait for a certain time to take the next image 
             time.sleep(timeBetweenImages)
