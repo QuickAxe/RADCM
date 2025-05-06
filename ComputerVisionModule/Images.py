@@ -28,7 +28,7 @@ def saveImage(image, lat, lng, imageNumber):
     exifBytes = piexif.dump(exifDict)
 
     # save the image finally 
-    image.save(f"ComputerVisionModule/Images/image-{imageNumber}.jpg", exif=exifBytes)
+    image.save(f"./Images/image-{imageNumber}.jpg", exif=exifBytes)
 
 
 # I did not code this function, cgpt did 
@@ -53,7 +53,7 @@ def extract_user_comment(image_path):
 
 def sendImages():
     
-    imagePaths = glob.glob("ComputerVisionModule/Images/*.jpg")
+    imagePaths = glob.glob("./Images/*.jpg")
 
     #! add proper url here
     url = "http://192.168.1.5:5000/upload"
