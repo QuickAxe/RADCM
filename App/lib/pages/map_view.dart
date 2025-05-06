@@ -1,9 +1,11 @@
 import 'dart:developer' as dev;
 
 import 'package:app/components/anomaly_zoom_popup.dart';
+import 'package:app/util/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
@@ -16,6 +18,7 @@ import '../services/providers/map_controller_provider.dart';
 import '../services/providers/permissions.dart';
 import '../services/providers/user_settings.dart';
 import '../util/map_utils.dart';
+import 'map_route_screen.dart';
 
 class MapView extends StatefulWidget {
   final PolylineLayer? polylineLayer;
@@ -27,9 +30,26 @@ class MapView extends StatefulWidget {
   State<MapView> createState() => _MapViewState();
 }
 
+Future<String> _getAddress(LatLng location) async {
+  try {
+    List<Placemark> placemarks =
+        await placemarkFromCoordinates(location.latitude, location.longitude);
+    if (placemarks.isNotEmpty) {
+      return "${placemarks[0].street}, ${placemarks[0].locality}, ${placemarks[0].country}";
+    }
+  } catch (e) {
+    return "Address not available";
+  }
+  return "Address not available";
+}
+
 class _MapViewState extends State<MapView> {
   late final MapController _mapController;
   late final GridMovementHandler _gridHandler;
+
+  LatLng? _tapMarker;
+  String? _tapAddress;
+
   double _currentZoom = defaultZoom;
 
   @override
@@ -94,6 +114,19 @@ class _MapViewState extends State<MapView> {
             initialZoom: defaultZoom,
             maxZoom: maxZoom,
             minZoom: minZoom,
+            onTap: (tapPosition, latlng) async {
+              setState(() {
+                _tapMarker = latlng;
+                _tapAddress = null; // reset
+              });
+
+              String address = await _getAddress(latlng);
+              if (mounted) {
+                setState(() {
+                  _tapAddress = address;
+                });
+              }
+            },
           ),
           children: [
             const MapTileLayer(),
@@ -108,6 +141,100 @@ class _MapViewState extends State<MapView> {
                   ),
                 ],
               ),
+
+            // marker that appears when users tap on locations
+            if (_tapMarker != null) ...[
+              MarkerLayer(
+                markers: [
+                  // fix this: marker nudges down after address loads
+                  Marker(
+                    point: _tapMarker!,
+                    rotate: true,
+                    width: 250,
+                    height: 180,
+                    child: Column(
+                      children: [
+                        Card(
+                          elevation: 4,
+                          margin: const EdgeInsets.only(bottom: 6),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: _tapAddress == null
+                                ? const SizedBox(
+                                    width: 200,
+                                    child: Center(
+                                        child: CircularProgressIndicator()),
+                                  )
+                                : SizedBox(
+                                    width: 200,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 12.0),
+                                          child: Text(
+                                            _tapAddress!,
+                                            textAlign: TextAlign.center,
+                                            style: context
+                                                .theme.textTheme.titleSmall,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                setState(() {
+                                                  _tapMarker = null;
+                                                  _tapAddress = null;
+                                                });
+                                              },
+                                              child: Text("Close",
+                                                  style: TextStyle(
+                                                      color: context.colorScheme
+                                                          .secondary)),
+                                            ),
+                                            const SizedBox(
+                                              width: 10,
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        MapRouteScreen(
+                                                      endLat:
+                                                          _tapMarker!.latitude,
+                                                      endLng:
+                                                          _tapMarker!.longitude,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                              child: const Text("Go here"),
+                                            ),
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                          ),
+                        ),
+                        Icon(Icons.location_on_rounded,
+                            size: 30, color: context.colorScheme.tertiary),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+
             if (widget.polylineLayer != null) widget.polylineLayer!,
             // dis anomaly marker layer ＼（〇_ｏ）／
             AnimatedOpacity(

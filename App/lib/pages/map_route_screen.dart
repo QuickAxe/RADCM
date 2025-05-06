@@ -11,7 +11,9 @@ import 'package:provider/provider.dart';
 import '../services/providers/route_provider.dart';
 
 class MapRouteScreen extends StatefulWidget {
-  const MapRouteScreen({super.key});
+  final double? endLat;
+  final double? endLng;
+  const MapRouteScreen({super.key, this.endLat, this.endLng});
 
   @override
   State<MapRouteScreen> createState() => _MapRouteScreenState();
@@ -26,7 +28,12 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final mapProvider = Provider.of<RouteProvider>(context, listen: false);
       mapProvider.setLoading();
-      mapProvider.initialize(context, _mapController);
+      if (widget.endLat != null && widget.endLng != null) {
+        mapProvider.initialize(context, _mapController,
+            customEndLat: widget.endLat, customEndLng: widget.endLng);
+      } else {
+        mapProvider.initialize(context, _mapController);
+      }
     });
   }
 

@@ -30,14 +30,17 @@ class RouteProvider with ChangeNotifier {
   late LatLngBounds bounds;
 
   /// Initialize the provider by fetching routes.
-  Future<void> initialize(
-      BuildContext context, MapController mapController) async {
+  Future<void> initialize(BuildContext context, MapController mapController,
+      {double? customEndLat, double? customEndLng}) async {
     final searchProvider = Provider.of<Search>(context, listen: false);
     final permissionsProvider =
         Provider.of<Permissions>(context, listen: false);
 
     // Set destination to the currently selected place
-    if (searchProvider.isCurrentSelected &&
+    if (customEndLat != null && customEndLng != null) {
+      endLat = customEndLat;
+      endLng = customEndLng;
+    } else if (searchProvider.isCurrentSelected &&
         searchProvider.currentSelected != null) {
       double? parsedLat =
           double.tryParse(searchProvider.currentSelected['lat']);
