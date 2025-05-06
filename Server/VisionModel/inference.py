@@ -1,20 +1,20 @@
 from ultralytics import YOLO
 from io import BytesIO
 from PIL import Image
-from celery import shared_task
 
 # Crack -> 3, Pothole -> 1
 remap_dict = {0: 3, 1: 1}
 
 
-@shared_task
-def vision_predict_anomaly_class(image_list):
+
+def vision_predict_anomaly_class(image_list) -> list[list[tuple[str, float]]]:
     """
     Predict multiple anomalies if present in an image, powered by Ultralytics YOLO.
     #### Args:
     image_list (list[bytes]): A list of images each represented by a byte array.
     #### Returns:
-    list[list[tuple[str, float]]]: A list of tuples of predicted classes for each image in the bytes_list, along with the associated confidence value.
+    list[list[tuple[str, float]]]: A list of tuples of predicted classes 
+        for each image in the bytes_list, along with the associated confidence value.
     """
 
     model = YOLO("VisionModel/models/yolo11m_cbam.pt")

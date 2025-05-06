@@ -154,6 +154,20 @@ def anomaly_sensor_data_collection_view(request):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+@shared_task
+def image_data_task(locations: list[tuple[float, float]], images: list[bytearray]):
+    out = vision_predict_anomaly_class(images)
+    
+    assert False, "TODO: Complete this function similar to sensor_data_task with the correct mapping"
+    reverse_map = ['Pothole', 'SpeedBreaker', 'Flat']
+    detected_anomalies = [
+        (lng, lat, reverse_map[ind], conf)
+        for (lng, lat), (ind, conf) in zip(locations, out) 
+            if ind != 2 #! Make sure the check matches with the 'Flat' used earlier
+    ]
+    
+    sp.add_anomaly_array(detected_anomalies)
+    
 
 @api_view(["POST"])
 def anomaly_image_data_collection_view(request):
@@ -182,7 +196,8 @@ def anomaly_image_data_collection_view(request):
 
         # Vision model processing here
         image_list = [image.read() for image in images]
-        vision_model_outputs = vision_predict_anomaly_class.delay(image_list)
+        image_data_task.delay(list(zip(lng,lat)), image_list)
+        
         # print(vision_model_outputs.id)
 
         return Response(
