@@ -19,6 +19,7 @@ import 'package:admin_app/theme/theme.dart';
 import 'package:admin_app/theme/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -48,8 +49,10 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => AnomalyProvider()),
         ChangeNotifierProvider(create: (context) => MapControllerProvider()),
       ],
-      child:
-          MyApp(isDev: currentPrefs["isDev"], isUser: currentPrefs["isUser"]),
+      child: Phoenix(
+        child:
+            MyApp(isDev: currentPrefs["isDev"], isUser: currentPrefs["isUser"]),
+      ),
     ),
   );
 }

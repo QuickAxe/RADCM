@@ -15,6 +15,7 @@ import 'package:app/services/providers/user_settings.dart';
 import 'package:app/theme/theme.dart';
 import 'package:app/theme/util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:provider/provider.dart';
 
 import 'components/anomaly_image_uploader.dart';
@@ -33,7 +34,9 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => AnomalyProvider()),
         ChangeNotifierProvider(create: (context) => MapControllerProvider()),
       ],
-      child: const MyApp(),
+      child: Phoenix(
+        child: const MyApp(),
+      ),
     ),
   );
 }
@@ -50,30 +53,26 @@ class MyApp extends StatelessWidget {
     TextTheme textTheme = createTextTheme(context, "Albert Sans", "ABeeZee");
     MaterialTheme theme = MaterialTheme(textTheme);
 
-    return Builder(
-      builder: (context) {
-        return MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaler: const TextScaler.linear(0.8)),
-          child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: const SplashScreen(),
-            themeMode: themeMode,
-            theme: theme.light(),
-            darkTheme: theme.dark(),
-            routes: {
-              '/settings': (context) => const SettingsScreen(),
-              '/toggle_anomalies': (context) => const ToggleAnomaliesScreen(),
-              '/routines': (context) => const RoutinesScreen(),
-              '/voice_engine': (context) => const VoiceEngineScreen(),
-              '/additional_settings': (context) => const AdditionalSettings(),
-              '/map_route': (context) => const MapRouteScreen(),
-              '/navigation_preferences': (context) =>
-                  const NavigationPreferences(),
-              '/capture': (context) => AnomalyImageUploader(),
-            },
-          ),
-        );
-      },
+    return MediaQuery(
+      data: MediaQuery.of(context)
+          .copyWith(textScaler: const TextScaler.linear(0.8)),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: const SplashScreen(),
+        themeMode: themeMode,
+        theme: theme.light(),
+        darkTheme: theme.dark(),
+        routes: {
+          '/settings': (context) => const SettingsScreen(),
+          '/toggle_anomalies': (context) => const ToggleAnomaliesScreen(),
+          '/routines': (context) => const RoutinesScreen(),
+          '/voice_engine': (context) => const VoiceEngineScreen(),
+          '/additional_settings': (context) => const AdditionalSettings(),
+          '/map_route': (context) => const MapRouteScreen(),
+          '/navigation_preferences': (context) => const NavigationPreferences(),
+          '/capture': (context) => AnomalyImageUploader(),
+        },
+      ),
     );
   }
 }
