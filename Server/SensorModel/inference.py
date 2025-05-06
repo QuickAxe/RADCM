@@ -3,11 +3,9 @@ import torch
 from .transforms import Interpolate
 from copy import deepcopy
 import time
-from celery import shared_task
 import numpy as np
 
-@shared_task
-def predictAnomalyClass(anomalyData):
+def predictAnomalyClass(anomalyData: list[list[float]]) -> list[tuple[int, float]]:
     '''
     Predict the class of an anomaly
     #### Args:

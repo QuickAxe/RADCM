@@ -8,6 +8,30 @@ from django.core.files.base import ContentFile
 
 from SensorModel.inference import predictAnomalyClass
 from VisionModel.inference import vision_predict_anomaly_class
+from path import spatial_database_queries as sp
+
+from celery import shared_task
+
+
+@shared_task
+def sensor_data_task(locations: list[tuple[float, float]], anomalies: list[list[float]]):
+    out = predictAnomalyClass(anomalies)
+    # out is a list of tuples [[class, confidence]]
+    # NOTE: the class here is an index of the class, 
+    #  use below reference to decode it, but in reverse:
+    # classNames = {"Pothole": 0, "Breaker": 1, "Flat": 2}
+    # NOTE: as of now, only the first two classes have been used
+    #! Make sure that this mapping is consistent with whatever model is used
+    reverse_map = ['Pothole', 'SpeedBreaker', 'Flat']
+    detected_anomalies = [
+        (lng, lat, reverse_map[ind], conf)
+        for (lng, lat), (ind, conf) in zip(locations, out) 
+            if ind != 2 #! Make sure the check matches with the 'Flat' used earlier
+    ]
+    
+    sp.add_anomaly_array(detected_anomalies)
+    
+
 
 # Response data format:
 # {
@@ -50,6 +74,7 @@ def anomaly_sensor_data_collection_view(request):
 
         # a list to store all anomalies, and only anomaly data, to send to the model
         # the first dim should be the number of anomalies in the list
+        locationList = []
         anomalyList = []
 
         # Process each anomaly
@@ -95,7 +120,7 @@ def anomaly_sensor_data_collection_view(request):
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-
+            locationList.append((longitude, latitude))
             anomalyList.append(window)
 
         # todo  <---------------------------------------------------------------------------------- modify this
@@ -109,15 +134,8 @@ def anomaly_sensor_data_collection_view(request):
         # send anomalyList to the model here..
         # the shape of anomaly list will be (no of anomalies, 200, 3)
         # the reason I'm sending them as batches and not one at a time is to possibly speed up inference
-        anomalyOutputs = predictAnomalyClass.delay(anomalyList)
-
-        # anomalyOutputs should be of the form:
-        # [ (anomaly_1_CLass, confidence), (anomaly_2_Class, confidence), ...... ]
-        # ugh look at me using snake case
-
-        # NOTE: the class here is an index of the class, use below reference to decode it, but in reverse:
-        # classNames = {"Pothole": 0, "Breaker": 1, "Flat": 2}
-        # NOTE: as of now, only the first two classes have been used
+        sensor_data_task.delay(locationList, anomalyList)
+        
 
         # ! now add these to database, take care of the source (for the weights)
         # ! OUUU, what if... we scale the weights based on the confidence value??

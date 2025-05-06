@@ -373,3 +373,18 @@ def routes_are_different(route1: list, route2: list) -> bool:
 #     print("Pass")
 # else:
 #     print("Fail")
+
+
+def add_anomaly(longitude, latitude, a_type,confidence):
+    with connection.cursor() as cursor:
+        query = """INSERT INTO public.potential_anomaly(
+                    longitude, latitude, a_type, confidence)
+                    VALUES (%s, %s, %s, %s);"""
+        cursor.execute(query, [longitude, latitude, a_type,confidence])
+# List of  (longitude, latitude, a_type,confidence)
+def add_anomaly_array(arr: list[tuple[float, float, str, float]]):
+    with connection.cursor() as cursor:
+        query = """INSERT INTO public.potential_anomaly(
+                    longitude, latitude, a_type, confidence)
+                    VALUES (%s, %s, %s, %s);"""
+        cursor.executemany(query, arr)
