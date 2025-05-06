@@ -6,13 +6,13 @@ import cv2 as cv
 from server import runServer
 from Images import handleImages
 
-DEBUG = True
+DEBUG = False
 
 # global queue for managing messages between the threads 
 messageQue = Queue()
 
 # the time to wait between consequitive images while performing a survey, in seconds 
-TIMEBETWEENIMAGES = 0.01
+TIMEBETWEENIMAGES = 0.5
 
 
 if not DEBUG:

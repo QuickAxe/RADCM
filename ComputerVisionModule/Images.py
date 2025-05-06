@@ -9,6 +9,7 @@ import glob
 import requests 
 import os
 
+# ! remove this later, probably 
 DEBUG = True
 
 # function to save the image with it's location encoded as part of it's EXIF data, in the UserComment field
