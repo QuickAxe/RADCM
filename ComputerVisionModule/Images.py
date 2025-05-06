@@ -56,7 +56,7 @@ def sendImages():
     imagePaths = glob.glob("ComputerVisionModule/Images/*.jpg")
 
     #! add proper url here
-    url = "http://127.0.0.1:5000/upload"
+    url = "http://192.168.1.5:5000/upload"
 
 
     for imagePath in imagePaths:
