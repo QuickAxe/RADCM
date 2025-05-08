@@ -77,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Positioned(
             left: 16,
-            bottom: 210,
+            bottom: MediaQuery.of(context).size.height * 0.255,
             child: FloatingActionButton.extended(
               heroTag: "survey",
               onPressed: () async => await _onSurveyPressed(),

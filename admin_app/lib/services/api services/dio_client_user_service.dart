@@ -74,8 +74,8 @@ class DioClientUser {
   Future<DioResponse> postRequest(String endpoint, dynamic data,
       {String? baseUrl}) async {
     try {
-      print('baseUrl ----> $baseUrl');
-      print('optns baseUrl ----> ${_dio.options.baseUrl}');
+      // print('baseUrl ----> $baseUrl');
+      // print('optns baseUrl ----> ${_dio.options.baseUrl}');
       Response response = await _dio.post(
           Uri.parse(baseUrl ?? _dio.options.baseUrl)
               .resolve(endpoint)

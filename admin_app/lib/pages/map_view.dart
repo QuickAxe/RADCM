@@ -241,11 +241,14 @@ class _MapViewState extends State<MapView> {
               opacity: opacity,
               child: const AnomalyMarkerLayer(),
             ),
-            const Align(
+            Align(
               alignment: Alignment.bottomRight,
               child: Padding(
-                padding: EdgeInsets.only(right: 16.0, bottom: 210.0),
-                child: Attribution(),
+                padding: EdgeInsets.only(
+                  right: 16.0,
+                  bottom: MediaQuery.of(context).size.height * 0.25,
+                ),
+                child: const Attribution(),
               ),
             ),
             SafeArea(
