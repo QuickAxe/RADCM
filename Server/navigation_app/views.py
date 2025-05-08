@@ -1,4 +1,5 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, throttle_classes
+from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 from rest_framework import status
 from rest_framework.response import Response
 from django.core.cache import cache
@@ -7,8 +8,8 @@ from django.db import connection
 from path import spatial_database_queries as sp
 
 
-
 @api_view(["GET"])
+@throttle_classes([UserRateThrottle, AnonRateThrottle])
 def anomalies_in_region_view(request):
     try:
         # Extract latitude and longitude from request body (expects JSON)
@@ -20,7 +21,7 @@ def anomalies_in_region_view(request):
             if radius is None:
                 raise ValueError
             radius = float(radius)
-            if radius <0.001:
+            if radius < 0.001:
                 raise ValueError
         except ValueError:
             radius = 0.4
@@ -47,19 +48,23 @@ def anomalies_in_region_view(request):
                 {"error": "Invalid latitude or longitude values."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-            
+
         anomalies_data = sp.get_anomalies_by_longlat(longitude, latitude, radius)
 
         return Response(
-            {"message": "Coordinates received successfully!", "anomalies": anomalies_data},
+            {
+                "message": "Coordinates received successfully!",
+                "anomalies": anomalies_data,
+            },
             status=status.HTTP_200_OK,
         )
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+
 
 @api_view(["GET"])
+@throttle_classes([UserRateThrottle, AnonRateThrottle])
 def routes_view(request):
     try:
         # Extract start and end coordinates from request data
@@ -98,21 +103,23 @@ def routes_view(request):
 
         # get nodes for corresponding (lon, lat) pairs
         node1, node2 = sp.get_nodes_from_longlat(
-             longitudeStart, latitudeStart,
-             longitudeEnd, latitudeEnd,
+            longitudeStart,
+            latitudeStart,
+            longitudeEnd,
+            latitudeEnd,
         )
-        
+
         # check cache
-        key = str(node1) + '_' + str(node2)
+        key = str(node1) + "_" + str(node2)
         value = cache.get(key)
-        
+
         routes = value
         if not routes:
             routes = sp.get_path_by_nodeid(node1, node2)
             cache.set(key, routes, timeout=60 * 10)
-            print('stored route in cache - got value from db query')
+            print("stored route in cache - got value from db query")
         else:
-            print('retrived route from redis cache')
+            print("retrived route from redis cache")
 
         return Response(
             {

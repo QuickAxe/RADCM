@@ -22,14 +22,14 @@ from django.http import HttpResponse
 # from path.views import my_view
 
 urlpatterns = [
-    path("", lambda request: HttpResponse("RADCM Backend")),
+    # path("", lambda request: HttpResponse("RADCM Backend")),
     path(
         "admin/", admin.site.urls
     ),  # admin can add users who can then log in to the authority app
     path("api/", include("auth_app.urls")),
     path("api/", include("navigation_app.urls")),
     path("api/", include("data_collection_app.urls")),
-    path("path/", include("path.urls")),
+    # path("path/", include("path.urls")),
 ]
 
 # --------------------------------------- Active API end-points ---------------------------------------
