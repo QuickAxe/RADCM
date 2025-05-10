@@ -29,7 +29,7 @@ class HomeScreen extends StatelessWidget {
           ),
           Positioned(
             left: 16,
-            bottom: MediaQuery.of(context).size.height * 0.25,
+            bottom: 210,
             child: FloatingActionButton(
               heroTag: "capture_anomaly",
               onPressed: () => Navigator.pushNamed(context, '/capture'),

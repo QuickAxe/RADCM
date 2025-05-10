@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class DioResponse {
   final bool success;
@@ -11,7 +10,6 @@ class DioResponse {
   DioResponse({required this.success, this.data, this.errorMessage});
 }
 
-// Certain options are commented out, this was for me cuz i use NGROK sometimes, ignore it
 class DioClientUser {
   static final DioClientUser _instance = DioClientUser._internal();
   final Dio _dio;
@@ -21,13 +19,10 @@ class DioClientUser {
   DioClientUser._internal()
       : _dio = Dio(
           BaseOptions(
-            baseUrl: 'http://${dotenv.env['IP_ADDRESS']}:8000/api/',
-            // baseUrl: 'https://a399-152-57-245-247.ngrok-free.app/api/',
+            baseUrl: 'https://radcm.sorciermahep.tech/api/',
             connectTimeout: const Duration(seconds: 10),
             headers: {
               'Content-Type': 'application/json',
-              // 'Accept': 'application/json',
-              // 'ngrok-skip-browser-warning': 'true',
             },
           ),
         ) {
