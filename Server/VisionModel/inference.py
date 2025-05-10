@@ -7,13 +7,13 @@ remap_dict = {0: 3, 1: 1}
 
 
 
-def vision_predict_anomaly_class(image_list) -> list[list[tuple[str, float]]]:
+def vision_predict_anomaly_class(image_list) -> list[list[tuple[int, float]]]:
     """
     Predict multiple anomalies if present in an image, powered by Ultralytics YOLO.
     #### Args:
     image_list (list[bytes]): A list of images each represented by a byte array.
     #### Returns:
-    list[list[tuple[str, float]]]: A list of tuples of predicted classes 
+    list[list[tuple[int, float]]]: A list of tuples of predicted classes 
         for each image in the bytes_list, along with the associated confidence value.
     """
 

@@ -161,16 +161,17 @@ def anomaly_sensor_data_collection_view(request):
 def image_data_task(locations: list[tuple[float, float]], images: list[bytearray]):
     out = vision_predict_anomaly_class(images)
 
-    assert (
-        False
-    ), "TODO: Complete this function similar to sensor_data_task with the correct mapping"
-    reverse_map = ["Pothole", "SpeedBreaker", "Flat"]
-    detected_anomalies = [
-        (lng, lat, reverse_map[ind], conf)
-        for (lng, lat), (ind, conf) in zip(locations, out)
-        if ind != 2  #! Make sure the check matches with the 'Flat' used earlier
-    ]
+    reverse_map = {3: "Cracks", 1: "Pothole"}
 
+    detected_anomalies = []
+    for (lng, lat), arr_for_image in zip(locations, out):
+
+        anomalies_for_image = [
+            (lng, lat, reverse_map.get(ind), conf)
+            for (ind, conf) in arr_for_image
+            if ind in reverse_map  #! This should be unreachable actually
+        ]
+        detected_anomalies.extend(anomalies_for_image)
     sp.add_anomaly_array(detected_anomalies)
 
 
