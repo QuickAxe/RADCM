@@ -71,4 +71,4 @@ jobs:
           uses: ncipollo/release-action@v1
           with:
             artifacts: admin_app/build/app/outputs/flutter-apk/RostoRadar-Admin.apk
-            tag: v1.${{github.run_number}}.${{github.run_attempt}}+admin
+            tag: v0.${{github.run_number}}.${{github.run_attempt}}+admin
