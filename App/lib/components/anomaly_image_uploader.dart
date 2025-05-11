@@ -1,10 +1,12 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:app/util/context_extensions.dart';
+import 'package:app/util/general_utils.dart';
 import 'package:dio/dio.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -20,9 +22,12 @@ class AnomalyImageUploader extends StatefulWidget {
 
 class _AnomalyImageUploaderState extends State<AnomalyImageUploader> {
   File? _imageFile;
+  double? _latitude;
+  double? _longitude;
   final ImagePicker _picker = ImagePicker();
   bool _isUploading = false;
   final DioClientUser _dioClient = DioClientUser();
+  double _uploadProgress = 0.0;
 
   Future<void> _captureImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.camera);
@@ -30,16 +35,22 @@ class _AnomalyImageUploaderState extends State<AnomalyImageUploader> {
       setState(() {
         _imageFile = File(pickedFile.path);
       });
+      showToast("Fetching current location");
+      Position? position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+
+      setState(() {
+        _latitude = position.latitude;
+        _longitude = position.longitude;
+      });
     }
   }
 
-  Future<void> _uploadImage(BuildContext context) async {
+  Future<String?> _uploadImage() async {
     if (_imageFile == null) {
-      Fluttertoast.showToast(
-        msg: "No image selected!",
-        toastLength: Toast.LENGTH_SHORT,
-      );
-      return;
+      return "No image selected";
+    } else if (_latitude == null || _longitude == null) {
+      return "No location data available";
     }
 
     setState(() => _isUploading = true);
@@ -47,13 +58,11 @@ class _AnomalyImageUploaderState extends State<AnomalyImageUploader> {
     try {
       String fileName = basename(_imageFile!.path);
 
-      // Example coordinates (replace with real GPS values)
-      String latitude = "12.3456";
-      String longitude = "77.6543";
+      String latitude = _latitude.toString();
+      String longitude = _longitude.toString();
 
       FormData formData = FormData();
 
-      // Add fields (source, lat, lng)
       formData.fields.addAll([
         const MapEntry("source", "mobile"),
         MapEntry("lat", latitude),
@@ -61,56 +70,72 @@ class _AnomalyImageUploaderState extends State<AnomalyImageUploader> {
       ]);
 
       // Add image as a list-compatible entry
+      final mime = lookupMimeType(_imageFile!.path);
+      final mimeSplit = mime?.split('/') ?? ['image', 'jpeg'];
       formData.files.add(
         MapEntry(
           "image",
           await MultipartFile.fromFile(
             _imageFile!.path,
             filename: fileName,
-            contentType: MediaType.parse(lookupMimeType(_imageFile!.path) ?? "image/jpeg"),
+            contentType: MediaType(mimeSplit[0], mimeSplit[1]),
           ),
         ),
       );
 
-      DioResponse response =
-          await _dioClient.postRequest("anomalies/images/", formData);
+      DioResponse response = await _dioClient.postRequest(
+        "anomalies/images/",
+        formData,
+        onSendProgress: (sent, total) {
+          if (total != -1) {
+            setState(() {
+              _uploadProgress = sent / total;
+            });
+          }
+        },
+      );
 
       setState(() => _isUploading = false);
 
       if (response.success) {
-        Fluttertoast.showToast(
-            msg: "Anomaly submitted!", toastLength: Toast.LENGTH_SHORT);
-        setState(() => _imageFile = null);
+        return null;
       } else {
-        Fluttertoast.showToast(
-            msg: "Something went wrong :/", toastLength: Toast.LENGTH_SHORT);
         log("Upload failed: ${response.errorMessage}");
+        return "Something went wrong";
       }
     } catch (e) {
       setState(() => _isUploading = false);
-      Fluttertoast.showToast(
-          msg: "An error occurred!", toastLength: Toast.LENGTH_SHORT);
       log('Error: $e');
+      return "An error occured";
     }
   }
 
   void _removeImage() {
     setState(() {
       _imageFile = null;
+      _latitude = null;
+      _longitude = null;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
       ),
       body: Column(
         children: [
+          if (_isUploading)
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                  child: LinearProgressIndicator(value: _uploadProgress),
+                ),
+                const SizedBox(height: 2),
+              ],
+            ),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.all(25.0),
@@ -119,7 +144,7 @@ class _AnomalyImageUploaderState extends State<AnomalyImageUploader> {
                       borderType: BorderType.RRect,
                       radius: const Radius.circular(25.0),
                       dashPattern: const [8, 4],
-                      color: colorScheme.outlineVariant,
+                      color: context.colorScheme.outlineVariant,
                       strokeWidth: 2,
                       child: Container(
                         width: double.infinity,
@@ -129,10 +154,10 @@ class _AnomalyImageUploaderState extends State<AnomalyImageUploader> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(LucideIcons.fileQuestion,
-                                size: 50, color: colorScheme.secondary),
+                                size: 50, color: context.colorScheme.secondary),
                             const SizedBox(height: 30),
                             Text("Capture a picture of the anomaly",
-                                style: theme.textTheme.bodyMedium),
+                                style: context.theme.textTheme.bodyMedium),
                           ],
                         ),
                       ),
@@ -140,7 +165,7 @@ class _AnomalyImageUploaderState extends State<AnomalyImageUploader> {
                   : Container(
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: colorScheme.outlineVariant,
+                          color: context.colorScheme.outlineVariant,
                           width: 2,
                         ),
                         borderRadius: BorderRadius.circular(25.0),
@@ -159,82 +184,118 @@ class _AnomalyImageUploaderState extends State<AnomalyImageUploader> {
           Container(
             padding: const EdgeInsets.all(25.0),
             decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest,
+              color: context.colorScheme.surfaceContainerHighest,
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(25.0)),
             ),
             child: Column(
               children: [
                 if (_imageFile == null)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const SizedBox(width: 20),
-                      _buildActionButton(
-                        icon: LucideIcons.camera,
-                        label: "Capture",
-                        onPressed: _captureImage,
-                        buttonColor: colorScheme.primaryContainer,
-                        iconColor: colorScheme.onPrimaryContainer,
-                        textColor: colorScheme.onPrimaryContainer,
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 20),
+                      minimumSize: const Size.fromHeight(60),
+                      backgroundColor: context.colorScheme.primary,
+                    ),
+                    onPressed: _captureImage,
+                    icon: Icon(Icons.camera_alt_rounded,
+                        color: context.colorScheme.onPrimary),
+                    label: Text(
+                      'Capture',
+                      style: context.theme.textTheme.labelLarge?.copyWith(
+                        color: context.colorScheme.onPrimary,
                       ),
-                    ],
+                    ),
                   )
                 else
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildActionButton(
-                        icon: LucideIcons.trash,
-                        label: "Discard",
-                        onPressed: _removeImage,
-                        buttonColor: colorScheme.errorContainer,
-                        iconColor: colorScheme.onErrorContainer,
-                        textColor: colorScheme.onErrorContainer,
-                      ),
-                      const SizedBox(width: 20),
-                      _isUploading
-                          ? const CircularProgressIndicator()
-                          : _buildActionButton(
-                              icon: LucideIcons.upload,
-                              label: "Submit",
-                              onPressed: () => _uploadImage(context),
-                              buttonColor: colorScheme.primaryContainer,
-                              iconColor: colorScheme.onPrimaryContainer,
-                              textColor: colorScheme.onPrimaryContainer,
+                      // remove image button
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            backgroundColor: _isUploading
+                                ? context.colorScheme.onSurface.withOpacity(0.5)
+                                : context.colorScheme.error,
+                          ),
+                          onPressed: _isUploading ? null : _removeImage,
+                          icon: Icon(Icons.delete_outline,
+                              color: context.colorScheme.onError),
+                          label: Text(
+                            'Discard',
+                            style: context.theme.textTheme.labelLarge?.copyWith(
+                              color: context.colorScheme.onError,
                             ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            backgroundColor: _isUploading
+                                ? context.colorScheme.onSurface.withOpacity(0.5)
+                                : context.colorScheme.primary,
+                          ),
+                          onPressed: _isUploading
+                              ? null
+                              : () async {
+                                  final confirmed = await showDialog<bool>(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      icon: const Icon(
+                                          Icons.cloud_upload_rounded),
+                                      title: const Text('Confirm Submit'),
+                                      content: const Text(
+                                          'You are about to submit an image and its associated location data.\n\nNOTE: The location data is not linked to your device and will only be used to display the anomaly on the map.'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(ctx).pop(false),
+                                          child: const Text('Cancel'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(ctx).pop(true),
+                                          child: const Text('Yes, Submit'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+
+                                  if (confirmed == true) {
+                                    String? result = await _uploadImage();
+                                    setState(() {
+                                      _uploadProgress = 0.0;
+                                      _isUploading = false;
+                                    });
+                                    if (result == null) {
+                                      showSnackBar(
+                                          "Anomaly image submitted successfully!",
+                                          context);
+                                    } else {
+                                      showSnackBar(result, context);
+                                    }
+                                  }
+                                },
+                          icon: Icon(Icons.cloud_upload_rounded,
+                              color: context.colorScheme.onPrimary),
+                          label: Text(
+                            'Submit',
+                            style: context.theme.textTheme.labelLarge?.copyWith(
+                              color: context.colorScheme.onPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onPressed,
-    required Color buttonColor,
-    required Color textColor,
-    required Color iconColor,
-  }) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, color: iconColor, size: 22),
-      label: Text(label,
-          style: TextStyle(
-              fontSize: 16, fontWeight: FontWeight.bold, color: textColor)),
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        backgroundColor: buttonColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.0),
-        ),
-        elevation: 6,
-        shadowColor: Colors.black26,
       ),
     );
   }
