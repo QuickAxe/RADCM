@@ -63,9 +63,12 @@ jobs:
         - name: Building the flutter release apk
           run: flutter build apk --release
           working-directory: App
+        
+        - name: Rename the apk
+          run: mv App/build/app/outputs/flutter-apk/app-release.apk App/build/app/outputs/flutter-apk/RostoRadar.apk
 
         - name: Upload release apk to artifacts
           uses: actions/upload-artifact@v4
           with:
             name: release-apk
-            path: App/build/app/outputs/flutter-apk/app-release.apk
+            path: App/build/app/outputs/flutter-apk/RostoRadar.apk
