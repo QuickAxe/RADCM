@@ -57,6 +57,8 @@ jobs:
         - run: flutter pub get
           working-directory: App
         - run: touch App/.env
+        - run: flutter pub run build_runner build
+          working-directory: App
 
         - name: Building the flutter release apk
           run: flutter build apk --release
@@ -66,4 +68,4 @@ jobs:
           uses: actions/upload-artifact@v4
           with:
             name: release-apk
-            path: App/build/app/outputs/apk/release/app-release.apk
+            path: App/build/app/outputs/flutter-apk/app-release.apk
