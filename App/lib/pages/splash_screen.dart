@@ -7,7 +7,6 @@ import 'package:app/util/context_extensions.dart';
 import 'package:app/util/general_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -55,7 +54,7 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _initializeApp() async {
     try {
       // Load environment variables.
-      await dotenv.load(fileName: ".env");
+      // await dotenv.load(fileName: ".env");
 
       // Initialize FMTC and create the map store.
       try {
