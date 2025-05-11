@@ -61,14 +61,14 @@ jobs:
           working-directory: admin_app
 
         - name: Building the flutter release apk
-          run: flutter build apk --release
+          run: flutter build apk --release --split-per-abi
           working-directory: admin_app
         
         - name: Rename the apk
-          run: mv admin_app/build/app/outputs/flutter-apk/app-release.apk admin_app/build/app/outputs/flutter-apk/RostoRadar-Admin.apk
+          run: mv admin_app/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk admin_app/build/app/outputs/flutter-apk/RostoRadar-Admin.apk
 
-        - name: Upload release apk to artifacts
-          uses: actions/upload-artifact@v4
+        - name: Push as a github release
+          uses: ncipollo/release-action@v1
           with:
-            name: release-apk
-            path: admin_app/build/app/outputs/flutter-apk/RostoRadar-Admin.apk
+            artifacts: admin_app/build/app/outputs/flutter-apk/RostoRadar-Admin.apk
+            tag: v1.${{github.run_number}}.${{github.run_attempt}}+admin
