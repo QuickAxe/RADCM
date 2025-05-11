@@ -1,3 +1,4 @@
+import 'package:admin_app/utils/context_extensions.dart';
 import 'package:admin_app/utils/marker_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -5,7 +6,6 @@ import 'package:geocoding/geocoding.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
-import '../components/attribution.dart';
 import '../data/models/anomaly_marker_model.dart';
 import '../services/providers/user_settings.dart';
 import '../utils/fix_anomaly_dialog.dart';
@@ -38,6 +38,10 @@ class AnomalyDetailPage extends StatelessWidget {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+      ),
       body: Stack(
         children: [
           Column(
@@ -52,6 +56,10 @@ class AnomalyDetailPage extends StatelessWidget {
                   ),
                   child: FlutterMap(
                     options: MapOptions(
+                      interactionOptions: const InteractionOptions(
+                        enableMultiFingerGestureRace: true,
+                        flags: InteractiveFlag.all,
+                      ),
                       initialCenter: anomaly.location,
                       initialZoom: 18.0,
                     ),
@@ -75,7 +83,6 @@ class AnomalyDetailPage extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const Attribution(),
                     ],
                   ),
                 ),
@@ -92,10 +99,7 @@ class AnomalyDetailPage extends StatelessWidget {
                       const SizedBox(height: 20),
                       Text(
                         anomaly.category,
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: context.theme.textTheme.headlineLarge,
                       ),
                       const SizedBox(height: 10),
                       FutureBuilder<String>(
@@ -104,20 +108,24 @@ class AnomalyDetailPage extends StatelessWidget {
                           return Text(
                             snapshot.data ?? "Fetching address...",
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 16,
+                            style: context.theme.textTheme.bodyLarge?.copyWith(
                               color: Colors.grey,
                             ),
                           );
                         },
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 40),
 
                       // "Go to Anomaly" Button
                       Row(
                         children: [
                           Expanded(
-                            child: ElevatedButton(
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 20),
+                                backgroundColor: context.colorScheme.primary,
+                              ),
                               onPressed: () {
                                 Navigator.push(
                                   context,
@@ -129,19 +137,44 @@ class AnomalyDetailPage extends StatelessWidget {
                                   ),
                                 );
                               },
-                              child: const Text("Go to Anomaly"),
+                              icon: Icon(
+                                Icons.navigation_rounded,
+                                color: context.colorScheme.onPrimary,
+                              ),
+                              label: Text(
+                                'Go to Anomaly',
+                                style: context.theme.textTheme.labelLarge
+                                    ?.copyWith(
+                                  color: context.colorScheme.onPrimary,
+                                ),
+                              ),
                             ),
                           ),
                           const SizedBox(width: 20),
                           Expanded(
-                            child: ElevatedButton(
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 20),
+                                backgroundColor: context.colorScheme.tertiary,
+                              ),
                               onPressed: () {
                                 showAnomalyDialog(
                                     context,
                                     anomaly.location.latitude,
                                     anomaly.location.longitude);
                               },
-                              child: const Text("Fix Anomaly"),
+                              icon: Icon(
+                                Icons.construction_rounded,
+                                color: context.colorScheme.onTertiary,
+                              ),
+                              label: Text(
+                                'Mark as Fixed',
+                                style: context.theme.textTheme.labelLarge
+                                    ?.copyWith(
+                                  color: context.colorScheme.onTertiary,
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -153,19 +186,6 @@ class AnomalyDetailPage extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-
-          // Floating back button
-          Positioned(
-            top: 50,
-            left: 16,
-            child: CircleAvatar(
-              backgroundColor: Colors.white,
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.black),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
           ),
         ],
       ),

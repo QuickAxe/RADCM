@@ -64,7 +64,7 @@ class _VoiceEngineScreenState extends State<VoiceEngineScreen> {
                             settings.setSelectedVoice("en-gb-x-gbb-local");
                             settings.setSelectedLocale("en-GB");
                             TtsService(settings).speak(
-                              "Got it. I'll watch for road anomalies and guide you with turn-by-turn directions, so 'YOU' can enjoy your drive.",
+                              "Got it. I'll watch for road anomalies and guide you with turn-by-turn directions.",
                             );
                           },
                         ),
@@ -80,7 +80,7 @@ class _VoiceEngineScreenState extends State<VoiceEngineScreen> {
                             settings.setSelectedVoice("en-gb-x-gba-local");
                             settings.setSelectedLocale("en-GB");
                             TtsService(settings).speak(
-                                "Alright! I’ll watch out for anomalies and guide you along the way, so 'YOU' can enjoy your drive!");
+                                "Alright! I’ll watch out for anomalies and guide you with turn-by-turn directions.");
                           },
                         ),
                       ],

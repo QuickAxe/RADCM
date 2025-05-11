@@ -71,6 +71,10 @@ class NavigationMode extends StatelessWidget {
           body: FlutterMap(
             mapController: mapController,
             options: MapOptions(
+              interactionOptions: const InteractionOptions(
+                enableMultiFingerGestureRace: true,
+                flags: InteractiveFlag.all,
+              ),
               initialCenter:
                   LatLng(routeProvider.startLat, routeProvider.startLng),
               initialZoom: defaultZoom,

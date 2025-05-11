@@ -109,6 +109,10 @@ class _MapViewState extends State<MapView> {
         return FlutterMap(
           mapController: _mapController,
           options: MapOptions(
+            interactionOptions: const InteractionOptions(
+              enableMultiFingerGestureRace: true,
+              flags: InteractiveFlag.all,
+            ),
             initialCenter: userLocation,
             initialZoom: defaultZoom,
             maxZoom: maxZoom,
