@@ -3,6 +3,7 @@ from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 from rest_framework import status
 from rest_framework.response import Response
 import os, uuid
+import filetype
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -202,7 +203,19 @@ def anomaly_image_data_collection_view(request):
             )
 
         # Vision model processing here
-        image_list = [image.read() for image in images]
+        image_list = []
+
+        for image in images:
+            image = image.read()
+            kind = filetype.guess(image)
+
+            if kind is None or kind.extension not in ["jpg", "jpeg", "png"]:
+                return Response(
+                    {"error": "Invalid image type or contents."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            image_list.append(image)
         image_data_task.delay(list(zip(lng, lat)), image_list)
 
         # print(vision_model_outputs.id)
