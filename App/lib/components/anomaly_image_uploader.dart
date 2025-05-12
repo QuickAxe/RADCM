@@ -101,12 +101,41 @@ class _AnomalyImageUploaderState extends State<AnomalyImageUploader> {
         return null;
       } else {
         log("Upload failed: ${response.errorMessage}");
-        return "Something went wrong";
+        return response.errorMessage ?? "Upload failed. Please try again.";
       }
+    } on DioException catch (dioError) {
+      setState(() => _isUploading = false);
+
+      if (dioError.type == DioExceptionType.connectionTimeout ||
+          dioError.type == DioExceptionType.receiveTimeout) {
+        return "Connection timed out. Check your internet and try again.";
+      } else if (dioError.type == DioExceptionType.badResponse) {
+        final statusCode = dioError.response?.statusCode;
+        final data = dioError.response?.data;
+
+        log("Server error [$statusCode]: $data");
+
+        if (statusCode == 400) {
+          return "Invalid request. Please ensure your image and location are valid.";
+        } else if (statusCode == 413) {
+          return "Image too large. Please select a smaller file.";
+        } else if (statusCode == 500) {
+          return "Server error. Please try again later.";
+        } else if (statusCode == 429) {
+          return "Too many requests! Try after some time.";
+        } else {
+          return "Upload failed with status $statusCode.";
+        }
+      } else {
+        return "Upload failed. Please check your connection.";
+      }
+    } on SocketException {
+      setState(() => _isUploading = false);
+      return "No internet connection. Please reconnect and try again.";
     } catch (e) {
       setState(() => _isUploading = false);
-      log('Error: $e');
-      return "An error occured";
+      log('Unexpected error: $e');
+      return "An unexpected error occurred. Please try again.";
     }
   }
 
@@ -273,10 +302,16 @@ class _AnomalyImageUploaderState extends State<AnomalyImageUploader> {
                                     });
                                     if (result == null) {
                                       showSnackBar(
-                                          "Anomaly image submitted successfully!",
-                                          context);
+                                        "Anomaly image submitted successfully!",
+                                        context,
+                                      );
+                                      _removeImage();
                                     } else {
-                                      showSnackBar(result, context);
+                                      showSnackBar(
+                                        result,
+                                        context,
+                                        seconds: 5,
+                                      );
                                     }
                                   }
                                 },

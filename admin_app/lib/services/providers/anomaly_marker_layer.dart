@@ -53,6 +53,7 @@ class _AnomalyMarkerLayerState extends State<AnomalyMarkerLayer>
               return Marker(
                 rotate: true,
                 point: anomaly.location,
+                alignment: Alignment.topCenter,
                 child: GestureDetector(
                   onTap: () {
                     Navigator.push(

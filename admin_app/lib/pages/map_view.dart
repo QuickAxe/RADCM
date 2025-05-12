@@ -106,166 +106,216 @@ class _MapViewState extends State<MapView> {
                 permissions.position!.latitude, permissions.position!.longitude)
             : defaultCenter;
 
-        return FlutterMap(
-          mapController: _mapController,
-          options: MapOptions(
-            interactionOptions: const InteractionOptions(
-              enableMultiFingerGestureRace: true,
-              flags: InteractiveFlag.all,
-            ),
-            initialCenter: userLocation,
-            initialZoom: defaultZoom,
-            maxZoom: maxZoom,
-            minZoom: minZoom,
-            onTap: (tapPosition, latlng) async {
-              setState(() {
-                _tapMarker = latlng;
-                _tapAddress = null; // reset
-              });
-
-              String address = await _getAddress(latlng);
-              if (mounted) {
-                setState(() {
-                  _tapAddress = address;
-                });
-              }
-            },
-          ),
+        return Stack(
           children: [
-            const MapTileLayer(),
-            if (permissions.position != null)
-              MarkerLayer(
-                markers: [
-                  Marker(
-                    rotate: true,
-                    point: userLocation,
-                    child: mapMarkerIcon("assets/icons/ic_user.png",
-                        Theme.of(context).colorScheme.outlineVariant),
+            FlutterMap(
+              mapController: _mapController,
+              options: MapOptions(
+                interactionOptions: const InteractionOptions(
+                  enableMultiFingerGestureRace: true,
+                  flags: InteractiveFlag.all,
+                ),
+                initialCenter: userLocation,
+                initialZoom: defaultZoom,
+                maxZoom: maxZoom,
+                minZoom: minZoom,
+                onTap: (tapPosition, latlng) async {
+                  setState(() {
+                    _tapMarker = latlng;
+                    _tapAddress = null; // reset
+                  });
+
+                  String address = await _getAddress(latlng);
+                  if (mounted) {
+                    setState(() {
+                      _tapAddress = address;
+                    });
+                  }
+                },
+              ),
+              children: [
+                const MapTileLayer(),
+
+                // USER -----
+                if (permissions.position != null)
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        rotate: true,
+                        point: userLocation,
+                        alignment: Alignment.topCenter,
+                        child: mapMarkerIcon("assets/icons/ic_user.png",
+                            Theme.of(context).colorScheme.outlineVariant),
+                      ),
+                    ],
+                  ),
+
+                // ROUTE? -----
+                if (widget.polylineLayer != null) widget.polylineLayer!,
+
+                // dis anomaly marker layer ＼（〇_ｏ）／
+                AnimatedOpacity(
+                  duration: const Duration(milliseconds: 500),
+                  opacity: opacity,
+                  child: const AnomalyMarkerLayer(),
+                ),
+
+                // DROPPED PIN MARKER -----
+                if (_tapMarker != null) ...[
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        point: _tapMarker!,
+                        rotate: true,
+                        width: 255,
+                        height: 155,
+                        alignment: Alignment.topCenter,
+                        child: Column(
+                          children: [
+                            Card(
+                              elevation: 4,
+                              margin: const EdgeInsets.only(bottom: 6),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(20.0),
+                                child: SizedBox(
+                                  width: 255,
+                                  child: Column(
+                                    children: [
+                                      _tapAddress == null
+                                          ? Text(
+                                              "Fetching address...",
+                                              style: context
+                                                  .theme.textTheme.labelLarge
+                                                  ?.copyWith(
+                                                      color: Colors.grey),
+                                            )
+                                          : Text(
+                                              _tapAddress!,
+                                              textAlign: TextAlign.center,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: context
+                                                  .theme.textTheme.labelLarge,
+                                            ),
+                                      const SizedBox(height: 15),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          ElevatedButton.icon(
+                                            style: ElevatedButton.styleFrom(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 10,
+                                                      horizontal: 20),
+                                              backgroundColor:
+                                                  context.colorScheme.secondary,
+                                            ),
+                                            onPressed: () {
+                                              setState(() {
+                                                _tapMarker = null;
+                                                _tapAddress = null;
+                                              });
+                                            },
+                                            icon: Icon(
+                                              Icons.close_rounded,
+                                              color: context
+                                                  .colorScheme.onSecondary,
+                                            ),
+                                            label: Text(
+                                              'Close',
+                                              style: context
+                                                  .theme.textTheme.labelLarge
+                                                  ?.copyWith(
+                                                color: context
+                                                    .colorScheme.onSecondary,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            width: 6,
+                                          ),
+                                          ElevatedButton.icon(
+                                            style: ElevatedButton.styleFrom(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 10,
+                                                      horizontal: 20),
+                                              backgroundColor:
+                                                  context.colorScheme.primary,
+                                            ),
+                                            onPressed: () {
+                                              Navigator.of(context).push(
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      MapRouteScreen(
+                                                    endLat:
+                                                        _tapMarker!.latitude,
+                                                    endLng:
+                                                        _tapMarker!.longitude,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            icon: Icon(
+                                              Icons.navigation_rounded,
+                                              color:
+                                                  context.colorScheme.onPrimary,
+                                            ),
+                                            label: Text(
+                                              'Go Here',
+                                              style: context
+                                                  .theme.textTheme.labelLarge
+                                                  ?.copyWith(
+                                                color: context
+                                                    .colorScheme.onPrimary,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Icon(Icons.location_on_rounded,
+                                size: 30, color: context.colorScheme.tertiary),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ],
-              ),
 
-            // marker that appears when users tap on locations
-            if (_tapMarker != null) ...[
-              MarkerLayer(
-                markers: [
-                  // fix this: marker nudges down after address loads
-                  Marker(
-                    point: _tapMarker!,
-                    rotate: true,
-                    width: 250,
-                    height: 180,
-                    child: Column(
-                      children: [
-                        Card(
-                          elevation: 4,
-                          margin: const EdgeInsets.only(bottom: 6),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: _tapAddress == null
-                                ? const SizedBox(
-                                    width: 200,
-                                    child: Center(
-                                        child: CircularProgressIndicator()),
-                                  )
-                                : SizedBox(
-                                    width: 200,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(top: 12.0),
-                                          child: Text(
-                                            _tapAddress!,
-                                            textAlign: TextAlign.center,
-                                            style: context
-                                                .theme.textTheme.titleSmall,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            ElevatedButton(
-                                              onPressed: () {
-                                                setState(() {
-                                                  _tapMarker = null;
-                                                  _tapAddress = null;
-                                                });
-                                              },
-                                              child: Text("Close",
-                                                  style: TextStyle(
-                                                      color: context.colorScheme
-                                                          .secondary)),
-                                            ),
-                                            const SizedBox(
-                                              width: 10,
-                                            ),
-                                            ElevatedButton(
-                                              onPressed: () {
-                                                Navigator.of(context).push(
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        MapRouteScreen(
-                                                      endLat:
-                                                          _tapMarker!.latitude,
-                                                      endLng:
-                                                          _tapMarker!.longitude,
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                              child: const Text("Go here"),
-                                            ),
-                                          ],
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                          ),
-                        ),
-                        Icon(Icons.location_on_rounded,
-                            size: 30, color: context.colorScheme.tertiary),
-                      ],
+                // ATTRIBUTION -------
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      right: 16.0,
+                      bottom: MediaQuery.of(context).size.height * 0.25,
+                    ),
+                    child: const Attribution(),
+                  ),
+                ),
+
+                // ZOOM IN POP-UP -------
+                SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                        top: 16.0, left: 10.0, right: 10.0),
+                    child: AnimatedOpacity(
+                      opacity: showPopup ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 500),
+                      child: AnomalyZoomPopup(mapController: _mapController),
                     ),
                   ),
-                ],
-              ),
-            ],
-
-            if (widget.polylineLayer != null) widget.polylineLayer!,
-            // dis anomaly marker layer ＼（〇_ｏ）／
-            AnimatedOpacity(
-              duration: const Duration(milliseconds: 500),
-              opacity: opacity,
-              child: const AnomalyMarkerLayer(),
-            ),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: Padding(
-                padding: EdgeInsets.only(
-                  right: 16.0,
-                  bottom: MediaQuery.of(context).size.height * 0.25,
                 ),
-                child: const Attribution(),
-              ),
-            ),
-            SafeArea(
-              child: Padding(
-                padding:
-                    const EdgeInsets.only(top: 16.0, left: 10.0, right: 10.0),
-                child: AnimatedOpacity(
-                  opacity: showPopup ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 500),
-                  child: AnomalyZoomPopup(mapController: _mapController),
-                ),
-              ),
-            ),
+              ],
+            )
           ],
         );
       },

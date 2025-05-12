@@ -11,13 +11,25 @@ void showToast(String message) {
 }
 
 // To be preferred over showToast
-void showSnackBar(String label, BuildContext context) {
+void showSnackBar(
+  String label,
+  BuildContext context, {
+  String? actionLabel,
+  VoidCallback? onActionPressed,
+  int? seconds,
+}) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Text(label),
-      duration: const Duration(seconds: 2),
+      duration: Duration(seconds: seconds ?? 3),
       behavior: SnackBarBehavior.floating,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      action: (actionLabel != null && onActionPressed != null)
+          ? SnackBarAction(
+              label: actionLabel,
+              onPressed: onActionPressed,
+            )
+          : null,
     ),
   );
 }
