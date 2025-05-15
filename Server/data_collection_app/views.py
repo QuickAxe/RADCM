@@ -128,12 +128,12 @@ def anomaly_sensor_data_collection_view(request):
             anomalyList.append(window)
 
         # todo  <---------------------------------------------------------------------------------- modify this
-        if source == "jimmy":
-            print("recieved data from jimmy")
-            # handle data from jimmy
-        else:
-            print("recieved data from mobile")
-            # handle data from mobile
+        # if source == "jimmy":
+        #     print("recieved data from jimmy")
+        # handle data from jimmy
+        # else:
+        #     print("recieved data from mobile")
+        # handle data from mobile
 
         # send anomalyList to the model here..
         # the shape of anomaly list will be (no of anomalies, 200, 3)

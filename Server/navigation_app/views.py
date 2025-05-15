@@ -117,9 +117,10 @@ def routes_view(request):
         if not routes:
             routes = sp.get_path_by_nodeid(node1, node2)
             cache.set(key, routes, timeout=60 * 10)
-            print("stored route in cache - got value from db query")
+            # print("stored route in cache - got value from db query")
         else:
-            print("retrived route from redis cache")
+            # print("retrived route from redis cache")
+            pass
 
         return Response(
             {

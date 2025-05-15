@@ -1,41 +1,132 @@
 from django.test import TestCase
+from rest_framework.test import APIClient
+from unittest.mock import patch
+from django.urls import reverse
+import io
+from PIL import Image
 import json
-import random
-import requests
-
-def random_sensor_data(num_anomalies=2):
-    source = random.choice(["mobile", "jimmy"])
-    anomaly_data = []
-    
-    for _ in range(num_anomalies):
-        latitude = round(random.uniform(15, 15.6), 6)  
-        longitude = round(random.uniform(73.9, 74.4), 6)  
-        
-        
-        window = [[round(random.uniform(1.0, 10.0), 2) for _ in range(3)] for _ in range(200)]
-        
-        anomaly_data.append({
-            "latitude": latitude,
-            "longitude": longitude,
-            "window": window
-        })
-    
-    request_json = {
-        "source": source,
-        "anomaly_data": anomaly_data
-    }
-    
-    return request_json 
 
 
-request_payload = random_sensor_data()
+class AnomalyViewsTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.sensors_url = "/api/anomalies/sensors/"
+        self.images_url = "/api/anomalies/images/"
 
-# print(json.dumps(request_payload, indent=1))
-print("Locations")
-for anomaly in request_payload['anomaly_data']:
-    print(anomaly['latitude'], anomaly['longitude'])
+    @patch("data_collection_app.views.sensor_data_task.delay")
+    def test_anomaly_sensor_data_collection_valid(self, mock_task):
+        url = self.sensors_url
+        data = {
+            "source": "mobile",
+            "anomaly_data": [
+                {
+                    "latitude": 12.9716,
+                    "longitude": 77.5946,
+                    "window": [[1.0, 2.0, 3.0]] * 200,
+                }
+            ],
+        }
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("message", response.data)
+        mock_task.assert_called_once()
 
-url = f"http://127.0.0.1:8000/api/anomalies/sensors/"
-r = requests.post(url, json = request_payload)
-print(r.status_code)
-print(r.json())
+    def test_anomaly_sensor_data_collection_missing_data(self):
+        url = self.sensors_url
+        response = self.client.post(url, {"source": "mobile"}, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("error", response.data)
+
+    def test_anomaly_sensor_data_collection_invalid_latlon(self):
+        url = self.sensors_url
+        data = {
+            "source": "mobile",
+            "anomaly_data": [
+                {
+                    "latitude": "invalid",
+                    "longitude": 77.5946,
+                    "window": [[1.0, 2.0, 3.0]] * 200,
+                }
+            ],
+        }
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("error", response.data)
+
+    def test_anomaly_sensor_data_collection_wrong_window_length(self):
+        url = self.sensors_url
+        data = {
+            "source": "mobile",
+            "anomaly_data": [
+                {
+                    "latitude": 12.9716,
+                    "longitude": 77.5946,
+                    "window": [[1.0, 2.0, 3.0]] * 199,
+                }
+            ],
+        }
+        response = self.client.post(url, data, format="json")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("error", response.data)
+
+    @patch("data_collection_app.views.image_data_task.delay")
+    def test_anomaly_image_data_collection_valid(self, mock_task):
+        url = self.images_url
+        image = Image.new("RGB", (60, 30), color=(73, 109, 137))
+        byte_arr = io.BytesIO()
+        image.save(byte_arr, format="PNG")
+        byte_arr.seek(0)
+
+        data = {
+            "source": "mobile",
+            "lat": ["12.9716"],
+            "lng": ["77.5946"],
+            "image": [byte_arr],
+        }
+        response = self.client.post(url, data, format="multipart")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("message", response.data)
+        mock_task.assert_called_once()
+
+    def test_anomaly_image_data_collection_no_images(self):
+        url = self.images_url
+        data = {
+            "source": "mobile",
+            "lat": ["12.9716"],
+            "lng": ["77.5946"],
+        }
+        response = self.client.post(url, data, format="multipart")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("error", response.data)
+
+    def test_anomaly_image_data_collection_mismatched_coords(self):
+        url = self.images_url
+        image = Image.new("RGB", (60, 30), color=(73, 109, 137))
+        byte_arr = io.BytesIO()
+        image.save(byte_arr, format="PNG")
+        byte_arr.seek(0)
+
+        data = {
+            "source": "mobile",
+            "lat": ["12.9716", "12.9717"],
+            "lng": ["77.5946"],
+            "image": [byte_arr],
+        }
+        response = self.client.post(url, data, format="multipart")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("error", response.data)
+
+    def test_anomaly_image_data_collection_invalid_image(self):
+        url = self.images_url
+        byte_arr = io.BytesIO(b"notanimage")
+        byte_arr.name = "test.txt"
+
+        data = {
+            "source": "mobile",
+            "lat": ["12.9716"],
+            "lng": ["77.5946"],
+            "image": [byte_arr],
+        }
+        response = self.client.post(url, data, format="multipart")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("error", response.data)

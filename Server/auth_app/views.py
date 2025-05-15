@@ -59,7 +59,7 @@ def fixed_anomaly_view(request):
             )
 
         # Success response
-        print("go sing a song.. it works")
+        # print("go sing a song.. it works")
 
         return Response(
             {"message": "Coordinates received successfully!"},
