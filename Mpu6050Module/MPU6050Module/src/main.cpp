@@ -62,11 +62,11 @@
 
 // The number of potential anomalies to store in a buffer before sending all back
 // Probably leave this value below 100
-#define ANOMALY_BUFFER_SIZE 4
+#define ANOMALY_BUFFER_SIZE 1
 
 // The number of anomalies to send in one batch, back to the server in a single POST request
 // Maybe make sure this is a divisor of ANOMALY_BUFFER_SIZE... I mean the code should still work
-#define ANOMALY_BATCH_SIZE 2
+#define ANOMALY_BATCH_SIZE 1
 
 // ----------------------------------------------------------------- Declarations ----------------------------------------------------------------------
 
@@ -102,7 +102,7 @@ uint16_t anomalyCounter = 0;
 const char *filePath = "anomalies.txt";
 
 // Server URL:
-const char *url = "http://192.168.1.9:8000";
+const char *url = "http://radcm.sorciermahep.tech/api/anomalies/sensors/";
 
 // ============================================================================ Setup ==================================================================================
 void setup()

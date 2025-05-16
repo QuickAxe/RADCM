@@ -240,9 +240,9 @@ int sendData(const char *url, fs::FS &fs, const uint8_t &anomalyCounter, const u
 
                 // read the GPS location now
                 temp = file.readStringUntil(' ');
-                doc["anomaly_data"][j]["Latitude"] = temp.toFloat();
+                doc["anomaly_data"][j]["latitude"] = temp.toFloat();
                 temp = file.readStringUntil(' ');
-                doc["anomaly_data"][j]["Longitude"] = temp.toFloat();
+                doc["anomaly_data"][j]["longitude"] = temp.toFloat();
                 file.read();
 
                 file.close();
@@ -259,6 +259,9 @@ int sendData(const char *url, fs::FS &fs, const uint8_t &anomalyCounter, const u
                 // send the data to the server now:
                 http.addHeader("Content-Type", "application/json");
                 httpResponseCode = http.POST(buffer);
+
+                Serial.print("sentAnomalies with code: ");
+                Serial.print(httpResponseCode);
             }
         }
 
