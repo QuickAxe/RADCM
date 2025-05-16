@@ -1,13 +1,40 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, throttle_classes
+from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 from rest_framework import status
 from rest_framework.response import Response
 import os, uuid
+import filetype
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 
 from SensorModel.inference import predictAnomalyClass
 from VisionModel.inference import vision_predict_anomaly_class
+from path import spatial_database_queries as sp
+
+from celery import shared_task
+
+
+@shared_task
+def sensor_data_task(
+    locations: list[tuple[float, float]], anomalies: list[list[float]]
+):
+    out = predictAnomalyClass(anomalies)
+    # out is a list of tuples [[class, confidence]]
+    # NOTE: the class here is an index of the class,
+    #  use below reference to decode it, but in reverse:
+    # classNames = {"Pothole": 0, "Breaker": 1, "Flat": 2}
+    # NOTE: as of now, only the first two classes have been used
+    #! Make sure that this mapping is consistent with whatever model is used
+    reverse_map = ["Pothole", "SpeedBreaker", "Flat"]
+    detected_anomalies = [
+        (lng, lat, reverse_map[ind], conf)
+        for (lng, lat), (ind, conf) in zip(locations, out)
+        if ind != 2  #! Make sure the check matches with the 'Flat' used earlier
+    ]
+
+    sp.add_anomaly_array(detected_anomalies)
+
 
 # Response data format:
 # {
@@ -33,6 +60,7 @@ from VisionModel.inference import vision_predict_anomaly_class
 
 
 @api_view(["POST"])
+@throttle_classes([UserRateThrottle, AnonRateThrottle])
 def anomaly_sensor_data_collection_view(request):
     try:
         # Extract anomaly data from request body
@@ -50,6 +78,7 @@ def anomaly_sensor_data_collection_view(request):
 
         # a list to store all anomalies, and only anomaly data, to send to the model
         # the first dim should be the number of anomalies in the list
+        locationList = []
         anomalyList = []
 
         # Process each anomaly
@@ -95,29 +124,21 @@ def anomaly_sensor_data_collection_view(request):
                     },
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-
+            locationList.append((longitude, latitude))
             anomalyList.append(window)
 
         # todo  <---------------------------------------------------------------------------------- modify this
-        if source == "jimmy":
-            print("recieved data from jimmy")
-            # handle data from jimmy
-        else:
-            print("recieved data from mobile")
-            # handle data from mobile
+        # if source == "jimmy":
+        #     print("recieved data from jimmy")
+        # handle data from jimmy
+        # else:
+        #     print("recieved data from mobile")
+        # handle data from mobile
 
         # send anomalyList to the model here..
         # the shape of anomaly list will be (no of anomalies, 200, 3)
         # the reason I'm sending them as batches and not one at a time is to possibly speed up inference
-        anomalyOutputs = predictAnomalyClass.delay(anomalyList)
-
-        # anomalyOutputs should be of the form:
-        # [ (anomaly_1_CLass, confidence), (anomaly_2_Class, confidence), ...... ]
-        # ugh look at me using snake case
-
-        # NOTE: the class here is an index of the class, use below reference to decode it, but in reverse:
-        # classNames = {"Pothole": 0, "Breaker": 1, "Flat": 2}
-        # NOTE: as of now, only the first two classes have been used
+        sensor_data_task.delay(locationList, anomalyList)
 
         # ! now add these to database, take care of the source (for the weights)
         # ! OUUU, what if... we scale the weights based on the confidence value??
@@ -137,7 +158,26 @@ def anomaly_sensor_data_collection_view(request):
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
+@shared_task
+def image_data_task(locations: list[tuple[float, float]], images: list[bytearray]):
+    out = vision_predict_anomaly_class(images)
+
+    reverse_map = {3: "Cracks", 1: "Pothole"}
+
+    detected_anomalies = []
+    for (lng, lat), arr_for_image in zip(locations, out):
+
+        anomalies_for_image = [
+            (lng, lat, reverse_map.get(ind), conf)
+            for (ind, conf) in arr_for_image
+            if ind in reverse_map  #! This should be unreachable actually
+        ]
+        detected_anomalies.extend(anomalies_for_image)
+    sp.add_anomaly_array(detected_anomalies)
+
+
 @api_view(["POST"])
+@throttle_classes([UserRateThrottle, AnonRateThrottle])
 def anomaly_image_data_collection_view(request):
     try:
         images = request.FILES.getlist("image")
@@ -163,8 +203,21 @@ def anomaly_image_data_collection_view(request):
             )
 
         # Vision model processing here
-        image_list = [image.read() for image in images]
-        vision_model_outputs = vision_predict_anomaly_class.delay(image_list)
+        image_list = []
+
+        for image in images:
+            image = image.read()
+            kind = filetype.guess(image)
+
+            if kind is None or kind.extension not in ["jpg", "jpeg", "png"]:
+                return Response(
+                    {"error": "Invalid image type or contents."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            image_list.append(image)
+        image_data_task.delay(list(zip(lng, lat)), image_list)
+
         # print(vision_model_outputs.id)
 
         return Response(

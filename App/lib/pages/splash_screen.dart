@@ -1,15 +1,16 @@
 // lib/splash_screen.dart
 import 'dart:developer' as dev;
-import 'dart:ui';
 
 import 'package:app/data/models/anomaly_marker_model.dart';
 import 'package:app/services/background/activity_tracker.dart';
 import 'package:app/util/context_extensions.dart';
 import 'package:app/util/general_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
+import 'package:flutter_phoenix/flutter_phoenix.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import '../services/providers/permissions.dart';
@@ -36,7 +37,7 @@ class _SplashScreenState extends State<SplashScreen>
     _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(_controller);
     _controller.forward();
 
-    Future.delayed(const Duration(seconds: 10), () {
+    Future.delayed(const Duration(seconds: 15), () {
       if (mounted) {
         setState(() {
           _showDelayMessage = true;
@@ -53,15 +54,33 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _initializeApp() async {
     try {
       // Load environment variables.
-      await dotenv.load(fileName: ".env");
+      // await dotenv.load(fileName: ".env");
 
       // Initialize FMTC and create the map store.
-      await FMTCObjectBoxBackend().initialise();
+      try {
+        await FMTCObjectBoxBackend().initialise();
+      } on FMTCBackendError catch (e) {
+        if (e.toString().contains('RootAlreadyInitialised')) {
+          dev.log('FMTC already initialised. Skipping.');
+        } else {
+          rethrow;
+        }
+      }
       await const FMTCStore('mapStore').manage.create();
 
       // Initialize Hive and register adapters.
       await Hive.initFlutter();
-      Hive.registerAdapter(AnomalyMarkerAdapter());
+      try {
+        Hive.registerAdapter(AnomalyMarkerAdapter());
+      } on HiveError catch (e) {
+        if (e
+            .toString()
+            .contains('There is already a TypeAdapter for typeId 0')) {
+          dev.log('Hive already initialised. Skipping.');
+        } else {
+          rethrow;
+        }
+      }
 
       // Initialize permission logic and start the activity tracker
       final permissions = Provider.of<Permissions>(context, listen: false);
@@ -87,31 +106,48 @@ class _SplashScreenState extends State<SplashScreen>
       }
     } catch (e, stackTrace) {
       dev.log('Error during initialization: $e', stackTrace: stackTrace);
-      showToast("An error occurred when initializing.");
-      _showInitializationError();
+      _showInitializationError(e);
     }
   }
 
-  void _showInitializationError() {
+  void _showInitializationError([Object? error]) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: const Text('Initialization Error'),
-        content: const Text('Something went wrong. Please retry'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Something went wrong. Please retry',
+              style: context.theme.textTheme.bodyLarge,
+            ),
+            const SizedBox(height: 12),
+            if (error != null)
+              Text(
+                "Error: ${error.toString()}",
+                style: context.theme.textTheme.labelMedium,
+              ),
+          ],
+        ),
+        icon: const Icon(LucideIcons.alertTriangle),
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop();
-              _initializeApp();
+              // must close the app
+              SystemNavigator.pop();
             },
-            child: const Text('Retry'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
+              // phoenix rebirth restarts the app, completely rebuilding the context's widget tree
+              Phoenix.rebirth(context);
             },
-            child: const Text('Cancel'),
+            child: const Text('Restart app'),
           ),
         ],
       ),
@@ -124,16 +160,6 @@ class _SplashScreenState extends State<SplashScreen>
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(
-            "assets/splash_background_dark.jpg",
-            fit: BoxFit.cover,
-          ),
-          BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-            child: Container(
-              color: Colors.black.withOpacity(0.5),
-            ),
-          ),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -144,13 +170,8 @@ class _SplashScreenState extends State<SplashScreen>
               // SizedBox(height: MediaQuery.of(context).size.height * 0.05),
               FadeTransition(
                 opacity: _fadeAnimation,
-                child: Text(
-                  "Rosto Radar",
-                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
+                child: Text("Rosto Radar",
+                    style: Theme.of(context).textTheme.displayMedium),
               ),
               SizedBox(height: MediaQuery.of(context).size.height * 0.05),
               CircularProgressIndicator(
@@ -162,7 +183,7 @@ class _SplashScreenState extends State<SplashScreen>
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
                     "Hang tight...",
-                    style: context.theme.textTheme.labelLarge,
+                    style: context.theme.textTheme.bodyLarge,
                   ),
                 ),
             ],

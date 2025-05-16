@@ -47,8 +47,12 @@ class WifiQrCode {
     isWifiConnectionAttempted = await WiFiForIoTPlugin.connect(ssid!,
         password: password,
         security: NetworkSecurity.WPA,
-        withInternet: false,
+        withInternet: true,
         timeoutInSeconds: 10);
+
+    if(isWifiConnectionAttempted) {
+      await WiFiForIoTPlugin.forceWifiUsage(true);
+    }
 
     return isWifiConnectionAttempted;
   }

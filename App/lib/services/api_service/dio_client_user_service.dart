@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class DioResponse {
   final bool success;
@@ -11,7 +10,6 @@ class DioResponse {
   DioResponse({required this.success, this.data, this.errorMessage});
 }
 
-// Certain options are commented out, this was for me cuz i use NGROK sometimes, ignore it
 class DioClientUser {
   static final DioClientUser _instance = DioClientUser._internal();
   final Dio _dio;
@@ -21,30 +19,27 @@ class DioClientUser {
   DioClientUser._internal()
       : _dio = Dio(
           BaseOptions(
-            baseUrl: 'http://${dotenv.env['IP_ADDRESS']}:8000/api/',
-            // baseUrl: 'https://a399-152-57-245-247.ngrok-free.app/api/',
+            baseUrl: 'https://radcm.sorciermahep.tech/api/',
             connectTimeout: const Duration(seconds: 10),
-            headers: {
-              'Content-Type': 'application/json',
-              // 'Accept': 'application/json',
-              // 'ngrok-skip-browser-warning': 'true',
-            },
+            // headers: {
+            //   'Content-Type': 'application/json',
+            // },
           ),
         ) {
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
-        log("Request: ${options.method} ${options.uri}");
+        log("Request Method: ${options.method} ${options.uri}");
         log("Headers: ${options.headers}");
         log("Body: ${options.data}");
         return handler.next(options);
       },
       onResponse: (response, handler) {
-        log("Response: ${response.statusCode}");
+        log("Response Code: ${response.statusCode}");
         log("Data: ${response.data}");
         return handler.next(response);
       },
       onError: (DioException e, handler) {
-        log("Error: ${e.response?.statusCode} ${e.message}");
+        log("Error Codee/Msg: ${e.response?.statusCode} ${e.message}");
         log("Response Data: ${e.response?.data}");
         return handler.next(e);
       },
@@ -72,16 +67,20 @@ class DioClientUser {
   }
 
   // POST request
-  Future<DioResponse> postRequest(String endpoint, dynamic data,
-      {String? baseUrl}) async {
+  Future<DioResponse> postRequest(
+    String endpoint,
+    dynamic data, {
+    String? baseUrl,
+    ProgressCallback? onSendProgress,
+  }) async {
     try {
-      print('baseUrl ----> $baseUrl');
-      print('optns baseUrl ----> ${_dio.options.baseUrl}');
+      // print('baseUrl ----> $baseUrl');
+      // print('optns baseUrl ----> ${_dio.options.baseUrl}');
       Response response = await _dio.post(
-          Uri.parse(baseUrl ?? _dio.options.baseUrl)
-              .resolve(endpoint)
-              .toString(),
-          data: data);
+        Uri.parse(baseUrl ?? _dio.options.baseUrl).resolve(endpoint).toString(),
+        data: data,
+        onSendProgress: onSendProgress,
+      );
       return DioResponse(success: true, data: response.data);
     } on DioException catch (e) {
       return DioResponse(

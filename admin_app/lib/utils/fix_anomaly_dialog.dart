@@ -1,3 +1,4 @@
+import 'package:admin_app/utils/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
@@ -28,33 +29,42 @@ Future<void> showAnomalyDialog(
       return StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
+            icon: const Icon(Icons.construction_rounded),
             title: const Center(child: Text('Fix Anomaly')),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  children: [
-                    Checkbox(
-                        value: checkboxOne,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            checkboxOne = value ?? false;
-                          });
-                        }),
-                    const Text("Confirm Inspection")
-                  ],
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 12.0),
+                  child: Text(
+                    "Please confirm the following before marking the anomaly as fixed",
+                    style: TextStyle(fontSize: 14),
+                  ),
                 ),
-                Row(
-                  children: [
-                    Checkbox(
-                        value: checkboxTwo,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            checkboxTwo = value ?? false;
-                          });
-                        }),
-                    const Text("Attach my signature")
-                  ],
+                const Divider(),
+                CheckboxListTile(
+                  title: Text(
+                    "Confirm Inspection",
+                    style: context.theme.textTheme.labelLarge,
+                  ),
+                  value: checkboxOne,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      checkboxOne = value ?? false;
+                    });
+                  },
+                ),
+                CheckboxListTile(
+                  title: Text(
+                    "Attach my signature",
+                    style: context.theme.textTheme.labelLarge,
+                  ),
+                  value: checkboxTwo,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      checkboxTwo = value ?? false;
+                    });
+                  },
                 ),
               ],
             ),
@@ -87,7 +97,8 @@ Future<void> showAnomalyDialog(
                               } else {
                                 final prefs =
                                     await SharedPreferences.getInstance();
-                                print(prefs.getString("--------------------------------------------------"));
+                                print(prefs.getString(
+                                    "--------------------------------------------------"));
 
                                 print(prefs.getString("isDev"));
                                 print(prefs.getString("isUser"));
@@ -125,17 +136,24 @@ Future<void> showAnomalyDialog(
                                     // clear storage
                                     await DioClientAuth().logout();
 
-                                    final prefs = await SharedPreferences.getInstance();
+                                    final prefs =
+                                        await SharedPreferences.getInstance();
                                     await prefs.remove("isDev");
                                     await prefs.remove("isUser");
 
                                     if (!context.mounted) return;
 
                                     // reset providers
-                                    Provider.of<Permissions>(context, listen: false).logout();
-                                    Provider.of<RouteProvider>(context, listen: false).logout();
-                                    Provider.of<Search>(context, listen: false).logout();
-                                    Provider.of<UserSettingsProvider>(context, listen: false)
+                                    Provider.of<Permissions>(context,
+                                            listen: false)
+                                        .logout();
+                                    Provider.of<RouteProvider>(context,
+                                            listen: false)
+                                        .logout();
+                                    Provider.of<Search>(context, listen: false)
+                                        .logout();
+                                    Provider.of<UserSettingsProvider>(context,
+                                            listen: false)
                                         .logout();
 
                                     await Restart.restartApp();
@@ -156,7 +174,7 @@ Future<void> showAnomalyDialog(
                           const Text("Mark Fixed", textAlign: TextAlign.center),
                     ),
                   ),
-                  const SizedBox(width: 5),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(context),

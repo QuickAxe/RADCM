@@ -1,0 +1,74 @@
+name: Admin App Test+Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "admin_app/**"
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - "admin_app/**"
+
+jobs:
+  admin-app-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.29.0"
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: admin_app
+
+      # To prevent asset build issues
+      - name: Create dummy .env file
+        run: touch admin_app/.env
+
+      - name: Run Flutter tests
+        run: flutter test
+        working-directory: admin_app
+
+  admin-app-build:
+    runs-on: ubuntu-latest
+    needs: ["admin-app-test"]
+        
+    steps:
+        - uses: actions/checkout@v4
+        - uses: subosito/flutter-action@v2
+          with:
+            flutter-version: "3.29.0"
+            cache: true
+
+        - name: Set up OpenJDK 21
+          uses: actions/setup-java@v4
+          with:
+            distribution: 'semeru'
+            java-version: '21'
+
+        - run: flutter pub get
+          working-directory: admin_app
+        - run: touch admin_app/.env
+        - run: flutter pub run build_runner build
+          working-directory: admin_app
+
+        - name: Building the flutter release apk
+          run: flutter build apk --release --split-per-abi
+          working-directory: admin_app
+        
+        - name: Rename the apk
+          run: mv admin_app/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk admin_app/build/app/outputs/flutter-apk/RostoRadar-Admin.apk
+
+        - name: Push as a github release
+          uses: ncipollo/release-action@v1
+          with:
+            artifacts: admin_app/build/app/outputs/flutter-apk/RostoRadar-Admin.apk
+            tag: v0.${{github.run_number}}.${{github.run_attempt}}+admin

@@ -77,6 +77,10 @@ class _NavigationModeState extends State<NavigationMode> {
       body: FlutterMap(
         mapController: widget.mapController,
         options: MapOptions(
+          interactionOptions: const InteractionOptions(
+            enableMultiFingerGestureRace: true,
+            flags: InteractiveFlag.all,
+          ),
           initialCenter:
               LatLng(widget.mapProvider.startLat, widget.mapProvider.startLng),
           initialZoom: defaultZoom,

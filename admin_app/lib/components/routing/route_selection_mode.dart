@@ -98,11 +98,13 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
                       ),
                     ),
                   ),
-                  Text(
-                    "Select a Route",
-                    style: context.theme.textTheme.headlineSmall
-                        ?.copyWith(fontWeight: FontWeight.bold),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.01,
                   ),
+                  // Text(
+                  //   "Select a Route",
+                  //   style: context.theme.textTheme.headlineLarge,
+                  // ),
                   // List of routes
                   ListView.builder(
                     padding: EdgeInsets.zero,
@@ -114,23 +116,35 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
                       return ListTile(
                         leading: CircleAvatar(
                           backgroundColor: getColorForRoute(index),
-                          child: Text(
-                            '${index + 1}',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold),
+                          child: Icon(
+                            Icons.navigation_rounded,
+                            color: context.colorScheme.surface,
                           ),
                         ),
-                        title: Text(
-                          routeProvider.alternativeRoutes.length == 1
-                              ? "Shortest Route (Avoids anomalies)"
-                              : index == 0
-                                  ? "Shortest Route"
-                                  : "Route avoiding anomalies",
-                          style: context.theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        title: routeProvider.alternativeRoutes.length == 1
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Shortest Route",
+                                    style: context.theme.textTheme.titleLarge,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Chip(
+                                    label: Text("Avoids anomalies too!"),
+                                    visualDensity: VisualDensity.compact,
+                                    avatar: Icon(LucideIcons.sparkles),
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 8),
+                                  ),
+                                ],
+                              )
+                            : Text(
+                                index == 0
+                                    ? "Shortest Route"
+                                    : "Route avoiding anomalies",
+                                style: context.theme.textTheme.titleLarge,
+                              ),
                         subtitle: Text(
                             "Distance: ${route.distance != null ? formatDistance(route.distance!) : "N/A"}"
                             // "Duration: ${route.duration != null ? formatDuration(route.duration!) : "N/A"}",
@@ -162,8 +176,7 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
                           children: [
                             Text(
                               "Directions",
-                              style: context.theme.textTheme.headlineSmall
-                                  ?.copyWith(fontWeight: FontWeight.bold),
+                              style: context.theme.textTheme.headlineSmall,
                             ),
                             RouteDirections(route: routeProvider.currentRoute),
                           ],
@@ -233,6 +246,10 @@ class _RouteSelectionModeState extends State<RouteSelectionMode> {
       body: FlutterMap(
         mapController: widget.mapController,
         options: MapOptions(
+          interactionOptions: const InteractionOptions(
+            enableMultiFingerGestureRace: true,
+            flags: InteractiveFlag.all,
+          ),
           initialCenter:
               LatLng(widget.mapProvider.startLat, widget.mapProvider.startLng),
           initialZoom: 14.0,

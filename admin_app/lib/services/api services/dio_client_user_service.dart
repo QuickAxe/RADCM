@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class DioResponse {
   final bool success;
@@ -20,13 +19,10 @@ class DioClientUser {
   DioClientUser._internal()
       : _dio = Dio(
           BaseOptions(
-            baseUrl: 'http://${dotenv.env['IP_ADDRESS']}:8000/api/',
-            // baseUrl: 'https://a399-152-57-245-247.ngrok-free.app/api/',
+            baseUrl: 'https://radcm.sorciermahep.tech/api/',
             connectTimeout: const Duration(seconds: 10),
             headers: {
               'Content-Type': 'application/json',
-              // 'Accept': 'application/json',
-              // 'ngrok-skip-browser-warning': 'true',
             },
           ),
         ) {
@@ -74,8 +70,8 @@ class DioClientUser {
   Future<DioResponse> postRequest(String endpoint, dynamic data,
       {String? baseUrl}) async {
     try {
-      print('baseUrl ----> $baseUrl');
-      print('optns baseUrl ----> ${_dio.options.baseUrl}');
+      // print('baseUrl ----> $baseUrl');
+      // print('optns baseUrl ----> ${_dio.options.baseUrl}');
       Response response = await _dio.post(
           Uri.parse(baseUrl ?? _dio.options.baseUrl)
               .resolve(endpoint)

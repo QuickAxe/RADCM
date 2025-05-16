@@ -1,11 +1,10 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class DioClientAuth {
   final Dio dio = Dio(
     BaseOptions(
-      baseUrl: "http://${dotenv.env['IP_ADDRESS']}:8000/api/",
+      baseUrl: "https://radcm.sorciermahep.tech/api/",
       connectTimeout: const Duration(seconds: 5), // Connection timeout
     ),
   );
