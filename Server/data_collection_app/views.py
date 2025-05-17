@@ -14,6 +14,9 @@ from path import spatial_database_queries as sp
 
 from celery import shared_task
 
+import json
+import uuid
+
 
 @shared_task
 def sensor_data_task(
@@ -66,6 +69,18 @@ def anomaly_sensor_data_collection_view(request):
         # Extract anomaly data from request body
         anomaly_data = request.data.get("anomaly_data")
         source = request.data.get("source")
+
+        # !----------------------------------------------------------------------------
+        # save the request data to a local file:
+        name = str(uuid.uuid4())
+
+        if not os.path.exists("savedAnomalies/"):
+            os.makedirs("savedAnomalies/")
+
+        with open(f"savedAnomalies/{source}-{name}.json", "w") as file:
+            json.dump(anomaly_data, file, indent=4)
+
+        # ! ===========================================================================
 
         # Validate that anomaly_data is a list
         if not isinstance(anomaly_data, list):
