@@ -1,4 +1,4 @@
-from django.db import connection
+from django.db import connection, DatabaseError
 from math import pi
 from itertools import starmap
 
@@ -388,3 +388,36 @@ def add_anomaly_array(arr: list[tuple[float, float, str, float]]):
                     longitude, latitude, a_type, confidence)
                     VALUES (%s, %s, %s, %s);"""
         cursor.executemany(query, arr)
+
+def get_ids_of_potential_anomalies(longitude:float, latitude:float, cluster_id:int):
+    with connection.cursor() as cursor:
+        query = """
+                WITH input as (SELECT %s as lng, %s lat, %s as cid)
+                SELECT point_ids
+                FROM mv_clustered_anomalies, input
+                WHERE 
+                    ST_DWithin(
+                        p_geom, 
+                        st_setsrid(st_makepoint(input.lng, input.lat),4326),
+                        0.01)
+                    AND unique_id = input.cid
+                ORDER BY (
+                    SELECT ST_DISTANCE(p_geom, ST_SetSRID(ST_MAKEPOINT(input.lng , input.lat), 4326))
+            ) 
+            LIMIT 1
+                ;"""
+        cursor.execute(query, [longitude, latitude, cluster_id])       
+        results = cursor.fetchone()
+        
+        return results[0]
+    
+def delete_from_potential_anomaly(ids: list[int]):
+    with connection.cursor() as cursor:
+        if not isinstance(ids, list) or not all(int(x) for x in ids):
+            raise ValueError
+        placeholders = ', '.join(['%s'] * len(ids))
+        query = f"DELETE FROM potential_anomaly WHERE id IN ({placeholders})"
+        try:
+            cursor.execute(query, ids)
+        except DatabaseError as e:
+            print(str(e))
