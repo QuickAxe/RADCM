@@ -89,5 +89,10 @@ ultralytics==8.3.74
 redis==5.2.1
 valkey==6.1.0
 django_valkey
+
+channels
+channels_redis
+daphne
+
 psycopg
 filetype
