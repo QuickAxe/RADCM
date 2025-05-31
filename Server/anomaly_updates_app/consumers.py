@@ -1,3 +1,4 @@
+from asyncio.log import logger
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 
@@ -25,7 +26,7 @@ class AnomalyUpdatesConsumer(AsyncWebsocketConsumer):
         message = data['message']
 
         event = {
-            'type': 'anomaly_update',
+            'type': 'send_message',
             'message': message
         }
         
@@ -37,6 +38,10 @@ class AnomalyUpdatesConsumer(AsyncWebsocketConsumer):
         
     async def send_message(self, event):
         message = event['message']
+        
+        # Log the event
+        print(f"Received message: {message}")
+        logger.info(f"Sending WebSocket message: {message}")
         
         # Send the message to WebSocket
         await self.send(text_data=json.dumps({

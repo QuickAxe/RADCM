@@ -13,6 +13,8 @@ from VisionModel.inference import vision_predict_anomaly_class
 from path import spatial_database_queries as sp
 
 from celery import shared_task
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 import json
 import uuid
@@ -36,7 +38,18 @@ def sensor_data_task(
         if ind != 2  #! Make sure the check matches with the 'Flat' used earlier
     ]
 
-    sp.add_anomaly_array(detected_anomalies)
+    if len(detected_anomalies) > 0:
+        sp.add_anomaly_array(detected_anomalies)
+        
+        # notify users to re-fetch via WebSocket
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            "anomaly_updates",
+            {
+                "type": "send_message",
+                "message": "anomalies_added",
+            },
+        )
 
 
 # Response data format:
@@ -188,8 +201,20 @@ def image_data_task(locations: list[tuple[float, float]], images: list[bytearray
             if ind in reverse_map  #! This should be unreachable actually
         ]
         detected_anomalies.extend(anomalies_for_image)
-    sp.add_anomaly_array(detected_anomalies)
-
+        
+    if len(detected_anomalies) > 0:
+        # add anomalies to the spatial database
+        sp.add_anomaly_array(detected_anomalies)
+        
+        # notify users to re-fetch via WebSocket
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            "anomaly_updates",
+            {
+                "type": "send_message",
+                "message": "anomalies_added",
+            },
+        )
 
 @api_view(["POST"])
 @throttle_classes([UserRateThrottle, AnonRateThrottle])

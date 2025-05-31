@@ -40,3 +40,5 @@ urlpatterns = [
 # api/anomalies/sensors/ - to report anomlies (sensor data collector) [POST]
 # api/anomalies/images/ - to report anomlies (image data collector) [POST]
 # api/routes/ - to get routes from (latitudeStart, longitudeStart) to (latitudeEnd, longitudeEnd) [GET]
+
+# ws://host:port/ws/anomaly_updates/ - to receive anomaly updates in real-time (WebSocket connection) [GET]

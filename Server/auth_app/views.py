@@ -7,6 +7,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle, ScopedRateThrottle
 
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
@@ -58,8 +60,17 @@ def fixed_anomaly_view(request):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Success response
-        # print("go sing a song.. it works")
+        # handle anomaly deletion logic here . . 
+         
+        # notify users to re-fetch via WebSocket
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            "anomaly_updates",
+            {
+                "type": "send_message",
+                "message": "anomalies_removed",
+            },
+        )
 
         return Response(
             {"message": "Coordinates received successfully!"},
