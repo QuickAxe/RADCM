@@ -10,6 +10,8 @@ from rest_framework.throttling import UserRateThrottle, ScopedRateThrottle
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
+from path import spatial_database_queries as sp
+
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
@@ -32,24 +34,26 @@ class CustomTokenRefreshView(TokenRefreshView):
 @throttle_classes([UserRateThrottle])
 def fixed_anomaly_view(request):
     try:
-        # Extract latitude and longitude from request body (expects JSON)
+        # Extract latitude, longitude and cid from request body (expects JSON)
         latitude = request.data.get("latitude")
         longitude = request.data.get("longitude")
+        cid = request.data.get("cid")
 
-        # Check if lat lon has some content or not
-        if latitude is None or longitude is None:
+        # Check if lat, lon, cid has some content or not
+        if latitude is None or longitude is None or cid is None:
             return Response(
-                {"error": "Latitude and longitude are required."},
+                {"error": "Latitude, longitude and cid are required."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Ensure lat lon are floats
+        # Ensure lat lon are floats and cid in int
         try:
             latitude = float(latitude)
             longitude = float(longitude)
+            cid = int(cid)
         except ValueError:
             return Response(
-                {"error": "Latitude and longitude must be valid numbers."},
+                {"error": "Latitude, longitude and cid must be valid numbers."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -60,17 +64,23 @@ def fixed_anomaly_view(request):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # handle anomaly deletion logic here . . 
-         
-        # notify users to re-fetch via WebSocket
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            "anomaly_updates",
-            {
-                "type": "send_message",
-                "message": "anomalies_removed",
-            },
-        )
+        # get ids of potential anomalies based on latitude, longitude and cid
+        potentialAnomalyIds = sp.get_ids_of_potential_anomalies(latitude, longitude, cid)
+        print(potentialAnomalyIds)
+        
+        if potentialAnomalyIds:
+            # delete potential anomalies
+            sp.delete_from_potential_anomaly(potentialAnomalyIds)
+            
+            # notify users to re-fetch via WebSocket
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                "anomaly_updates",
+                {
+                    "type": "send_message",
+                    "message": "anomalies_removed",
+                },
+            )
 
         return Response(
             {"message": "Coordinates received successfully!"},

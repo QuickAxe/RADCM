@@ -40,7 +40,6 @@ class AnomalyUpdatesConsumer(AsyncWebsocketConsumer):
         message = event['message']
         
         # Log the event
-        print(f"Received message: {message}")
         logger.info(f"Sending WebSocket message: {message}")
         
         # Send the message to WebSocket
