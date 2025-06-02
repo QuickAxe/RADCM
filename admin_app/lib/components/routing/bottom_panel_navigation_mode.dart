@@ -11,6 +11,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
+import '../../data/models/anomaly_marker_model.dart';
 import '../../services/providers/anomaly_marker_layer.dart';
 import '../../services/providers/route_provider.dart';
 import '../../services/providers/user_settings.dart';
@@ -24,12 +25,16 @@ class NavigationMode extends StatefulWidget {
   final MapController mapController;
   final double endLat;
   final double endLng;
+  final AnomalyMarker?
+      anomaly; // if null means navigating to some place, otherwise navigating to an anomaly
+
   const NavigationMode({
     super.key,
     required this.mapController,
     required this.mapProvider,
     required this.endLat,
     required this.endLng,
+    this.anomaly,
   });
 
   @override
@@ -159,23 +164,34 @@ class _NavigationModeState extends State<NavigationMode> {
               ),
             ),
           ),
-          Positioned(
-            left: 16,
-            bottom: screenHeight * 0.38,
-            child: FloatingActionButton(
-              heroTag: "fix_anomaly",
-              onPressed: () {
-                showAnomalyDialog(context, widget.endLat, widget.endLng);
-              },
-              tooltip: "Fix Anomaly",
-              backgroundColor: context.colorScheme.primaryContainer,
-              elevation: 6,
-              child: Icon(
-                Icons.construction_rounded,
-                color: context.colorScheme.onPrimaryContainer,
+
+          // Fix anomaly is only shown if navigating to an anomaly, which means
+          // an anomaly has to be passed, otherwise its null
+          if (widget.anomaly != null)
+            Positioned(
+              left: 16,
+              bottom: screenHeight * 0.38,
+              child: FloatingActionButton(
+                heroTag: "fix_anomaly",
+                onPressed: () {
+                  showAnomalyDialog(
+                    context,
+                    widget.endLat,
+                    widget.endLng,
+                    widget.anomaly!.cid,
+                    widget.anomaly!.category,
+                  );
+                },
+                tooltip: "Fix Anomaly",
+                backgroundColor: context.colorScheme.primaryContainer,
+                elevation: 6,
+                child: Icon(
+                  Icons.construction_rounded,
+                  color: context.colorScheme.onPrimaryContainer,
+                ),
               ),
             ),
-          ),
+
           // button to toggle anomaly alerts when navigating
           Positioned(
             left: 16,

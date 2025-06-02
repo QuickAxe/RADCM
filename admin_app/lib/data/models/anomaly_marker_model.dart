@@ -14,10 +14,14 @@ class AnomalyMarker {
   @HiveField(2)
   final String category;
 
+  @HiveField(3)
+  final int cid;
+
   AnomalyMarker({
     required this.latitude,
     required this.longitude,
     required this.category,
+    required this.cid,
   });
 
   LatLng get location => LatLng(latitude, longitude);

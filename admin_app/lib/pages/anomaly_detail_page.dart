@@ -2,8 +2,6 @@ import 'package:admin_app/utils/context_extensions.dart';
 import 'package:admin_app/utils/marker_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
 import '../data/models/anomaly_marker_model.dart';
@@ -16,19 +14,6 @@ class AnomalyDetailPage extends StatelessWidget {
   final AnomalyMarker anomaly;
 
   const AnomalyDetailPage({super.key, required this.anomaly});
-
-  Future<String> _getAddress(LatLng location) async {
-    try {
-      List<Placemark> placemarks =
-          await placemarkFromCoordinates(location.latitude, location.longitude);
-      if (placemarks.isNotEmpty) {
-        return "${placemarks[0].street}, ${placemarks[0].locality}, ${placemarks[0].country}";
-      }
-    } catch (e) {
-      return "Address not available";
-    }
-    return "Address not available";
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +88,7 @@ class AnomalyDetailPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
                       FutureBuilder<String>(
-                        future: _getAddress(anomaly.location),
+                        future: getAddress(anomaly.location),
                         builder: (context, snapshot) {
                           return Text(
                             snapshot.data ?? "Fetching address...",
@@ -133,6 +118,7 @@ class AnomalyDetailPage extends StatelessWidget {
                                     builder: (context) => MapRouteScreen(
                                       endLat: anomaly.location.latitude,
                                       endLng: anomaly.location.longitude,
+                                      anomaly: anomaly,
                                     ),
                                   ),
                                 );
@@ -160,9 +146,12 @@ class AnomalyDetailPage extends StatelessWidget {
                               ),
                               onPressed: () {
                                 showAnomalyDialog(
-                                    context,
-                                    anomaly.location.latitude,
-                                    anomaly.location.longitude);
+                                  context,
+                                  anomaly.location.latitude,
+                                  anomaly.location.longitude,
+                                  anomaly.cid,
+                                  anomaly.category,
+                                );
                               },
                               icon: Icon(
                                 Icons.construction_rounded,

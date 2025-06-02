@@ -3,6 +3,7 @@ import 'package:admin_app/components/UI/blur_with_loading.dart';
 import 'package:admin_app/components/routing/bottom_panel_navigation_mode.dart'
     as prefix;
 import 'package:admin_app/components/routing/route_selection_mode.dart';
+import 'package:admin_app/data/models/anomaly_marker_model.dart';
 import 'package:flutter/material.dart' hide Step;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
@@ -11,11 +12,17 @@ import 'package:provider/provider.dart';
 import '../services/providers/route_provider.dart';
 
 class MapRouteScreen extends StatefulWidget {
-  // these 2 are needed to support go to anomaly
   final double endLat;
   final double endLng;
+  final AnomalyMarker?
+      anomaly; // if null means navigating to some place, otherwise navigating to an anomaly
 
-  const MapRouteScreen({super.key, required this.endLat, required this.endLng});
+  const MapRouteScreen({
+    super.key,
+    required this.endLat,
+    required this.endLng,
+    this.anomaly,
+  });
 
   @override
   State<MapRouteScreen> createState() => _MapRouteScreenState();
@@ -106,6 +113,7 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
                         mapController: _mapController,
                         endLat: widget.endLat,
                         endLng: widget.endLng,
+                        anomaly: widget.anomaly,
                       )
                     : RouteSelectionMode(
                         mapController: _mapController,

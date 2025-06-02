@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:latlong2/latlong.dart';
 
 Widget customDarkModeTileBuilder(
   BuildContext context,
@@ -43,4 +45,18 @@ Widget mapMarkerIcon(String iconPath, Color shadowColor) {
       ),
     ],
   );
+}
+
+/// Takes a LatLng and returns a formatted address string
+Future<String> getAddress(LatLng location) async {
+  try {
+    List<Placemark> placemarks =
+        await placemarkFromCoordinates(location.latitude, location.longitude);
+    if (placemarks.isNotEmpty) {
+      return "${placemarks[0].street}, ${placemarks[0].locality}, ${placemarks[0].country}";
+    }
+  } catch (e) {
+    return "Address not available";
+  }
+  return "Address not available";
 }

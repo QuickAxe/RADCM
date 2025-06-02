@@ -3,9 +3,9 @@ import 'dart:developer' as dev;
 import 'package:admin_app/components/anomaly_zoom_popup.dart';
 import 'package:admin_app/utils/context_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 
@@ -28,19 +28,6 @@ class MapView extends StatefulWidget {
 
   @override
   State<MapView> createState() => _MapViewState();
-}
-
-Future<String> _getAddress(LatLng location) async {
-  try {
-    List<Placemark> placemarks =
-        await placemarkFromCoordinates(location.latitude, location.longitude);
-    if (placemarks.isNotEmpty) {
-      return "${placemarks[0].street}, ${placemarks[0].locality}, ${placemarks[0].country}";
-    }
-  } catch (e) {
-    return "Address not available";
-  }
-  return "Address not available";
 }
 
 class _MapViewState extends State<MapView> {
@@ -125,7 +112,7 @@ class _MapViewState extends State<MapView> {
                     _tapAddress = null; // reset
                   });
 
-                  String address = await _getAddress(latlng);
+                  String address = await getAddress(latlng);
                   if (mounted) {
                     setState(() {
                       _tapAddress = address;
@@ -284,7 +271,19 @@ class _MapViewState extends State<MapView> {
                             Icon(Icons.location_on_rounded,
                                 size: 30, color: context.colorScheme.tertiary),
                           ],
-                        ),
+                        )
+                            .animate(
+                              onPlay: (controller) =>
+                                  controller.forward(from: 0),
+                            )
+                            .scale(
+                              begin: const Offset(0.0, 0.0),
+                              end: const Offset(1.0, 1.0),
+                              alignment: Alignment.bottomCenter,
+                              duration: 300.ms,
+                              curve: Curves.elasticInOut,
+                            )
+                            .fadeIn(duration: 250.ms),
                       ),
                     ],
                   ),

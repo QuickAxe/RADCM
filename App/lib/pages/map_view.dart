@@ -3,6 +3,7 @@ import 'dart:developer' as dev;
 import 'package:app/components/anomaly_zoom_popup.dart';
 import 'package:app/util/context_extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:geocoding/geocoding.dart';
@@ -288,7 +289,19 @@ class _MapViewState extends State<MapView> {
                             Icon(Icons.location_on_rounded,
                                 size: 30, color: context.colorScheme.tertiary),
                           ],
-                        ),
+                        )
+                            .animate(
+                              onPlay: (controller) =>
+                                  controller.forward(from: 0),
+                            )
+                            .scale(
+                              begin: const Offset(0.0, 0.0),
+                              end: const Offset(1.0, 1.0),
+                              alignment: Alignment.bottomCenter,
+                              duration: 300.ms,
+                              curve: Curves.elasticInOut,
+                            )
+                            .fadeIn(duration: 250.ms),
                       ),
                     ],
                   ),

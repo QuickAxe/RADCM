@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+
 import 'dio_client_auth_service.dart';
 
 class AuthorityService {
@@ -8,19 +9,19 @@ class AuthorityService {
   AuthorityService(this.dioClient);
 
   Future<bool> login(String username, String password) async {
-    print("---------------------------------- im in the login api caller ---------------------------------------");
+    print(
+        "---------------------------------- im in the login api caller ---------------------------------------");
     try {
       Response response = await dioClient.dio.post(
         "token/",
-        data: {
-          "username": username,
-          "password": password
-        },
+        data: {"username": username, "password": password},
       );
 
       if (response.statusCode == 200) {
-        await dioClient.storage.write(key: "access_token", value: response.data["access"]);
-        await dioClient.storage.write(key: "refresh_token", value: response.data["refresh"]);
+        await dioClient.storage
+            .write(key: "access_token", value: response.data["access"]);
+        await dioClient.storage
+            .write(key: "refresh_token", value: response.data["refresh"]);
         return true;
       }
     } catch (e) {
@@ -29,13 +30,14 @@ class AuthorityService {
     return false;
   }
 
-  Future<bool> fixAnomaly(double latitude, double longitude) async {
+  Future<bool> fixAnomaly(double latitude, double longitude, int cid) async {
     try {
       Response response = await dioClient.dio.delete(
         "anomaly/fixed/",
         data: {
           "latitude": latitude,
-          "longitude": longitude
+          "longitude": longitude,
+          "cid": cid,
         },
       );
 
@@ -47,6 +49,4 @@ class AuthorityService {
     }
     return false;
   }
-
-
 }

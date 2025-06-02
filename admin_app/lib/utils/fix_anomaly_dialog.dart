@@ -16,9 +16,16 @@ import '../services/providers/user_settings.dart';
 
 // util to show the dialog box and fix anomaly
 Future<void> showAnomalyDialog(
-    BuildContext context, double lat, double lon) async {
+  BuildContext context,
+  double lat,
+  double lon,
+  int cid,
+  String cat,
+) async {
   List<Placemark> placemarks = await placemarkFromCoordinates(lat, lon);
   print(placemarks.toString());
+  String anomalyAddress =
+      "${placemarks[0].street}, ${placemarks[0].locality}, ${placemarks[0].country}";
 
   showDialog(
     context: context,
@@ -30,14 +37,14 @@ Future<void> showAnomalyDialog(
         builder: (context, setState) {
           return AlertDialog(
             icon: const Icon(Icons.construction_rounded),
-            title: const Center(child: Text('Fix Anomaly')),
+            title: Center(child: Text('Fix $cat')),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(bottom: 12.0),
                   child: Text(
-                    "Please confirm the following before marking the anomaly as fixed",
+                    "$cat Location: $anomalyAddress\n\nPlease confirm the following before marking the anomaly as fixed",
                     style: TextStyle(fontSize: 14),
                   ),
                 ),
@@ -113,8 +120,8 @@ Future<void> showAnomalyDialog(
                                   // perform anomaly fix
                                   final authService =
                                       AuthorityService(DioClientAuth());
-                                  bool isAuthenticated =
-                                      await authService.fixAnomaly(lat, lon);
+                                  bool isAuthenticated = await authService
+                                      .fixAnomaly(lat, lon, cid);
 
                                   if (isAuthenticated) {
                                     Fluttertoast.showToast(

@@ -74,9 +74,15 @@ dependencies:
   # Easily restart your application from scratch, losing any previous state.
   flutter_phoenix:
 
+  # Animations in flutter
+  flutter_animate: ^4.5.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+  # Required for mocking classes for testing
+  mocktail:
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

@@ -128,6 +128,7 @@ class GridMovementHandler {
           latitude: anomaly['latitude'],
           longitude: anomaly['longitude'],
           category: anomaly['category'],
+          cid: anomaly['anomaly_id'],
         );
       }).toList();
 
