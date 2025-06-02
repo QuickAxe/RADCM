@@ -10,6 +10,7 @@ import 'package:admin_app/pages/splash_screen.dart';
 import 'package:admin_app/pages/survey/survey_control_screen.dart';
 import 'package:admin_app/pages/survey/survey_screen.dart';
 import 'package:admin_app/services/providers/anomaly_provider.dart';
+import 'package:admin_app/services/providers/anomaly_websocket_provider.dart';
 import 'package:admin_app/services/providers/map_controller_provider.dart';
 import 'package:admin_app/services/providers/permissions.dart';
 import 'package:admin_app/services/providers/route_provider.dart';
@@ -47,6 +48,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => RouteProvider()),
         ChangeNotifierProvider(create: (context) => AnomalyProvider()),
         ChangeNotifierProvider(create: (context) => MapControllerProvider()),
+        ChangeNotifierProvider(create: (context) => AnomalyWebSocketProvider()),
       ],
       child: Phoenix(
         child:

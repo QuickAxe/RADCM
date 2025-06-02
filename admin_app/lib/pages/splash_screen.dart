@@ -10,7 +10,7 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
-import '../services/anomaly_websocket_service.dart';
+import '../services/providers/anomaly_websocket_provider.dart';
 import '../services/providers/permissions.dart';
 import '../utils/general_utils.dart';
 import 'home_screen.dart';
@@ -79,8 +79,8 @@ class _SplashScreenState extends State<SplashScreen>
       }
 
       // Start the connection with the Websocket
-      final AnomalyWebSocketService ws = AnomalyWebSocketService();
-      await ws.connect();
+      final ws = Provider.of<AnomalyWebSocketProvider>(context, listen: false);
+      ws.init();
 
 
       // Initialize permission logic and start the activity tracker
