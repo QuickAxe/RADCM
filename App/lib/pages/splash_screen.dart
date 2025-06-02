@@ -3,6 +3,7 @@ import 'dart:developer' as dev;
 
 import 'package:app/data/models/anomaly_marker_model.dart';
 import 'package:app/services/background/activity_tracker.dart';
+import 'package:app/services/providers/anomaly_websocket_provider.dart';
 import 'package:app/util/context_extensions.dart';
 import 'package:app/util/general_utils.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,6 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
-import '../services/anomaly_websocket_service.dart';
 import '../services/providers/permissions.dart';
 import 'home_screen.dart';
 
@@ -83,10 +83,6 @@ class _SplashScreenState extends State<SplashScreen>
         }
       }
 
-      // Start the connection with the Websocket
-      final AnomalyWebSocketService ws = AnomalyWebSocketService();
-      await ws.connect();
-
       // Initialize permission logic and start the activity tracker
       final permissions = Provider.of<Permissions>(context, listen: false);
       await permissions.fetchPosition().then((_) async {
@@ -98,6 +94,10 @@ class _SplashScreenState extends State<SplashScreen>
       }).catchError((error) {
         dev.log("failed fetchlocation: $error");
       });
+
+      // Start the connection with the Websocket
+      final ws = Provider.of<AnomalyWebSocketProvider>(context, listen: false);
+      ws.init();
 
       // Log a message indicating initialization is complete.
       dev.log('Initialization complete. Navigating to HomeScreen.');

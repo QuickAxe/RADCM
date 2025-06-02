@@ -7,6 +7,7 @@ import 'package:app/pages/settings_screens/toggle_anomalies.dart';
 import 'package:app/pages/settings_screens/voice_engine.dart';
 import 'package:app/pages/splash_screen.dart';
 import 'package:app/services/providers/anomaly_provider.dart';
+import 'package:app/services/providers/anomaly_websocket_provider.dart';
 import 'package:app/services/providers/map_controller_provider.dart';
 import 'package:app/services/providers/permissions.dart';
 import 'package:app/services/providers/route_provider.dart';
@@ -33,6 +34,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (context) => RouteProvider()),
         ChangeNotifierProvider(create: (context) => AnomalyProvider()),
         ChangeNotifierProvider(create: (context) => MapControllerProvider()),
+        ChangeNotifierProvider(create: (context) => AnomalyWebSocketProvider()),
       ],
       child: Phoenix(
         child: const MyApp(),
