@@ -1,12 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+
+import 'package:app/services/grid_movement_handler.dart';
 import 'package:flutter/material.dart';
 
 import '../../util/general_utils.dart';
 
-class AnomalyWebSocketProvider extends ChangeNotifier with WidgetsBindingObserver {
+class AnomalyWebSocketProvider extends ChangeNotifier
+    with WidgetsBindingObserver {
   WebSocket? _socket;
   bool _isConnected = false;
   DateTime? _lastConnectAttempt;
@@ -28,7 +31,8 @@ class AnomalyWebSocketProvider extends ChangeNotifier with WidgetsBindingObserve
     // to prevent multiple websocket connections due to app resume
     if (state == AppLifecycleState.resumed && !_isConnected) {
       final now = DateTime.now();
-      if (_lastConnectAttempt == null || now.difference(_lastConnectAttempt!) > Duration(seconds: 2)) {
+      if (_lastConnectAttempt == null ||
+          now.difference(_lastConnectAttempt!) > Duration(seconds: 2)) {
         _lastConnectAttempt = now;
         connect();
       }
@@ -43,7 +47,8 @@ class AnomalyWebSocketProvider extends ChangeNotifier with WidgetsBindingObserve
     await disconnect();
 
     try {
-      _socket = await WebSocket.connect('wss://radcm.sorciermahep.tech/ws/anomaly_updates/');
+      _socket = await WebSocket.connect(
+          'wss://radcm.sorciermahep.tech/ws/anomaly_updates/');
       showToast("Websocket connected");
 
       _isConnected = true;
@@ -70,9 +75,11 @@ class AnomalyWebSocketProvider extends ChangeNotifier with WidgetsBindingObserve
     final message = json.decode(data)['message'];
 
     showToast("Websocket message: $message");
-    if(message == 'anomalies_added' || message == 'anomalies_removed') {
+    if (message == 'anomalies_added' || message == 'anomalies_removed') {
       // handle anomaly re-fetch
-      print('idk man keeping this empty didnt feel nice');
+      // print('idk man keeping this empty didnt feel nice');
+      log('calling anomaly refresh from GridHandler');
+      GridMovementHandler.instance.handleWebsocketAnomalyUpdate();
     }
   }
 

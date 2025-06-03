@@ -46,7 +46,6 @@ Future<String> _getAddress(LatLng location) async {
 
 class _MapViewState extends State<MapView> {
   late final MapController _mapController;
-  late final GridMovementHandler _gridHandler;
 
   LatLng? _tapMarker;
   String? _tapAddress;
@@ -60,13 +59,12 @@ class _MapViewState extends State<MapView> {
     super.initState();
     _mapController = context.read<MapControllerProvider>().mapController;
     dev.log(
-        'UserSettingsProvider: $widget.userSettingsProvider ------------------------------');
+        'UserSettingsProvider: ${widget.userSettingsProvider} ------------------------------');
     GridMovementHandler.initOnce(
       mapController: _mapController,
       userSettingsProvider: widget.userSettingsProvider,
       context: context,
     );
-    _gridHandler = GridMovementHandler.instance;
     Provider.of<AnomalyProvider>(context, listen: false).init();
 
     _mapController.mapEventStream.listen((event) {

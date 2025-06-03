@@ -149,6 +149,29 @@ class GridMovementHandler {
     }
   }
 
+  /// refreshes all the anomalies fetched so far, called when a websocket event is detected, indicating an anomaly fix or addition
+  Future<void> handleWebsocketAnomalyUpdate() async {
+    // these flags are required for the on-screen fetch indicator
+    userSettingsProvider.setFetchingAnomalies(true);
+    userSettingsProvider.setDirtyAnomalies(true);
+
+    try {
+      // for every gridCenter for which anomalies have been fetched, re-fetch the anomalies
+      for (LatLng gridCenter in anomalyCache.keys) {
+        await _fetchAnomalies(gridCenter);
+      }
+
+      // flags go false if all fetches were successful
+      userSettingsProvider.setFetchingAnomalies(false);
+      userSettingsProvider.setDirtyAnomalies(false);
+    } catch (e) {
+      log("error handling websocket anomaly update: $e");
+      userSettingsProvider.setFetchingAnomalies(false);
+      userSettingsProvider.setDirtyAnomalies(true);
+    }
+  }
+
+  /// stringifies all visitedGrids and stores them in a hive box as a list of strings
   void _saveVisitedGrids() {
     List<String> storedGrids =
         visitedGrids.map((grid) => _latLngToKey(grid)).toList();

@@ -45,7 +45,7 @@ class _MapViewState extends State<MapView> {
     super.initState();
     _mapController = context.read<MapControllerProvider>().mapController;
     dev.log(
-        'UserSettingsProvider: $widget.userSettingsProvider ------------------------------');
+        'UserSettingsProvider: ${widget.userSettingsProvider} ------------------------------');
     GridMovementHandler.initOnce(
       mapController: _mapController,
       userSettingsProvider: widget.userSettingsProvider,
