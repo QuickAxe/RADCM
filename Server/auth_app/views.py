@@ -65,7 +65,7 @@ def fixed_anomaly_view(request):
             )
 
         # get ids of potential anomalies based on latitude, longitude and cid
-        potentialAnomalyIds = sp.get_ids_of_potential_anomalies(latitude, longitude, cid)
+        potentialAnomalyIds = sp.get_ids_of_potential_anomalies(longitude, latitude, cid)
         print(potentialAnomalyIds)
         
         if potentialAnomalyIds:
