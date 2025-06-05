@@ -24,19 +24,12 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
+class _SplashScreenState extends State<SplashScreen> {
   bool _showDelayMessage = false;
 
   @override
   void initState() {
     super.initState();
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 2));
-    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(_controller);
-    _controller.forward();
 
     Future.delayed(const Duration(seconds: 15), () {
       if (mounted) {
@@ -165,19 +158,41 @@ class _SplashScreenState extends State<SplashScreen>
       body: Stack(
         fit: StackFit.expand,
         children: [
+          // Background
+          Positioned.fill(
+            child: ShaderMask(
+              shaderCallback: (Rect bounds) {
+                return LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.center,
+                  colors: [
+                    Colors.white.withOpacity(1.0),
+                    Colors.white.withOpacity(0.5),
+                    Colors.white.withOpacity(0.0),
+                  ],
+                  stops: const [0.0, 0.5, 1.0],
+                ).createShader(bounds);
+              },
+              blendMode: BlendMode.dstIn,
+              child: ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(0.3),
+                  BlendMode.darken,
+                ),
+                child: Image.asset(
+                  'assets/map_light.jpg',
+                  fit: BoxFit.contain,
+                  alignment: Alignment.topCenter,
+                ),
+              ),
+            ),
+          ),
+          // Foreground content
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // FadeTransition(
-              //   opacity: _fadeAnimation,
-              //   child: Image.asset("assets/logo.png", height: 100),
-              // ),
-              // SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-              FadeTransition(
-                opacity: _fadeAnimation,
-                child: Text("Rosto Radar",
-                    style: Theme.of(context).textTheme.displayMedium),
-              ),
+              Text("Rosto Radar",
+                  style: Theme.of(context).textTheme.displayMedium),
               SizedBox(height: MediaQuery.of(context).size.height * 0.05),
               CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -200,7 +215,6 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
-    _controller.dispose();
     super.dispose();
   }
 }

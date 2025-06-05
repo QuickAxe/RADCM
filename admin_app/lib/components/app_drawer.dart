@@ -23,12 +23,22 @@ class AppDrawer extends StatelessWidget {
           children: [
             DrawerHeader(
               child: Center(
-                child: Text(
-                  'Rosto Radar: Admin',
-                  style: TextStyle(
-                    fontSize: 20,
-                    color: context.colorScheme.onSurface,
-                  ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Rosto Radar',
+                      style: context.theme.textTheme.headlineLarge?.copyWith(
+                        color: context.colorScheme.onSurface,
+                      ),
+                    ),
+                    Text(
+                      'Admin',
+                      style: context.theme.textTheme.headlineSmall?.copyWith(
+                        color: context.colorScheme.primary,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

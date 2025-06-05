@@ -107,6 +107,8 @@ flutter:
   assets:
     - assets/icons/
     - assets/uav.png
+    - assets/map_dark.jpg
+    - assets/map_light.jpg
     - .env
   #   - images/a_dot_ham.jpeg
 

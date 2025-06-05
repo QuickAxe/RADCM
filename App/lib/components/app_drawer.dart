@@ -20,8 +20,7 @@ class AppDrawer extends StatelessWidget {
               child: Center(
                 child: Text(
                   "Rosto Radar",
-                  style: TextStyle(
-                    fontSize: 20,
+                  style: context.theme.textTheme.headlineLarge?.copyWith(
                     color: context.colorScheme.onSurface,
                   ),
                 ),

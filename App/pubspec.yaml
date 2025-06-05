@@ -121,7 +121,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/icons/
-    - assets/splash_background_dark.jpg
+    - assets/map_light.jpg
+    - assets/map_dark.jpg
     - .env
   #   - images/a_dot_ham.jpeg
 
