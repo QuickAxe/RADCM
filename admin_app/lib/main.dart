@@ -95,8 +95,8 @@ class _MyAppState extends State<MyApp> {
             '/additional_settings': (context) => const AdditionalSettings(),
             '/navigation_preferences': (context) =>
                 const NavigationPreferences(),
-            '/survey': (context) => SurveyScreen(),
-            '/survey_controls': (context) => SurveyControlScreen(),
+            '/survey': (context) => const SurveyScreen(),
+            '/survey_controls': (context) => const SurveyControlScreen(),
           }),
     );
   }
