@@ -9,8 +9,22 @@ import glob
 import requests
 import os
 
+import subprocess
+
 # ! remove this later, probably
 DEBUG = True
+
+
+# function to read the image using the rpi cam
+# note: this is a stupid workaround, because I already spent like 5 hours trying to get it to work normally and I can't be bothered any more
+def readImage():
+    subprocess.run(
+        "rpicam-jpeg -n --output /home/quickaxe/Desktop/RADCM/ComputerVisionModule/image.jpg --width 640 --height 640",
+        shell=True,
+    )
+
+    image = cv.imread("image.jpg")
+    return image
 
 
 # function to save the image with it's location encoded as part of it's EXIF data, in the UserComment field
@@ -88,7 +102,7 @@ def sendImages():
         print(response.text)
 
 
-def handleImages(messageQue, cap, timeBetweenImages):
+def handleImages(messageQue):
 
     imageNo = 0
 
@@ -102,7 +116,8 @@ def handleImages(messageQue, cap, timeBetweenImages):
 
         # check if the current command is to start the survey
         if not messageQue.empty() and messageQue.queue[0] == "start":
-            ret, frame = cap.read()
+
+            ret, frame = readImage()
 
             if not DEBUG:
                 # if frame is read correctly ret is True
@@ -128,9 +143,6 @@ def handleImages(messageQue, cap, timeBetweenImages):
             imageNo += 1
 
             print(f"survey running, saving image-{imageNo} ...")
-
-            # wait for a certain time to take the next image
-            time.sleep(timeBetweenImages)
 
         elif not messageQue.empty() and messageQue.queue[0] == "stop":
 
