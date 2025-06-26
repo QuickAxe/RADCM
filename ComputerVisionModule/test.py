@@ -12,7 +12,6 @@ def getImage():
     image = cv2.imread("image.jpg")
     return image
 
-
 while True:
 
     frame = getImage()
