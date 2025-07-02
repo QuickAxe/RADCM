@@ -20,8 +20,8 @@ class _SurveyControlScreenState extends State<SurveyControlScreen> {
   /// function to send commands to the UAV
   Future<void> sendCommand(String command) async {
     const fallbackUrls = [
-      // 'http://192.168.50.1:3333',
-      'http://raspberrypi.local:3333',
+      'http://192.168.50.1:3333',
+      // 'http://raspberrypi.local:3333',
     ];
 
     // to support retry
