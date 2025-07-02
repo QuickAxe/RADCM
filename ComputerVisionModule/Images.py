@@ -77,7 +77,7 @@ def sendImages():
     imagePaths = glob.glob("./Images/*.jpg")
 
     #! add proper url here
-    url = "http://192.168.1.5:5000/upload"
+    url = "https://radcm.sorciermahep.tech/api/anomalies/images"
 
     for imagePath in imagePaths:
 
