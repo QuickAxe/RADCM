@@ -17,9 +17,9 @@ DEBUG = True
 
 # function to read the image using the rpi cam
 # note: this is a stupid workaround, because I already spent like 5 hours trying to get it to work normally and I can't be bothered any more
-def readImage():
+def readImage(imageNumber):
     subprocess.run(
-        "rpicam-jpeg -n --output /home/quickaxe/Desktop/RADCM/ComputerVisionModule/image.jpg --width 640 --height 640",
+        f"rpicam-jpeg -n --output /home/quickaxe/Desktop/RADCM/ComputerVisionModule/Images/image-{imageNumber}.jpg --width 640 --height 640",
         shell=True,
     )
 
@@ -117,7 +117,7 @@ def handleImages(messageQue):
         # check if the current command is to start the survey
         if not messageQue.empty() and messageQue.queue[0] == "start":
 
-            frame = readImage()
+            frame = readImage(imageNo)
 
             if not DEBUG:
                 # if frame is read correctly frame will have some value
