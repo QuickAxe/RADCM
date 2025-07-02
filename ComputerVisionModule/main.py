@@ -24,7 +24,7 @@ TIMEBETWEENIMAGES = 0.5
 
 # create threads for the server and one for the images handling code
 t0 = Thread(target=runServer, args=(messageQue,))
-t1 = Thread(target=handleImages, args=(messageQue))
+t1 = Thread(target=handleImages, args=(messageQue,))
 
 if __name__ == "__main__":
     # start running the threads
