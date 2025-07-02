@@ -121,13 +121,13 @@ def handleImages(messageQue):
 
             if not DEBUG:
                 # if frame is read correctly frame will have some value
-                if frame is not None:
+                if frame is None:
                     print("Can't capture image, retrying ...")
                     time.sleep(0.33)
                     continue
             else:
                 # if frame is read correctly frame will have some value
-                if frame is not None:
+                if frame is None:
                     print("Can't capture image, exiting ...")
                     time.sleep(0.33)
                     break
