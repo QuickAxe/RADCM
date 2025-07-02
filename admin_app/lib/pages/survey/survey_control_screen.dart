@@ -21,7 +21,7 @@ class _SurveyControlScreenState extends State<SurveyControlScreen> {
   Future<void> sendCommand(String command) async {
     const fallbackUrls = [
       'http://192.168.50.1:3333',
-      'http://raspberrypi.local:3333',
+      // 'http://raspberrypi.local:3333',
     ];
 
     // to support retry
