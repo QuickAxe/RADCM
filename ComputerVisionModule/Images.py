@@ -117,17 +117,17 @@ def handleImages(messageQue):
         # check if the current command is to start the survey
         if not messageQue.empty() and messageQue.queue[0] == "start":
 
-            ret, frame = readImage()
+            frame = readImage()
 
             if not DEBUG:
-                # if frame is read correctly ret is True
-                if not ret:
+                # if frame is read correctly frame will have some value
+                if not frame:
                     print("Can't capture image, retrying ...")
                     time.sleep(0.33)
                     continue
             else:
-                # if frame is read correctly ret is True
-                if not ret:
+                # if frame is read correctly frame will have some value
+                if not frame:
                     print("Can't capture image, exiting ...")
                     time.sleep(0.33)
                     break
