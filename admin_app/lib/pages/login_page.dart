@@ -196,7 +196,7 @@ class _LoginPageState extends State<LoginPage> {
 
                       // welcome back, you've been missed!
                       Text(
-                        'Welcome back you lil scoundrel!',
+                        'Welcome back!',
                         style: TextStyle(
                           color: colorScheme.primary,
                           fontSize: 16,
