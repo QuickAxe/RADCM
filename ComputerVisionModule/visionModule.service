@@ -1,0 +1,12 @@
+[Unit]
+Description=Main VisionModule Service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/quickaxe/Desktop/RADCM/ComputerVisionModule
+ExecStart=sudo /home/quickaxe/Desktop/RADCM/ComputerVisionModule/venv/bin/python /home/quickaxe/Desktop/RADCM/ComputerVisionModule/main.py 
+User=VisionModule
+
+[Install]
+WantedBy=multi-user.target
