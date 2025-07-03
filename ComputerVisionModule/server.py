@@ -7,7 +7,7 @@ class Server(BaseHTTPRequestHandler):
     def __init__(self, messageQue):
         self.messageQue = messageQue
 
-    # using this method below to be able to have this class with custom args for it's init method
+    # using this method below to be able to have this class with custom args for its init method
     # https://stackoverflow.com/questions/21631799/how-can-i-pass-parameters-to-a-requesthandler
     # all hail stackoverflow
     def __call__(self, *args, **kwargs):
