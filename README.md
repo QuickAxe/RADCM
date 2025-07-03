@@ -13,10 +13,6 @@
 
 Rosto Radar is an automated system primarily using user's phones to map road anomalies like potholes, speed breakers, and rumble strips etc and delivers real-time alerts to users about newly identified anomalies and provides authorities with a dedicated interface for locating, navigating to, and resolving these issues efficiently.
 
-## Working 
-
-For a demo of the working of the app, visit: https://www.hensenjuang.com/ 
-
 ## Datasets
 
 To download the datasets on your local machine, run the GetDataset notebook.  
