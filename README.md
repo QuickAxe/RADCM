@@ -13,17 +13,9 @@
 
 Rosto Radar is an automated system primarily using user's phones to map road anomalies like potholes, speed breakers, and rumble strips etc and delivers real-time alerts to users about newly identified anomalies and provides authorities with a dedicated interface for locating, navigating to, and resolving these issues efficiently.
 
-## Note
+## Working 
 
-labels = {"Flat": 0, "Pothole": 1, "Breaker": 2}  
-This is the format for labels for the dataset, NOT TO BE INCLUDED IN THE DATASET ITSELF, ONLY FOR MODEL PURPOSES
-
-## Some basic directory structure
-
-All the android app stuff will go in App/  
-All the backend stuff, including django folders and all the ml stuff too, will go in Server/  
-All the code to be run on the mpu6050 module will go in Mpu6050Module/  
-... you get the idea
+For a demo of the working of the app, visit: https://www.hensenjuang.com/ 
 
 ## Datasets
 
