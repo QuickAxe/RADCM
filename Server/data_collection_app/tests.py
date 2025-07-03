@@ -6,8 +6,6 @@ import io
 from PIL import Image
 import json
 
-# kjbjb
-
 
 class AnomalyViewsTests(TestCase):
     def setUp(self):
