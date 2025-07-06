@@ -12,8 +12,8 @@ Rosto Radar is an automated system that uses data from user smartphones, modules
 ## Key Features
 
 - Real-time anomaly detection using:
-  - Smartphone sensors (Accelerometer, Gyroscope, GPS)
-  - Custom MPU-6050 hardware modules on heavy vehicles
+  - Smartphone sensors (Accelerometer, GPS)
+  - Custom MPU-6050 hardware modules on heavy/commercial vehicles
   - UAV-based aerial image surveys
   
 - Dual ML Model System:
