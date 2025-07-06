@@ -7,12 +7,12 @@
 
 Rosto Radar is a real-time road anomaly detection and mapping system built as part of our final year Computer Engineering project. 
 
-> The goal is simple - To provide a cheap yet efficient solution for road anomaly detection, mapping and closure in real-time.
-While some systems do use sensors, most still rely on expensive survey vehicles or manual reporting. We aimed to build a scalable, crowd-sourced approach that works in real time.
+> The goal is simple - To provide a cheap yet efficient solution for road anomaly detection, classification, mapping and closure in real-time.
+While most systems still rely on expensive survey vehicles or manual reporting, we aimed to build a scalable, crowd-sourced solution that works in real time.
 
 ## Overview
 
-Rosto Radar is an automated system that uses data from user smartphones, modules mounted on heavy/commercial vehicles, and drones. It uses user's phones to map road anomalies like potholes, speed breakers, and rumble strips etc and delivers real-time alerts to users about newly identified anomalies and provides authorities with a dedicated interface for locating, navigating to, and resolving these issues efficiently.  
+Rosto Radar is an automated system that uses data from users' smartphones, specialised modules mounted on heavy/commercial vehicles, and vision modules mounted on UAVs or survey vehicles. It uses users' phones to map road anomalies like potholes, speed breakers, rumble strips, etc, and delivers real-time alerts to users about anomalies and provides authorities with a dedicated interface for locating, navigating to, and resolving these issues efficiently.  
 Find the full report [here](https://drive.google.com/file/d/1x-ZZYwhfvtp2DP_fwxHNnYpE_NzICMvv/view?usp=drive_link)  
 Alternative link [here](https://drive.google.com/file/d/1z_CQ2B5m0QjGxL4IJsTfa8ztpJjg1f-t/view?usp=sharing)  
 
