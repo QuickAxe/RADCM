@@ -39,12 +39,12 @@ Rosto Radar is an automated system that uses data from user smartphones, modules
   - Tile server for map rendering
 
 ## Tech Stack
-Frontend - Flutter (User & Admin Apps)
-Backend - Django + Django REST Framework
-Database - PostgreSQL + PostGIS
-ML Models - YOLOv11 (Vision), CNN (Sensor), PyTorch
-Hardware - ESP8266, MPU6050, Raspberry Pi Zero W, GPS
-Deployment - NGINX, Gunicorn, Docker, Redis, Celery
+Frontend - Flutter (User & Admin Apps)  
+Backend - Django + Django REST Framework  
+Database - PostgreSQL + PostGIS  
+ML Models - YOLOv11 (Vision), CNN (Sensor), PyTorch  
+Hardware - ESP8266, MPU6050, Raspberry Pi Zero W, GPS  
+Deployment - NGINX, Gunicorn, Docker, Redis, Celery  
 
 ## The User App
 #### Anomalies are displayed as clusters and reveal as you zoom into them, and their visibility can be toggled
