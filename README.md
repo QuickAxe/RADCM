@@ -3,7 +3,7 @@
 
 Rosto Radar is a real-time road anomaly detection and mapping system built as part of our final year Computer Engineering project. 
 
-> The goal is simple - To provide a cheap yet efficient solution for road anomaly detection and mapping in real-time. Current solutions use expensive surveying vehicles for this purpose.
+> The goal is simple - To provide a cheap yet efficient solution for road anomaly detection and mapping in real-time.
 
 ## Overview
 
